@@ -1,0 +1,546 @@
+definitions:
+  api.HealthCheckResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  api.MemStats:
+    properties:
+      alloc:
+        type: integer
+      num_gc:
+        type: integer
+      pause_total_ns:
+        type: integer
+      sys:
+        type: integer
+      total_alloc:
+        type: integer
+    type: object
+  api.MetricsResponse:
+    properties:
+      mem_stats:
+        $ref: '#/definitions/api.MemStats'
+      num_goroutine:
+        type: integer
+      timestamp:
+        type: string
+      uptime:
+        type: string
+    type: object
+  api.Response:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  api.UserResponse:
+    properties:
+      created_at:
+        description: Using string to represent time; Swagger can handle this better
+        example: "2025-05-01T13:45:00Z"
+        format: date-time
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
+  api.createUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  api.loginUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  api.loginUserResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/api.UserResponse'
+    type: object
+  api.refreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  api.refreshTokenResponse:
+    properties:
+      access_token:
+        type: string
+      user:
+        $ref: '#/definitions/api.UserResponse'
+    type: object
+  api.registerUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  api.registerUserResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/api.UserResponse'
+    type: object
+  api.updateUserRequest:
+    properties:
+      email:
+        type: string
+      password_hash:
+        minLength: 6
+        type: string
+      username:
+        minLength: 3
+        type: string
+    type: object
+  db.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      password_hash:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user and return a JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/api.loginUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.loginUserResponse'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Authentication failed
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Login user
+      tags:
+      - auth
+  /api/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: Get a new access token using a refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          $ref: '#/definitions/api.refreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token refreshed successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.refreshTokenResponse'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Invalid refresh token
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Refresh access token
+      tags:
+      - auth
+  /api/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user and return authentication tokens
+      parameters:
+      - description: Registration information
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/api.registerUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.registerUserResponse'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Register a new user
+      tags:
+      - auth
+  /api/users:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of users with pagination
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        required: true
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/db.User'
+                  type: array
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user in the system
+      parameters:
+      - description: User information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/api.createUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/db.User'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Create a new user
+      tags:
+      - users
+  /api/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a user
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Get user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/db.User'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a user
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update user information by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User information to update
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/db.User'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a user
+      tags:
+      - users
+  /api/v1/users/me:
+    get:
+      consumes:
+      - application/json
+      description: Get authenticated user's profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/db.User'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get current user profile
+      tags:
+      - users
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the API server is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: API is healthy
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.HealthCheckResponse'
+              type: object
+      summary: Health check
+      tags:
+      - health
+  /metrics:
+    get:
+      consumes:
+      - application/json
+      description: Get system metrics and health information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Metrics retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.MetricsResponse'
+              type: object
+      summary: Get system metrics
+      tags:
+      - monitoring
+swagger: "2.0"
