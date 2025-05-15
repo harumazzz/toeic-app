@@ -56,6 +56,33 @@ definitions:
       username:
         type: string
     type: object
+  api.WordJSONField:
+    properties:
+      raw: {}
+    type: object
+  api.WordResponse:
+    properties:
+      conjugation:
+        $ref: '#/definitions/api.WordJSONField'
+      descript_level:
+        type: string
+      freq:
+        type: number
+      id:
+        type: integer
+      level:
+        type: integer
+      means:
+        $ref: '#/definitions/api.WordJSONField'
+      pronounce:
+        type: string
+      short_mean:
+        type: string
+      snym:
+        $ref: '#/definitions/api.WordJSONField'
+      word:
+        type: string
+    type: object
   api.createUserRequest:
     properties:
       email:
@@ -71,6 +98,8 @@ definitions:
     - email
     - password
     - username
+    type: object
+  api.createWordRequest:
     type: object
   api.loginUserRequest:
     properties:
@@ -141,6 +170,8 @@ definitions:
       username:
         minLength: 3
         type: string
+    type: object
+  api.updateWordRequest:
     type: object
   db.User:
     properties:
@@ -503,6 +534,204 @@ paths:
       summary: Get current user profile
       tags:
       - users
+  /api/v1/words:
+    get:
+      consumes:
+      - application/json
+      description: List words with pagination
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of words
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.WordResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to list words
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List words
+      tags:
+      - words
+    post:
+      consumes:
+      - application/json
+      description: Create a new word with the input payload
+      parameters:
+      - description: Create Word Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.createWordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Word created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.WordResponse'
+              type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create word
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new word
+      tags:
+      - words
+  /api/v1/words/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a word by its ID
+      parameters:
+      - description: Word ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Word deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid word ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Word not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete word
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a word
+      tags:
+      - words
+    get:
+      consumes:
+      - application/json
+      description: Get a word by its ID
+      parameters:
+      - description: Word ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.WordResponse'
+              type: object
+        "400":
+          description: Invalid word ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Word not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to get word
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a word by ID
+      tags:
+      - words
+    put:
+      consumes:
+      - application/json
+      description: Update a word with the input payload
+      parameters:
+      - description: Word ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Word Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateWordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.WordResponse'
+              type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Word not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update word
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a word
+      tags:
+      - words
   /health:
     get:
       consumes:

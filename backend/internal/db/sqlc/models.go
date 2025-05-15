@@ -7,6 +7,8 @@ package db
 import (
 	"database/sql"
 	"time"
+
+	"github.com/sqlc-dev/pqtype"
 )
 
 type User struct {
@@ -26,4 +28,17 @@ type UserProfile struct {
 	AvatarUrl sql.NullString `json:"avatar_url"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
+}
+
+type Word struct {
+	ID            int32                 `json:"id"`
+	Word          string                `json:"word"`
+	Pronounce     string                `json:"pronounce"`
+	Level         int32                 `json:"level"`
+	DescriptLevel string                `json:"descript_level"`
+	ShortMean     string                `json:"short_mean"`
+	Means         pqtype.NullRawMessage `json:"means"`
+	Snym          pqtype.NullRawMessage `json:"snym"`
+	Freq          float32               `json:"freq"`
+	Conjugation   pqtype.NullRawMessage `json:"conjugation"`
 }

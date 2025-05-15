@@ -69,6 +69,14 @@ func (server *Server) setupRouter() {
 				users.PUT("/:id", server.updateUser)
 				users.DELETE("/:id", server.deleteUser)
 			}
+			words := authRoutes.Group("/words")
+			{
+				words.GET("/:id", server.getWord)
+				words.GET("", server.listWords)
+				words.POST("", server.createWord)
+				words.PUT("/:id", server.updateWord)
+				words.DELETE("/:id", server.deleteWord)
+			}
 		}
 	}
 
