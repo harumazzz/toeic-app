@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -9,6 +11,7 @@ import (
 	"github.com/toeic-app/internal/logger"
 	"github.com/toeic-app/internal/middleware"
 	"github.com/toeic-app/internal/token"
+	"github.com/toeic-app/internal/uploader"
 )
 
 // @BasePath /api/v1
@@ -23,6 +26,7 @@ type Server struct {
 	store      db.Querier
 	tokenMaker token.Maker
 	router     *gin.Engine
+	uploader   *uploader.CloudinaryUploader
 }
 
 // NewServer creates a new HTTP server and setup routing.
@@ -32,14 +36,99 @@ func NewServer(config config.Config, store db.Querier) (*Server, error) {
 		return nil, err
 	}
 
+	cloudinaryUploader, err := uploader.NewCloudinaryUploader(config)
+	if err != nil {
+		return nil, err
+	}
+
 	server := &Server{
 		config:     config,
 		store:      store,
 		tokenMaker: tokenMaker,
+		uploader:   cloudinaryUploader,
 	}
 
 	server.setupRouter()
 	return server, nil
+}
+
+// @Summary Upload an image file
+// @Description Uploads an image file to Cloudinary and returns the URL.
+// @Tags Uploads
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "Image file to upload"
+// @Success 200 {object} object{url=string} "Successfully uploaded image"
+// @Failure 400 {object} Response "Bad Request - File not found or invalid"
+// @Failure 500 {object} Response "Internal Server Error - Error opening or uploading file"
+// @Router /upload [post]
+func (server *Server) uploadFile(ctx *gin.Context) {
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		logger.Error("Error getting file from form: %v", err)
+		ErrorResponse(ctx, http.StatusBadRequest, "File not found in form data", err)
+		return
+	}
+
+	// TODO: consider generating a more unique filename or using a folder structure
+	// For now, using the original filename.
+	// Be cautious about security implications if filenames are user-controlled and not sanitized.
+	filename := file.Filename
+
+	src, err := file.Open()
+	if err != nil {
+		logger.Error("Error opening uploaded file: %v", err)
+		ErrorResponse(ctx, http.StatusInternalServerError, "Error opening uploaded file", err)
+		return
+	}
+	defer src.Close()
+
+	imageURL, err := server.uploader.UploadImage(ctx.Request.Context(), src, filename)
+	if err != nil {
+		logger.Error("Error uploading image to cloudinary: %v", err)
+		ErrorResponse(ctx, http.StatusInternalServerError, "Error uploading image to cloudinary", err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"url": imageURL})
+}
+
+// @Summary Upload an audio file
+// @Description Uploads an audio file to Cloudinary and returns the URL.
+// @Tags Uploads
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "Audio file to upload"
+// @Success 200 {object} object{url=string} "Successfully uploaded audio"
+// @Failure 400 {object} Response "Bad Request - File not found or invalid"
+// @Failure 500 {object} Response "Internal Server Error - Error opening or uploading file"
+// @Router /upload-audio [post]
+func (server *Server) uploadAudioFile(ctx *gin.Context) {
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		logger.Error("Error getting file from form: %v", err)
+		ErrorResponse(ctx, http.StatusBadRequest, "File not found in form data", err)
+		return
+	}
+
+	filename := file.Filename
+
+	src, err := file.Open()
+	if err != nil {
+		logger.Error("Error opening uploaded file: %v", err)
+		ErrorResponse(ctx, http.StatusInternalServerError, "Error opening uploaded file", err)
+		return
+	}
+	defer src.Close()
+
+	audioURL, err := server.uploader.UploadAudio(ctx.Request.Context(), src, filename)
+	if err != nil {
+		logger.Error("Error uploading audio to cloudinary: %v", err)
+		ErrorResponse(ctx, http.StatusInternalServerError, "Error uploading audio to cloudinary", err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"url": audioURL})
 }
 
 func (server *Server) setupRouter() {
@@ -63,6 +152,8 @@ func (server *Server) setupRouter() {
 	{
 		// Public routes
 		v1.POST("/users", server.createUser)
+		v1.POST("/upload", server.uploadFile)
+		v1.POST("/upload-audio", server.uploadAudioFile)
 
 		// Grammar routes (publicly accessible for now, consider auth later if needed)
 		grammarsPublic := v1.Group("/grammars")

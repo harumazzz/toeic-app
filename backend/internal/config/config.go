@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -12,12 +13,13 @@ import (
 // Config stores all configuration of the application.
 // The values are read from environment variables or .env file.
 type Config struct {
-	DBDriver             string `mapstructure:"DB_DRIVER"`
-	DBSource             string `mapstructure:"DB_SOURCE"`
-	ServerAddress        string `mapstructure:"SERVER_ADDRESS"`
-	TokenSymmetricKey    string `mapstructure:"TOKEN_SYMMETRIC_KEY"`
-	AccessTokenDuration  int64  `mapstructure:"ACCESS_TOKEN_DURATION"`
-	RefreshTokenDuration int64  `mapstructure:"REFRESH_TOKEN_DURATION"`
+	DBDriver             string        `mapstructure:"DB_DRIVER"`
+	DBSource             string        `mapstructure:"DB_SOURCE"`
+	ServerAddress        string        `mapstructure:"SERVER_ADDRESS"`
+	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
+	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	RefreshTokenDuration int64         `mapstructure:"REFRESH_TOKEN_DURATION"`
+	CloudinaryURL        string        `mapstructure:"CLOUDINARY_URL"`
 }
 
 // LoadEnv loads environment variables from .env file
@@ -77,8 +79,15 @@ func DefaultConfig() Config {
 
 	// Get JWT configuration
 	tokenKey := GetEnv("TOKEN_SYMMETRIC_KEY", "12345678901234567890123456789012")
-	accessTokenDuration := GetEnvAsInt("ACCESS_TOKEN_DURATION", 3600)
+	accessTokenDuration := time.Duration(GetEnvAsInt("ACCESS_TOKEN_DURATION", 3600)) * time.Second
 	refreshTokenDuration := GetEnvAsInt("REFRESH_TOKEN_DURATION", 604800)
+
+	// Get Cloudinary configuration
+	cloudinaryURL := GetEnv("CLOUDINARY_URL", "")
+
+	if cloudinaryURL == "" {
+		log.Fatal("CLOUDINARY_URL environment variable is required")
+	}
 
 	return Config{
 		DBDriver:             dbDriver,
@@ -87,5 +96,6 @@ func DefaultConfig() Config {
 		TokenSymmetricKey:    tokenKey,
 		AccessTokenDuration:  accessTokenDuration,
 		RefreshTokenDuration: refreshTokenDuration,
+		CloudinaryURL:        cloudinaryURL,
 	}
 }

@@ -3680,4 +3680,68 @@ paths:
       summary: Get system metrics
       tags:
       - monitoring
+  /upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads an image file to Cloudinary and returns the URL.
+      parameters:
+      - description: Image file to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully uploaded image
+          schema:
+            properties:
+              url:
+                type: string
+            type: object
+        "400":
+          description: Bad Request - File not found or invalid
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error - Error opening or uploading file
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Upload an image file
+      tags:
+      - Uploads
+  /upload-audio:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads an audio file to Cloudinary and returns the URL.
+      parameters:
+      - description: Audio file to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully uploaded audio
+          schema:
+            properties:
+              url:
+                type: string
+            type: object
+        "400":
+          description: Bad Request - File not found or invalid
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error - Error opening or uploading file
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Upload an audio file
+      tags:
+      - Uploads
 swagger: "2.0"
