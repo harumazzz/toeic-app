@@ -9,15 +9,29 @@ import (
 )
 
 type Querier interface {
+	CreateExample(ctx context.Context, arg CreateExampleParams) (Example, error)
+	CreateGrammar(ctx context.Context, arg CreateGrammarParams) (Grammar, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateWord(ctx context.Context, arg CreateWordParams) (Word, error)
+	DeleteExample(ctx context.Context, id int32) error
+	DeleteGrammar(ctx context.Context, id int32) error
 	DeleteUser(ctx context.Context, id int32) error
 	DeleteWord(ctx context.Context, id int32) error
+	GetExample(ctx context.Context, id int32) (Example, error)
+	GetGrammar(ctx context.Context, id int32) (Grammar, error)
+	GetRandomGrammar(ctx context.Context) (Grammar, error)
 	GetUser(ctx context.Context, id int32) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetWord(ctx context.Context, id int32) (Word, error)
+	ListExamples(ctx context.Context) ([]Example, error)
+	ListGrammars(ctx context.Context, arg ListGrammarsParams) ([]Grammar, error)
+	ListGrammarsByLevel(ctx context.Context, arg ListGrammarsByLevelParams) ([]Grammar, error)
+	ListGrammarsByTag(ctx context.Context, arg ListGrammarsByTagParams) ([]Grammar, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	ListWords(ctx context.Context, arg ListWordsParams) ([]Word, error)
+	SearchGrammars(ctx context.Context, arg SearchGrammarsParams) ([]Grammar, error)
+	UpdateExample(ctx context.Context, arg UpdateExampleParams) (Example, error)
+	UpdateGrammar(ctx context.Context, arg UpdateGrammarParams) (Grammar, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateWord(ctx context.Context, arg UpdateWordParams) (Word, error)
 }

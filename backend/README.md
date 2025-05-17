@@ -114,3 +114,6 @@ go run main.go
 - Password: `password`
 - Database: `toeic_db`
 - Adminer (database management tool) is available at `http://localhost:8080`
+
+## Docker command
+- ` docker exec -it toeic_postgres psql -U root -d toeic_db`

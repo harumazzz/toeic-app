@@ -1,4 +1,38 @@
 definitions:
+  api.ExampleResponse:
+    properties:
+      id:
+        type: integer
+      meaning:
+        type: string
+      title:
+        type: string
+    type: object
+  api.GrammarJSONField:
+    properties:
+      raw: {}
+    type: object
+  api.GrammarResponse:
+    properties:
+      contents:
+        type: object
+      grammar_key:
+        type: string
+      id:
+        type: integer
+      level:
+        type: integer
+      related:
+        items:
+          type: integer
+        type: array
+      tag:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
   api.HealthCheckResponse:
     properties:
       message:
@@ -45,7 +79,6 @@ definitions:
   api.UserResponse:
     properties:
       created_at:
-        description: Using string to represent time; Swagger can handle this better
         example: "2025-05-01T13:45:00Z"
         format: date-time
         type: string
@@ -83,6 +116,43 @@ definitions:
       word:
         type: string
     type: object
+  api.createExampleRequest:
+    properties:
+      meaning:
+        type: string
+      title:
+        type: string
+    required:
+    - meaning
+    - title
+    type: object
+  api.createGrammarRequest:
+    properties:
+      contents:
+        $ref: '#/definitions/api.GrammarJSONField'
+      grammar_key:
+        type: string
+      level:
+        minimum: 1
+        type: integer
+      related:
+        items:
+          type: integer
+        type: array
+      tag:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    required:
+    - contents
+    - grammar_key
+    - level
+    - related
+    - tag
+    - title
+    type: object
   api.createUserRequest:
     properties:
       email:
@@ -100,6 +170,32 @@ definitions:
     - username
     type: object
   api.createWordRequest:
+    properties:
+      conjugation:
+        $ref: '#/definitions/api.WordJSONField'
+      descript_level:
+        type: string
+      freq:
+        type: number
+      level:
+        type: integer
+      means:
+        $ref: '#/definitions/api.WordJSONField'
+      pronounce:
+        type: string
+      short_mean:
+        type: string
+      snym:
+        $ref: '#/definitions/api.WordJSONField'
+      word:
+        type: string
+    required:
+    - descript_level
+    - freq
+    - level
+    - pronounce
+    - short_mean
+    - word
     type: object
   api.loginUserRequest:
     properties:
@@ -160,33 +256,78 @@ definitions:
       user:
         $ref: '#/definitions/api.UserResponse'
     type: object
+  api.updateExampleRequest:
+    properties:
+      meaning:
+        type: string
+      title:
+        type: string
+    required:
+    - meaning
+    - title
+    type: object
+  api.updateGrammarRequest:
+    properties:
+      contents:
+        $ref: '#/definitions/api.GrammarJSONField'
+      grammar_key:
+        type: string
+      id:
+        minimum: 1
+        type: integer
+      level:
+        minimum: 1
+        type: integer
+      related:
+        items:
+          type: integer
+        type: array
+      tag:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    required:
+    - id
+    type: object
   api.updateUserRequest:
     properties:
       email:
         type: string
-      password_hash:
-        minLength: 6
+      password:
+        minLength: 8
         type: string
       username:
+        maxLength: 50
         minLength: 3
         type: string
     type: object
   api.updateWordRequest:
-    type: object
-  db.User:
     properties:
-      created_at:
+      conjugation:
+        $ref: '#/definitions/api.WordJSONField'
+      descript_level:
         type: string
-      email:
-        type: string
+      freq:
+        type: number
       id:
+        minimum: 1
         type: integer
-      password_hash:
+      level:
+        type: integer
+      means:
+        $ref: '#/definitions/api.WordJSONField'
+      pronounce:
         type: string
-      updated_at:
+      short_mean:
         type: string
-      username:
+      snym:
+        $ref: '#/definitions/api.WordJSONField'
+      word:
         type: string
+    required:
+    - id
     type: object
 info:
   contact: {}
@@ -308,10 +449,11 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get a list of users with pagination
+      description: Get a list of users with pagination. Allows for browsing through
+        users.
       parameters:
       - default: 10
-        description: Limit
+        description: Number of users to return per page
         in: query
         maximum: 100
         minimum: 1
@@ -319,7 +461,7 @@ paths:
         required: true
         type: integer
       - default: 0
-        description: Offset
+        description: Offset for pagination
         in: query
         minimum: 0
         name: offset
@@ -335,15 +477,15 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/db.User'
+                    $ref: '#/definitions/api.UserResponse'
                   type: array
               type: object
         "400":
-          description: Invalid request
+          description: Invalid query parameters
           schema:
             $ref: '#/definitions/api.Response'
         "500":
-          description: Server error
+          description: Server error during user listing
           schema:
             $ref: '#/definitions/api.Response'
       security:
@@ -354,9 +496,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new user in the system
+      description: Create a new user in the system. This endpoint is typically used
+        for user registration.
       parameters:
-      - description: User information
+      - description: User information for registration
         in: body
         name: user
         required: true
@@ -372,14 +515,14 @@ paths:
             - $ref: '#/definitions/api.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/db.User'
+                  $ref: '#/definitions/api.UserResponse'
               type: object
         "400":
-          description: Invalid request
+          description: Invalid request parameters or validation failure
           schema:
             $ref: '#/definitions/api.Response'
         "500":
-          description: Server error
+          description: Server error during user creation
           schema:
             $ref: '#/definitions/api.Response'
       summary: Create a new user
@@ -389,9 +532,9 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete user by ID
+      description: Delete a user by their ID.
       parameters:
-      - description: User ID
+      - description: User ID of the user to delete
         in: path
         name: id
         required: true
@@ -404,7 +547,7 @@ paths:
           schema:
             $ref: '#/definitions/api.Response'
         "400":
-          description: Invalid request
+          description: Invalid user ID format
           schema:
             $ref: '#/definitions/api.Response'
         "404":
@@ -412,7 +555,7 @@ paths:
           schema:
             $ref: '#/definitions/api.Response'
         "500":
-          description: Server error
+          description: Server error during user deletion
           schema:
             $ref: '#/definitions/api.Response'
       security:
@@ -423,7 +566,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get user by ID
+      description: Retrieve a specific user's details by their ID.
       parameters:
       - description: User ID
         in: path
@@ -440,10 +583,10 @@ paths:
             - $ref: '#/definitions/api.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/db.User'
+                  $ref: '#/definitions/api.UserResponse'
               type: object
         "400":
-          description: Invalid request
+          description: Invalid user ID format
           schema:
             $ref: '#/definitions/api.Response'
         "404":
@@ -451,25 +594,25 @@ paths:
           schema:
             $ref: '#/definitions/api.Response'
         "500":
-          description: Server error
+          description: Server error during user retrieval
           schema:
             $ref: '#/definitions/api.Response'
       security:
       - ApiKeyAuth: []
-      summary: Get a user
+      summary: Get a user by ID
       tags:
       - users
     put:
       consumes:
       - application/json
-      description: Update user information by ID
+      description: Update an existing user's information by their ID.
       parameters:
-      - description: User ID
+      - description: User ID of the user to update
         in: path
         name: id
         required: true
         type: integer
-      - description: User information to update
+      - description: User information to update. Only provided fields are updated.
         in: body
         name: user
         required: true
@@ -485,10 +628,10 @@ paths:
             - $ref: '#/definitions/api.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/db.User'
+                  $ref: '#/definitions/api.UserResponse'
               type: object
         "400":
-          description: Invalid request
+          description: Invalid request parameters or user ID format
           schema:
             $ref: '#/definitions/api.Response'
         "404":
@@ -496,7 +639,7 @@ paths:
           schema:
             $ref: '#/definitions/api.Response'
         "500":
-          description: Server error
+          description: Server error during user update
           schema:
             $ref: '#/definitions/api.Response'
       security:
@@ -504,11 +647,371 @@ paths:
       summary: Update a user
       tags:
       - users
+  /api/v1/grammars:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of grammars with pagination.
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Grammars retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.GrammarResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve grammars
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: List grammars
+      tags:
+      - grammars
+    post:
+      consumes:
+      - application/json
+      description: Add a new grammar to the database.
+      parameters:
+      - description: Grammar object to create
+        in: body
+        name: grammar
+        required: true
+        schema:
+          $ref: '#/definitions/api.createGrammarRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Grammar created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.GrammarResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create grammar
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new grammar
+      tags:
+      - grammars
+  /api/v1/grammars/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific grammar entry by its ID.
+      parameters:
+      - description: Grammar ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Grammar deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid grammar ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Grammar not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete grammar
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a grammar
+      tags:
+      - grammars
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific grammar entry by its ID.
+      parameters:
+      - description: Grammar ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Grammar retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.GrammarResponse'
+              type: object
+        "400":
+          description: Invalid grammar ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Grammar not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve grammar
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get a grammar by ID
+      tags:
+      - grammars
+    put:
+      consumes:
+      - application/json
+      description: Update an existing grammar entry by its ID.
+      parameters:
+      - description: Grammar ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Grammar object with fields to update
+        in: body
+        name: grammar
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateGrammarRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Grammar updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.GrammarResponse'
+              type: object
+        "400":
+          description: Invalid request body or grammar ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Grammar not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update grammar
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a grammar
+      tags:
+      - grammars
+  /api/v1/grammars/level:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of grammars filtered by level, with pagination.
+      parameters:
+      - description: Level to filter by
+        in: query
+        name: level
+        required: true
+        type: integer
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Grammars retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.GrammarResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve grammars by level
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: List grammars by level
+      tags:
+      - grammars
+  /api/v1/grammars/random:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single random grammar entry from the database.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Random grammar retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.GrammarResponse'
+              type: object
+        "500":
+          description: Failed to retrieve random grammar
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get a random grammar
+      tags:
+      - grammars
+  /api/v1/grammars/search:
+    get:
+      consumes:
+      - application/json
+      description: Search grammars by title, key, or tag, with pagination.
+      parameters:
+      - description: Search query
+        in: query
+        name: query
+        required: true
+        type: string
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Grammars retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.GrammarResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to search grammars
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Search grammars
+      tags:
+      - grammars
+  /api/v1/grammars/tag:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of grammars filtered by a specific tag, with pagination.
+      parameters:
+      - description: Tag to filter by
+        in: query
+        name: tag
+        required: true
+        type: string
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Grammars retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.GrammarResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve grammars by tag
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: List grammars by tag
+      tags:
+      - grammars
   /api/v1/users/me:
     get:
       consumes:
       - application/json
-      description: Get authenticated user's profile
+      description: Get the profile of the currently authenticated user.
       produces:
       - application/json
       responses:
@@ -519,14 +1022,14 @@ paths:
             - $ref: '#/definitions/api.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/db.User'
+                  $ref: '#/definitions/api.UserResponse'
               type: object
         "401":
-          description: Unauthorized
+          description: Unauthorized if the user is not authenticated
           schema:
             $ref: '#/definitions/api.Response'
         "500":
-          description: Server error
+          description: Server error when retrieving user profile
           schema:
             $ref: '#/definitions/api.Response'
       security:
@@ -732,6 +1235,185 @@ paths:
       summary: Update a word
       tags:
       - words
+  /examples:
+    get:
+      description: Get a list of all examples
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Examples retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.ExampleResponse'
+                  type: array
+              type: object
+        "500":
+          description: Failed to retrieve examples
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: List examples
+      tags:
+      - examples
+    post:
+      consumes:
+      - application/json
+      description: Create a new example
+      parameters:
+      - description: Example details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.createExampleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Example created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExampleResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create example
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create example
+      tags:
+      - examples
+  /examples/{id}:
+    delete:
+      description: Delete an existing example
+      parameters:
+      - description: Example ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Example deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid example ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete example
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete example
+      tags:
+      - examples
+    get:
+      description: Get details of an example by its ID
+      parameters:
+      - description: Example ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Example retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExampleResponse'
+              type: object
+        "400":
+          description: Invalid example ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Example not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve example
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get example by ID
+      tags:
+      - examples
+    put:
+      consumes:
+      - application/json
+      description: Update an existing example
+      parameters:
+      - description: Example ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Example details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateExampleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Example updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExampleResponse'
+              type: object
+        "400":
+          description: Invalid request body or example ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Example not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update example
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update example
+      tags:
+      - examples
   /health:
     get:
       consumes:

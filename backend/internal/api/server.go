@@ -10,6 +10,12 @@ import (
 	"github.com/toeic-app/internal/token"
 )
 
+// @BasePath /api/v1
+// @Schemes http https
+// @SecurityDefinitions.apikey ApiKeyAuth
+// @In header
+// @Name Authorization
+
 // Server serves HTTP requests for our banking service.
 type Server struct {
 	config     config.Config
@@ -42,10 +48,10 @@ func (server *Server) setupRouter() {
 	router.Use(gin.Recovery())      // Recovery middleware recovers from panics
 	router.Use(middleware.Logger()) // Our custom logger
 	router.Use(middleware.CORS())
-
 	// Health check and metrics routes
 	router.GET("/health", server.healthCheck)
 	router.GET("/metrics", server.getMetrics)
+
 	// Authentication routes
 	router.POST("/api/login", server.loginUser)
 	router.POST("/api/register", server.registerUser)
@@ -56,6 +62,17 @@ func (server *Server) setupRouter() {
 	{
 		// Public routes
 		v1.POST("/users", server.createUser)
+
+		// Grammar routes (publicly accessible for now, consider auth later if needed)
+		grammarsPublic := v1.Group("/grammars")
+		{
+			grammarsPublic.GET("", server.listGrammars)
+			grammarsPublic.GET("/:id", server.getGrammar)
+			grammarsPublic.GET("/random", server.getRandomGrammar)
+			grammarsPublic.GET("/level", server.listGrammarsByLevel)
+			grammarsPublic.GET("/tag", server.listGrammarsByTag)
+			grammarsPublic.GET("/search", server.searchGrammars)
+		}
 
 		// Protected routes requiring authentication
 		authRoutes := v1.Group("/")
@@ -77,11 +94,36 @@ func (server *Server) setupRouter() {
 				words.PUT("/:id", server.updateWord)
 				words.DELETE("/:id", server.deleteWord)
 			}
+
+			// Protected Grammar routes (e.g., for admin management)
+			grammarsProtected := authRoutes.Group("/grammars")
+			{
+				grammarsProtected.POST("", server.createGrammar)
+				grammarsProtected.PUT("/:id", server.updateGrammar)
+				grammarsProtected.DELETE("/:id", server.deleteGrammar)
+			}
+
+			// Example routes
+			examples := authRoutes.Group("/examples")
+			{
+				examples.GET("/:id", server.getExample)
+				examples.GET("", server.listExamples)
+				examples.POST("", server.createExample)
+				examples.PUT("/:id", server.updateExample)
+				examples.DELETE("/:id", server.deleteExample)
+			}
+
+			// Protected Example routes (if needed for admin/specific users)
+			// examplesProtected := authRoutes.Group("/examples")
+			// {
+			// 	// Add protected example routes here if necessary
+			// }
 		}
 	}
 
 	// Legacy routes for backward compatibility
 	router.POST("/api/users", server.createUser)
+
 	// Legacy protected routes
 	legacyAuth := router.Group("/api")
 	legacyAuth.Use(server.authMiddleware())
@@ -90,10 +132,9 @@ func (server *Server) setupRouter() {
 		legacyAuth.GET("/users", server.listUsers)
 		legacyAuth.PUT("/users/:id", server.updateUser)
 		legacyAuth.DELETE("/users/:id", server.deleteUser)
-	} // API documentation with custom URL and configuration options
-	// Configure Swagger with JWT auth support
-	// The URL points to API definition
+	}
 
+	// API documentation with custom URL and configuration options
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	server.router = router

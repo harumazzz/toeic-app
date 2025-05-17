@@ -208,7 +208,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get a list of users with pagination",
+                "description": "Get a list of users with pagination. Allows for browsing through users.",
                 "consumes": [
                     "application/json"
                 ],
@@ -225,7 +225,7 @@ const docTemplate = `{
                         "minimum": 1,
                         "type": "integer",
                         "default": 10,
-                        "description": "Limit",
+                        "description": "Number of users to return per page",
                         "name": "limit",
                         "in": "query",
                         "required": true
@@ -234,7 +234,7 @@ const docTemplate = `{
                         "minimum": 0,
                         "type": "integer",
                         "default": 0,
-                        "description": "Offset",
+                        "description": "Offset for pagination",
                         "name": "offset",
                         "in": "query"
                     }
@@ -253,7 +253,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/db.User"
+                                                "$ref": "#/definitions/api.UserResponse"
                                             }
                                         }
                                     }
@@ -262,13 +262,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Invalid query parameters",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
                     },
                     "500": {
-                        "description": "Server error",
+                        "description": "Server error during user listing",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -276,7 +276,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new user in the system",
+                "description": "Create a new user in the system. This endpoint is typically used for user registration.",
                 "consumes": [
                     "application/json"
                 ],
@@ -289,7 +289,7 @@ const docTemplate = `{
                 "summary": "Create a new user",
                 "parameters": [
                     {
-                        "description": "User information",
+                        "description": "User information for registration",
                         "name": "user",
                         "in": "body",
                         "required": true,
@@ -310,7 +310,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/db.User"
+                                            "$ref": "#/definitions/api.UserResponse"
                                         }
                                     }
                                 }
@@ -318,13 +318,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Invalid request parameters or validation failure",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
                     },
                     "500": {
-                        "description": "Server error",
+                        "description": "Server error during user creation",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -339,7 +339,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get user by ID",
+                "description": "Retrieve a specific user's details by their ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -349,7 +349,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Get a user",
+                "summary": "Get a user by ID",
                 "parameters": [
                     {
                         "type": "integer",
@@ -371,7 +371,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/db.User"
+                                            "$ref": "#/definitions/api.UserResponse"
                                         }
                                     }
                                 }
@@ -379,7 +379,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Invalid user ID format",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -391,7 +391,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Server error",
+                        "description": "Server error during user retrieval",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -404,7 +404,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Update user information by ID",
+                "description": "Update an existing user's information by their ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -418,13 +418,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "User ID",
+                        "description": "User ID of the user to update",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "User information to update",
+                        "description": "User information to update. Only provided fields are updated.",
                         "name": "user",
                         "in": "body",
                         "required": true,
@@ -445,7 +445,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/db.User"
+                                            "$ref": "#/definitions/api.UserResponse"
                                         }
                                     }
                                 }
@@ -453,7 +453,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Invalid request parameters or user ID format",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -465,7 +465,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Server error",
+                        "description": "Server error during user update",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -478,7 +478,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Delete user by ID",
+                "description": "Delete a user by their ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -492,7 +492,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "User ID",
+                        "description": "User ID of the user to delete",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -506,7 +506,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Invalid user ID format",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -518,7 +518,587 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Server error",
+                        "description": "Server error during user deletion",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/grammars": {
+            "get": {
+                "description": "Get a list of grammars with pagination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grammars"
+                ],
+                "summary": "List grammars",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grammars retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.GrammarResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve grammars",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Add a new grammar to the database.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grammars"
+                ],
+                "summary": "Create a new grammar",
+                "parameters": [
+                    {
+                        "description": "Grammar object to create",
+                        "name": "grammar",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.createGrammarRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Grammar created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.GrammarResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create grammar",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/grammars/level": {
+            "get": {
+                "description": "Get a list of grammars filtered by level, with pagination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grammars"
+                ],
+                "summary": "List grammars by level",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Level to filter by",
+                        "name": "level",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grammars retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.GrammarResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve grammars by level",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/grammars/random": {
+            "get": {
+                "description": "Retrieve a single random grammar entry from the database.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grammars"
+                ],
+                "summary": "Get a random grammar",
+                "responses": {
+                    "200": {
+                        "description": "Random grammar retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.GrammarResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve random grammar",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/grammars/search": {
+            "get": {
+                "description": "Search grammars by title, key, or tag, with pagination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grammars"
+                ],
+                "summary": "Search grammars",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search query",
+                        "name": "query",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grammars retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.GrammarResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to search grammars",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/grammars/tag": {
+            "get": {
+                "description": "Get a list of grammars filtered by a specific tag, with pagination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grammars"
+                ],
+                "summary": "List grammars by tag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tag to filter by",
+                        "name": "tag",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grammars retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.GrammarResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve grammars by tag",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/grammars/{id}": {
+            "get": {
+                "description": "Retrieve a specific grammar entry by its ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grammars"
+                ],
+                "summary": "Get a grammar by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Grammar ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grammar retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.GrammarResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid grammar ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Grammar not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve grammar",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update an existing grammar entry by its ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grammars"
+                ],
+                "summary": "Update a grammar",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Grammar ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Grammar object with fields to update",
+                        "name": "grammar",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.updateGrammarRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grammar updated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.GrammarResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or grammar ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Grammar not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update grammar",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete a specific grammar entry by its ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grammars"
+                ],
+                "summary": "Delete a grammar",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Grammar ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grammar deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid grammar ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Grammar not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete grammar",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -533,7 +1113,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get authenticated user's profile",
+                "description": "Get the profile of the currently authenticated user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -556,7 +1136,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/db.User"
+                                            "$ref": "#/definitions/api.UserResponse"
                                         }
                                     }
                                 }
@@ -564,13 +1144,13 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized if the user is not authenticated",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
                     },
                     "500": {
-                        "description": "Server error",
+                        "description": "Server error when retrieving user profile",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -904,6 +1484,300 @@ const docTemplate = `{
                 }
             }
         },
+        "/examples": {
+            "get": {
+                "description": "Get a list of all examples",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "examples"
+                ],
+                "summary": "List examples",
+                "responses": {
+                    "200": {
+                        "description": "Examples retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.ExampleResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve examples",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new example",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "examples"
+                ],
+                "summary": "Create example",
+                "parameters": [
+                    {
+                        "description": "Example details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.createExampleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Example created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.ExampleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create example",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/examples/{id}": {
+            "get": {
+                "description": "Get details of an example by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "examples"
+                ],
+                "summary": "Get example by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Example ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Example retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.ExampleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid example ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Example not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve example",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update an existing example",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "examples"
+                ],
+                "summary": "Update example",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Example ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Example details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.updateExampleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Example updated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.ExampleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or example ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Example not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update example",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete an existing example",
+                "tags": [
+                    "examples"
+                ],
+                "summary": "Delete example",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Example ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Example deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid example ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete example",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Check if the API server is running",
@@ -976,6 +1850,58 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.ExampleResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "meaning": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.GrammarJSONField": {
+            "type": "object",
+            "properties": {
+                "raw": {}
+            }
+        },
+        "api.GrammarResponse": {
+            "type": "object",
+            "properties": {
+                "contents": {
+                    "type": "object"
+                },
+                "grammar_key": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "related": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "tag": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "api.HealthCheckResponse": {
             "type": "object",
             "properties": {
@@ -1046,7 +1972,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "Using string to represent time; Swagger can handle this better",
                     "type": "string",
                     "format": "date-time",
                     "example": "2025-05-01T13:45:00Z"
@@ -1103,6 +2028,59 @@ const docTemplate = `{
                 }
             }
         },
+        "api.createExampleRequest": {
+            "type": "object",
+            "required": [
+                "meaning",
+                "title"
+            ],
+            "properties": {
+                "meaning": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.createGrammarRequest": {
+            "type": "object",
+            "required": [
+                "contents",
+                "grammar_key",
+                "level",
+                "related",
+                "tag",
+                "title"
+            ],
+            "properties": {
+                "contents": {
+                    "$ref": "#/definitions/api.GrammarJSONField"
+                },
+                "grammar_key": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "related": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "tag": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "api.createUserRequest": {
             "type": "object",
             "required": [
@@ -1126,7 +2104,44 @@ const docTemplate = `{
             }
         },
         "api.createWordRequest": {
-            "type": "object"
+            "type": "object",
+            "required": [
+                "descript_level",
+                "freq",
+                "level",
+                "pronounce",
+                "short_mean",
+                "word"
+            ],
+            "properties": {
+                "conjugation": {
+                    "$ref": "#/definitions/api.WordJSONField"
+                },
+                "descript_level": {
+                    "type": "string"
+                },
+                "freq": {
+                    "type": "number"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "means": {
+                    "$ref": "#/definitions/api.WordJSONField"
+                },
+                "pronounce": {
+                    "type": "string"
+                },
+                "short_mean": {
+                    "type": "string"
+                },
+                "snym": {
+                    "$ref": "#/definitions/api.WordJSONField"
+                },
+                "word": {
+                    "type": "string"
+                }
+            }
         },
         "api.loginUserRequest": {
             "type": "object",
@@ -1216,44 +2231,110 @@ const docTemplate = `{
                 }
             }
         },
+        "api.updateExampleRequest": {
+            "type": "object",
+            "required": [
+                "meaning",
+                "title"
+            ],
+            "properties": {
+                "meaning": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.updateGrammarRequest": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "contents": {
+                    "$ref": "#/definitions/api.GrammarJSONField"
+                },
+                "grammar_key": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "level": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "related": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "tag": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "api.updateUserRequest": {
             "type": "object",
             "properties": {
                 "email": {
                     "type": "string"
                 },
-                "password_hash": {
+                "password": {
                     "type": "string",
-                    "minLength": 6
+                    "minLength": 8
                 },
                 "username": {
                     "type": "string",
+                    "maxLength": 50,
                     "minLength": 3
                 }
             }
         },
         "api.updateWordRequest": {
-            "type": "object"
-        },
-        "db.User": {
             "type": "object",
+            "required": [
+                "id"
+            ],
             "properties": {
-                "created_at": {
+                "conjugation": {
+                    "$ref": "#/definitions/api.WordJSONField"
+                },
+                "descript_level": {
                     "type": "string"
                 },
-                "email": {
-                    "type": "string"
+                "freq": {
+                    "type": "number"
                 },
                 "id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "level": {
                     "type": "integer"
                 },
-                "password_hash": {
+                "means": {
+                    "$ref": "#/definitions/api.WordJSONField"
+                },
+                "pronounce": {
                     "type": "string"
                 },
-                "updated_at": {
+                "short_mean": {
                     "type": "string"
                 },
-                "username": {
+                "snym": {
+                    "$ref": "#/definitions/api.WordJSONField"
+                },
+                "word": {
                     "type": "string"
                 }
             }

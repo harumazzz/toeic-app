@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,15 +34,15 @@ type WordResponse struct {
 }
 
 type createWordRequest struct {
-	Word          string                `json:"word" binding:"required"`
-	Pronounce     string                `json:"pronounce" binding:"required"`
-	Level         int32                 `json:"level" binding:"required"`
-	DescriptLevel string                `json:"descript_level" binding:"required"`
-	ShortMean     string                `json:"short_mean" binding:"required"`
-	Means         pqtype.NullRawMessage `json:"means"`
-	Snym          pqtype.NullRawMessage `json:"snym"`
-	Freq          float32               `json:"freq" binding:"required"`
-	Conjugation   pqtype.NullRawMessage `json:"conjugation"`
+	Word          string        `json:"word" binding:"required"`
+	Pronounce     string        `json:"pronounce" binding:"required"`
+	Level         int32         `json:"level" binding:"required"`
+	DescriptLevel string        `json:"descript_level" binding:"required"`
+	ShortMean     string        `json:"short_mean" binding:"required"`
+	Means         WordJSONField `json:"means"`
+	Snym          WordJSONField `json:"snym"`
+	Freq          float32       `json:"freq" binding:"required"`
+	Conjugation   WordJSONField `json:"conjugation"`
 }
 
 // @Summary Create a new word
@@ -68,10 +69,10 @@ func (server *Server) createWord(ctx *gin.Context) {
 		Level:         req.Level,
 		DescriptLevel: req.DescriptLevel,
 		ShortMean:     req.ShortMean,
-		Means:         req.Means,
-		Snym:          req.Snym,
+		Means:         toNullRawMessage(req.Means),
+		Snym:          toNullRawMessage(req.Snym),
 		Freq:          req.Freq,
-		Conjugation:   req.Conjugation,
+		Conjugation:   toNullRawMessage(req.Conjugation),
 	}
 
 	word, err := server.store.CreateWord(ctx, arg)
@@ -156,16 +157,16 @@ func (server *Server) listWords(ctx *gin.Context) {
 }
 
 type updateWordRequest struct {
-	ID            int32                 `json:"id" binding:"required,min=1"`
-	Word          string                `json:"word"`
-	Pronounce     string                `json:"pronounce"`
-	Level         int32                 `json:"level"`
-	DescriptLevel string                `json:"descript_level"`
-	ShortMean     string                `json:"short_mean"`
-	Means         pqtype.NullRawMessage `json:"means"`
-	Snym          pqtype.NullRawMessage `json:"snym"`
-	Freq          float32               `json:"freq"`
-	Conjugation   pqtype.NullRawMessage `json:"conjugation"`
+	ID            int32         `json:"id" binding:"required,min=1"`
+	Word          string        `json:"word"`
+	Pronounce     string        `json:"pronounce"`
+	Level         int32         `json:"level"`
+	DescriptLevel string        `json:"descript_level"`
+	ShortMean     string        `json:"short_mean"`
+	Means         WordJSONField `json:"means"`
+	Snym          WordJSONField `json:"snym"`
+	Freq          float32       `json:"freq"`
+	Conjugation   WordJSONField `json:"conjugation"`
 }
 
 // @Summary Update a word
@@ -195,10 +196,10 @@ func (server *Server) updateWord(ctx *gin.Context) {
 		Level:         req.Level,
 		DescriptLevel: req.DescriptLevel,
 		ShortMean:     req.ShortMean,
-		Means:         req.Means,
-		Snym:          req.Snym,
+		Means:         toNullRawMessage(req.Means),
+		Snym:          toNullRawMessage(req.Snym),
 		Freq:          req.Freq,
-		Conjugation:   req.Conjugation,
+		Conjugation:   toNullRawMessage(req.Conjugation),
 	}
 
 	word, err := server.store.UpdateWord(ctx, arg)
@@ -212,6 +213,20 @@ func (server *Server) updateWord(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, word)
+}
+
+// toNullRawMessage converts a WordJSONField to pqtype.NullRawMessage
+func toNullRawMessage(field WordJSONField) pqtype.NullRawMessage {
+	// If field.Raw is nil, return NullRawMessage with Valid=false
+	if field.Raw == nil {
+		return pqtype.NullRawMessage{Valid: false}
+	}
+	// Marshal the Raw value to JSON
+	b, err := json.Marshal(field.Raw)
+	if err != nil {
+		return pqtype.NullRawMessage{Valid: false}
+	}
+	return pqtype.NullRawMessage{RawMessage: b, Valid: true}
 }
 
 // @Summary Delete a word

@@ -6,10 +6,27 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"time"
 
 	"github.com/sqlc-dev/pqtype"
 )
+
+type Example struct {
+	ID      int32  `json:"id"`
+	Title   string `json:"title"`
+	Meaning string `json:"meaning"`
+}
+
+type Grammar struct {
+	ID         int32           `json:"id"`
+	Level      int32           `json:"level"`
+	Title      string          `json:"title"`
+	Tag        []string        `json:"tag"`
+	GrammarKey string          `json:"grammar_key"`
+	Related    []int32         `json:"related"`
+	Contents   json.RawMessage `json:"contents"`
+}
 
 type User struct {
 	ID           int32     `json:"id"`
