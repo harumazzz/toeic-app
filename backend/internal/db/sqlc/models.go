@@ -91,6 +91,18 @@ type UserWordProgress struct {
 	UpdatedAt      time.Time    `json:"updated_at"`
 }
 
+type UserWriting struct {
+	ID             int32                 `json:"id"`
+	UserID         int32                 `json:"user_id"`
+	PromptID       sql.NullInt32         `json:"prompt_id"`
+	SubmissionText string                `json:"submission_text"`
+	AiFeedback     pqtype.NullRawMessage `json:"ai_feedback"`
+	AiScore        sql.NullString        `json:"ai_score"`
+	SubmittedAt    time.Time             `json:"submitted_at"`
+	EvaluatedAt    sql.NullTime          `json:"evaluated_at"`
+	UpdatedAt      time.Time             `json:"updated_at"`
+}
+
 type Word struct {
 	ID            int32                 `json:"id"`
 	Word          string                `json:"word"`
@@ -102,4 +114,13 @@ type Word struct {
 	Snym          pqtype.NullRawMessage `json:"snym"`
 	Freq          float32               `json:"freq"`
 	Conjugation   pqtype.NullRawMessage `json:"conjugation"`
+}
+
+type WritingPrompt struct {
+	ID              int32          `json:"id"`
+	UserID          sql.NullInt32  `json:"user_id"`
+	PromptText      string         `json:"prompt_text"`
+	Topic           sql.NullString `json:"topic"`
+	DifficultyLevel sql.NullString `json:"difficulty_level"`
+	CreatedAt       time.Time      `json:"created_at"`
 }

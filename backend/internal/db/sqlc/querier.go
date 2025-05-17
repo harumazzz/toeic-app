@@ -6,6 +6,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 type Querier interface {
@@ -17,7 +18,9 @@ type Querier interface {
 	CreateQuestion(ctx context.Context, arg CreateQuestionParams) (Question, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateUserWordProgress(ctx context.Context, arg CreateUserWordProgressParams) (UserWordProgress, error)
+	CreateUserWriting(ctx context.Context, arg CreateUserWritingParams) (UserWriting, error)
 	CreateWord(ctx context.Context, arg CreateWordParams) (Word, error)
+	CreateWritingPrompt(ctx context.Context, arg CreateWritingPromptParams) (WritingPrompt, error)
 	DeleteContent(ctx context.Context, contentID int32) error
 	DeleteExam(ctx context.Context, examID int32) error
 	DeleteExample(ctx context.Context, id int32) error
@@ -26,7 +29,9 @@ type Querier interface {
 	DeleteQuestion(ctx context.Context, questionID int32) error
 	DeleteUser(ctx context.Context, id int32) error
 	DeleteUserWordProgress(ctx context.Context, arg DeleteUserWordProgressParams) error
+	DeleteUserWriting(ctx context.Context, id int32) error
 	DeleteWord(ctx context.Context, id int32) error
+	DeleteWritingPrompt(ctx context.Context, id int32) error
 	GetContent(ctx context.Context, contentID int32) (Content, error)
 	GetExam(ctx context.Context, examID int32) (Exam, error)
 	GetExample(ctx context.Context, id int32) (Example, error)
@@ -37,9 +42,11 @@ type Querier interface {
 	GetUser(ctx context.Context, id int32) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserWordProgress(ctx context.Context, arg GetUserWordProgressParams) (UserWordProgress, error)
+	GetUserWriting(ctx context.Context, id int32) (UserWriting, error)
 	GetWord(ctx context.Context, id int32) (Word, error)
 	GetWordWithProgress(ctx context.Context, arg GetWordWithProgressParams) (GetWordWithProgressRow, error)
 	GetWordsForReview(ctx context.Context, userID int32) ([]GetWordsForReviewRow, error)
+	GetWritingPrompt(ctx context.Context, id int32) (WritingPrompt, error)
 	ListContentsByPart(ctx context.Context, partID int32) ([]Content, error)
 	ListExamples(ctx context.Context) ([]Example, error)
 	ListExams(ctx context.Context) ([]Exam, error)
@@ -49,8 +56,11 @@ type Querier interface {
 	ListPartsByExam(ctx context.Context, examID int32) ([]Part, error)
 	ListQuestionsByContent(ctx context.Context, contentID int32) ([]Question, error)
 	ListUserWordProgressByNextReview(ctx context.Context, arg ListUserWordProgressByNextReviewParams) ([]UserWordProgress, error)
+	ListUserWritingsByPromptID(ctx context.Context, promptID sql.NullInt32) ([]UserWriting, error)
+	ListUserWritingsByUserID(ctx context.Context, userID int32) ([]UserWriting, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	ListWords(ctx context.Context, arg ListWordsParams) ([]Word, error)
+	ListWritingPrompts(ctx context.Context) ([]WritingPrompt, error)
 	SearchGrammars(ctx context.Context, arg SearchGrammarsParams) ([]Grammar, error)
 	UpdateContent(ctx context.Context, arg UpdateContentParams) (Content, error)
 	UpdateExam(ctx context.Context, arg UpdateExamParams) (Exam, error)
@@ -60,7 +70,9 @@ type Querier interface {
 	UpdateQuestion(ctx context.Context, arg UpdateQuestionParams) (Question, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserWordProgress(ctx context.Context, arg UpdateUserWordProgressParams) (UserWordProgress, error)
+	UpdateUserWriting(ctx context.Context, arg UpdateUserWritingParams) (UserWriting, error)
 	UpdateWord(ctx context.Context, arg UpdateWordParams) (Word, error)
+	UpdateWritingPrompt(ctx context.Context, arg UpdateWritingPromptParams) (WritingPrompt, error)
 }
 
 var _ Querier = (*Queries)(nil)

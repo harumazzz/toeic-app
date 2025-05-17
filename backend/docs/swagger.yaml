@@ -1,3 +1,4 @@
+basePath: /
 definitions:
   api.ContentResponse:
     properties:
@@ -168,6 +169,29 @@ definitions:
       word_id:
         type: integer
     type: object
+  api.UserWritingResponse:
+    description: Response object for user writing submissions
+    properties:
+      ai_feedback:
+        description: AIFeedback is a JSON object containing AI-generated feedback
+        type: object
+      ai_score:
+        type: number
+      evaluated_at:
+        type: string
+      id:
+        type: integer
+      prompt_id:
+        type: integer
+      submission_text:
+        type: string
+      submitted_at:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
   api.WordJSONField:
     properties:
       raw: {}
@@ -228,6 +252,21 @@ definitions:
         $ref: '#/definitions/api.UserWordProgressResponse'
       word:
         $ref: '#/definitions/api.WordProgressResponse'
+    type: object
+  api.WritingPromptResponse:
+    properties:
+      created_at:
+        type: string
+      difficulty_level:
+        type: string
+      id:
+        type: integer
+      prompt_text:
+        type: string
+      topic:
+        type: string
+      user_id:
+        type: integer
     type: object
   api.createContentRequest:
     properties:
@@ -369,6 +408,25 @@ definitions:
     - repetitions
     - word_id
     type: object
+  api.createUserWritingRequest:
+    description: Request object for creating user writing submissions
+    properties:
+      ai_feedback:
+        description: AIFeedback is a JSON object containing AI-generated feedback
+        type: object
+      ai_score:
+        type: number
+      prompt_id:
+        type: integer
+      submission_text:
+        type: string
+      user_id:
+        minimum: 1
+        type: integer
+    required:
+    - submission_text
+    - user_id
+    type: object
   api.createWordRequest:
     properties:
       conjugation:
@@ -396,6 +454,19 @@ definitions:
     - pronounce
     - short_mean
     - word
+    type: object
+  api.createWritingPromptRequest:
+    properties:
+      difficulty_level:
+        type: string
+      prompt_text:
+        type: string
+      topic:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - prompt_text
     type: object
   api.loginUserRequest:
     properties:
@@ -571,6 +642,19 @@ definitions:
     - interval_days
     - repetitions
     type: object
+  api.updateUserWritingRequest:
+    description: Request object for updating user writing submissions
+    properties:
+      ai_feedback:
+        description: AIFeedback is a JSON object containing AI-generated feedback
+        type: object
+      ai_score:
+        type: number
+      evaluated_at:
+        type: string
+      submission_text:
+        type: string
+    type: object
   api.updateWordRequest:
     properties:
       conjugation:
@@ -597,8 +681,28 @@ definitions:
     required:
     - id
     type: object
+  api.updateWritingPromptRequest:
+    properties:
+      difficulty_level:
+        type: string
+      prompt_text:
+        type: string
+      topic:
+        type: string
+    type: object
+host: localhost:8000
 info:
-  contact: {}
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: A RESTful API for the Toeic application
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Toeic App API
+  version: "1.0"
 paths:
   /api/login:
     post:
@@ -2680,6 +2784,403 @@ paths:
       summary: Update a word
       tags:
       - words
+  /api/v1/writing/prompt-submissions/{prompt_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all writing submissions for a specific prompt
+      parameters:
+      - description: Prompt ID
+        in: path
+        name: prompt_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User writing submissions retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.UserWritingResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid prompt ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve user writing submissions
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: List user writing submissions by prompt ID
+      tags:
+      - writing
+  /api/v1/writing/prompts:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all writing prompts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Writing prompts retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.WritingPromptResponse'
+                  type: array
+              type: object
+        "500":
+          description: Failed to retrieve writing prompts
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: List all writing prompts
+      tags:
+      - writing
+    post:
+      consumes:
+      - application/json
+      description: Add a new writing prompt to the database
+      parameters:
+      - description: Writing prompt object to create
+        in: body
+        name: prompt
+        required: true
+        schema:
+          $ref: '#/definitions/api.createWritingPromptRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Writing prompt created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.WritingPromptResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create writing prompt
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new writing prompt
+      tags:
+      - writing
+  /api/v1/writing/prompts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific writing prompt by its ID
+      parameters:
+      - description: Writing Prompt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Writing prompt deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid prompt ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete writing prompt
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a writing prompt
+      tags:
+      - writing
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific writing prompt by its ID
+      parameters:
+      - description: Writing Prompt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Writing prompt retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.WritingPromptResponse'
+              type: object
+        "400":
+          description: Invalid prompt ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Writing prompt not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve writing prompt
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get a writing prompt by ID
+      tags:
+      - writing
+    put:
+      consumes:
+      - application/json
+      description: Update an existing writing prompt by ID
+      parameters:
+      - description: Writing Prompt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Writing prompt fields to update
+        in: body
+        name: prompt
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateWritingPromptRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Writing prompt updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.WritingPromptResponse'
+              type: object
+        "400":
+          description: Invalid request body or prompt ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Writing prompt not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update writing prompt
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a writing prompt
+      tags:
+      - writing
+  /api/v1/writing/submissions:
+    post:
+      consumes:
+      - application/json
+      description: Add a new user writing submission to the database
+      parameters:
+      - description: User writing submission object to create
+        in: body
+        name: writing
+        required: true
+        schema:
+          $ref: '#/definitions/api.createUserWritingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User writing submission created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserWritingResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create user writing submission
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new user writing submission
+      tags:
+      - writing
+  /api/v1/writing/submissions/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific user writing submission by its ID
+      parameters:
+      - description: User Writing Submission ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User writing submission deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid submission ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete user writing submission
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a user writing submission
+      tags:
+      - writing
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific user writing submission by its ID
+      parameters:
+      - description: User Writing Submission ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User writing submission retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserWritingResponse'
+              type: object
+        "400":
+          description: Invalid submission ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User writing submission not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve user writing submission
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get a user writing submission by ID
+      tags:
+      - writing
+    put:
+      consumes:
+      - application/json
+      description: Update an existing user writing submission by ID
+      parameters:
+      - description: User Writing Submission ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User writing submission fields to update
+        in: body
+        name: writing
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateUserWritingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User writing submission updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserWritingResponse'
+              type: object
+        "400":
+          description: Invalid request body or submission ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User writing submission not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update user writing submission
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a user writing submission
+      tags:
+      - writing
+  /api/v1/writing/users/{user_id}/submissions:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all writing submissions for a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User writing submissions retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.UserWritingResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve user writing submissions
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: List user writing submissions by user ID
+      tags:
+      - writing
   /health:
     get:
       consumes:
@@ -2720,4 +3221,10 @@ paths:
       summary: Get system metrics
       tags:
       - monitoring
+securityDefinitions:
+  ApiKeyAuth:
+    description: 'Bearer JWT token authorization. Format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

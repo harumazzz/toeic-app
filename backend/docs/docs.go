@@ -9,7 +9,16 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.example.com/support",
+            "email": "support@example.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -3414,6 +3423,658 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/writing/prompt-submissions/{prompt_id}": {
+            "get": {
+                "description": "Get a list of all writing submissions for a specific prompt",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "List user writing submissions by prompt ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Prompt ID",
+                        "name": "prompt_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User writing submissions retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.UserWritingResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid prompt ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve user writing submissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/writing/prompts": {
+            "get": {
+                "description": "Get a list of all writing prompts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "List all writing prompts",
+                "responses": {
+                    "200": {
+                        "description": "Writing prompts retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.WritingPromptResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve writing prompts",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Add a new writing prompt to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Create a new writing prompt",
+                "parameters": [
+                    {
+                        "description": "Writing prompt object to create",
+                        "name": "prompt",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.createWritingPromptRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Writing prompt created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.WritingPromptResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create writing prompt",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/writing/prompts/{id}": {
+            "get": {
+                "description": "Retrieve a specific writing prompt by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Get a writing prompt by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Writing Prompt ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Writing prompt retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.WritingPromptResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid prompt ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Writing prompt not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve writing prompt",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update an existing writing prompt by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Update a writing prompt",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Writing Prompt ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Writing prompt fields to update",
+                        "name": "prompt",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.updateWritingPromptRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Writing prompt updated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.WritingPromptResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or prompt ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Writing prompt not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update writing prompt",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete a specific writing prompt by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Delete a writing prompt",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Writing Prompt ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Writing prompt deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid prompt ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete writing prompt",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/writing/submissions": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Add a new user writing submission to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Create a new user writing submission",
+                "parameters": [
+                    {
+                        "description": "User writing submission object to create",
+                        "name": "writing",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.createUserWritingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User writing submission created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.UserWritingResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create user writing submission",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/writing/submissions/{id}": {
+            "get": {
+                "description": "Retrieve a specific user writing submission by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Get a user writing submission by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User Writing Submission ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User writing submission retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.UserWritingResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid submission ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User writing submission not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve user writing submission",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update an existing user writing submission by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Update a user writing submission",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User Writing Submission ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User writing submission fields to update",
+                        "name": "writing",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.updateUserWritingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User writing submission updated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.UserWritingResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or submission ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User writing submission not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update user writing submission",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete a specific user writing submission by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Delete a user writing submission",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User Writing Submission ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User writing submission deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid submission ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete user writing submission",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/writing/users/{user_id}/submissions": {
+            "get": {
+                "description": "Get a list of all writing submissions for a specific user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "List user writing submissions by user ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User writing submissions retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.UserWritingResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve user writing submissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Check if the API server is running",
@@ -3742,6 +4403,40 @@ const docTemplate = `{
                 }
             }
         },
+        "api.UserWritingResponse": {
+            "description": "Response object for user writing submissions",
+            "type": "object",
+            "properties": {
+                "ai_feedback": {
+                    "description": "AIFeedback is a JSON object containing AI-generated feedback",
+                    "type": "object"
+                },
+                "ai_score": {
+                    "type": "number"
+                },
+                "evaluated_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "prompt_id": {
+                    "type": "integer"
+                },
+                "submission_text": {
+                    "type": "string"
+                },
+                "submitted_at": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "api.WordJSONField": {
             "type": "object",
             "properties": {
@@ -3832,6 +4527,29 @@ const docTemplate = `{
                 },
                 "word": {
                     "$ref": "#/definitions/api.WordProgressResponse"
+                }
+            }
+        },
+        "api.WritingPromptResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "difficulty_level": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "prompt_text": {
+                    "type": "string"
+                },
+                "topic": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -4035,6 +4753,33 @@ const docTemplate = `{
                 }
             }
         },
+        "api.createUserWritingRequest": {
+            "description": "Request object for creating user writing submissions",
+            "type": "object",
+            "required": [
+                "submission_text",
+                "user_id"
+            ],
+            "properties": {
+                "ai_feedback": {
+                    "description": "AIFeedback is a JSON object containing AI-generated feedback",
+                    "type": "object"
+                },
+                "ai_score": {
+                    "type": "number"
+                },
+                "prompt_id": {
+                    "type": "integer"
+                },
+                "submission_text": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
         "api.createWordRequest": {
             "type": "object",
             "required": [
@@ -4072,6 +4817,26 @@ const docTemplate = `{
                 },
                 "word": {
                     "type": "string"
+                }
+            }
+        },
+        "api.createWritingPromptRequest": {
+            "type": "object",
+            "required": [
+                "prompt_text"
+            ],
+            "properties": {
+                "difficulty_level": {
+                    "type": "string"
+                },
+                "prompt_text": {
+                    "type": "string"
+                },
+                "topic": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -4333,6 +5098,25 @@ const docTemplate = `{
                 }
             }
         },
+        "api.updateUserWritingRequest": {
+            "description": "Request object for updating user writing submissions",
+            "type": "object",
+            "properties": {
+                "ai_feedback": {
+                    "description": "AIFeedback is a JSON object containing AI-generated feedback",
+                    "type": "object"
+                },
+                "ai_score": {
+                    "type": "number"
+                },
+                "evaluated_at": {
+                    "type": "string"
+                },
+                "submission_text": {
+                    "type": "string"
+                }
+            }
+        },
         "api.updateWordRequest": {
             "type": "object",
             "required": [
@@ -4371,18 +5155,40 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "api.updateWritingPromptRequest": {
+            "type": "object",
+            "properties": {
+                "difficulty_level": {
+                    "type": "string"
+                },
+                "prompt_text": {
+                    "type": "string"
+                },
+                "topic": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Bearer JWT token authorization. Format: Bearer {token}",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "1.0",
+	Host:             "localhost:8000",
+	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Toeic App API",
+	Description:      "A RESTful API for the Toeic application",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

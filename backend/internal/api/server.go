@@ -152,9 +152,7 @@ func (server *Server) setupRouter() {
 				questions.GET("/:id", server.getQuestion)
 				questions.PUT("/:id", server.updateQuestion)
 				questions.DELETE("/:id", server.deleteQuestion)
-			}
-
-			// User Word Progress routes
+			} // User Word Progress routes
 			userWordProgress := authRoutes.Group("/user-word-progress")
 			{
 				userWordProgress.POST("", server.createUserWordProgress)
@@ -163,6 +161,34 @@ func (server *Server) setupRouter() {
 				userWordProgress.DELETE("/:word_id", server.deleteUserWordProgress)
 				userWordProgress.GET("/reviews", server.getWordsForReview)
 				userWordProgress.GET("/word/:word_id", server.getWordWithProgress)
+			}
+
+			// Writing routes
+			writing := authRoutes.Group("/writing")
+			{ // Writing prompt routes
+				prompts := writing.Group("/prompts")
+				{
+					prompts.POST("", server.createWritingPrompt)
+					prompts.GET("/:id", server.getWritingPrompt)
+					prompts.GET("", server.listWritingPrompts)
+					prompts.PUT("/:id", server.updateWritingPrompt)
+					prompts.DELETE("/:id", server.deleteWritingPrompt)
+				}
+
+				// Prompt submissions - separate to avoid wildcard conflict
+				writing.GET("/prompt-submissions/:prompt_id", server.listUserWritingsByPromptID)
+
+				// User writing submissions routes
+				submissions := writing.Group("/submissions")
+				{
+					submissions.POST("", server.createUserWriting)
+					submissions.GET("/:id", server.getUserWriting)
+					submissions.PUT("/:id", server.updateUserWriting)
+					submissions.DELETE("/:id", server.deleteUserWriting)
+				}
+
+				// User-specific writing submissions
+				writing.GET("/users/:user_id/submissions", server.listUserWritingsByUserID)
 			}
 		}
 	}
