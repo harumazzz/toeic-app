@@ -60,6 +60,26 @@ type Question struct {
 	Keywords        sql.NullString `json:"keywords"`
 }
 
+type SpeakingSession struct {
+	ID           int32          `json:"id"`
+	UserID       int32          `json:"user_id"`
+	SessionTopic sql.NullString `json:"session_topic"`
+	StartTime    time.Time      `json:"start_time"`
+	EndTime      sql.NullTime   `json:"end_time"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+}
+
+type SpeakingTurn struct {
+	ID                 int32                 `json:"id"`
+	SessionID          int32                 `json:"session_id"`
+	SpeakerType        string                `json:"speaker_type"`
+	TextSpoken         sql.NullString        `json:"text_spoken"`
+	AudioRecordingPath sql.NullString        `json:"audio_recording_path"`
+	Timestamp          time.Time             `json:"timestamp"`
+	AiEvaluation       pqtype.NullRawMessage `json:"ai_evaluation"`
+	AiScore            sql.NullString        `json:"ai_score"`
+}
+
 type User struct {
 	ID           int32     `json:"id"`
 	Username     string    `json:"username"`

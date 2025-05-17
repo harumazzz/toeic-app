@@ -1,4 +1,3 @@
-basePath: /
 definitions:
   api.ContentResponse:
     properties:
@@ -129,6 +128,40 @@ definitions:
       message:
         type: string
       status:
+        type: string
+    type: object
+  api.SpeakingSessionResponse:
+    properties:
+      end_time:
+        type: string
+      id:
+        type: integer
+      session_topic:
+        type: string
+      start_time:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  api.SpeakingTurnResponse:
+    properties:
+      ai_evaluation:
+        type: object
+      ai_score:
+        type: number
+      audio_recording_path:
+        type: string
+      id:
+        type: integer
+      session_id:
+        type: integer
+      speaker_type:
+        type: string
+      text_spoken:
+        type: string
+      timestamp:
         type: string
     type: object
   api.UserResponse:
@@ -372,6 +405,41 @@ definitions:
     - title
     - true_answer
     type: object
+  api.createSpeakingSessionRequest:
+    properties:
+      end_time:
+        type: string
+      session_topic:
+        type: string
+      start_time:
+        type: string
+      user_id:
+        minimum: 1
+        type: integer
+    required:
+    - user_id
+    type: object
+  api.createSpeakingTurnRequest:
+    properties:
+      ai_evaluation:
+        type: object
+      ai_score:
+        type: number
+      audio_recording_path:
+        type: string
+      session_id:
+        minimum: 1
+        type: integer
+      speaker_type:
+        type: string
+      text_spoken:
+        type: string
+      timestamp:
+        type: string
+    required:
+    - session_id
+    - speaker_type
+    type: object
   api.createUserRequest:
     properties:
       email:
@@ -613,6 +681,28 @@ definitions:
       true_answer:
         type: string
     type: object
+  api.updateSpeakingSessionRequest:
+    properties:
+      end_time:
+        type: string
+      session_topic:
+        type: string
+      start_time:
+        type: string
+    type: object
+  api.updateSpeakingTurnRequest:
+    properties:
+      ai_evaluation:
+        type: object
+      ai_score:
+        type: number
+      audio_recording_path:
+        type: string
+      text_spoken:
+        type: string
+      timestamp:
+        type: string
+    type: object
   api.updateUserRequest:
     properties:
       email:
@@ -690,19 +780,8 @@ definitions:
       topic:
         type: string
     type: object
-host: localhost:8000
 info:
-  contact:
-    email: support@example.com
-    name: API Support
-    url: http://www.example.com/support
-  description: A RESTful API for the Toeic application
-  license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
-  termsOfService: http://swagger.io/terms/
-  title: Toeic App API
-  version: "1.0"
+  contact: {}
 paths:
   /api/login:
     post:
@@ -2104,6 +2183,386 @@ paths:
       summary: Update a question
       tags:
       - questions
+  /api/v1/speaking/sessions:
+    post:
+      consumes:
+      - application/json
+      description: Add a new speaking session to the database
+      parameters:
+      - description: Speaking session object to create
+        in: body
+        name: session
+        required: true
+        schema:
+          $ref: '#/definitions/api.createSpeakingSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Speaking session created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.SpeakingSessionResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create speaking session
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new speaking session
+      tags:
+      - speaking
+  /api/v1/speaking/sessions/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific speaking session by its ID
+      parameters:
+      - description: Speaking Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Speaking session deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid session ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete speaking session
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a speaking session
+      tags:
+      - speaking
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific speaking session by its ID
+      parameters:
+      - description: Speaking Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Speaking session retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.SpeakingSessionResponse'
+              type: object
+        "400":
+          description: Invalid session ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Speaking session not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve speaking session
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a speaking session by ID
+      tags:
+      - speaking
+    put:
+      consumes:
+      - application/json
+      description: Update an existing speaking session by ID
+      parameters:
+      - description: Speaking Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Speaking session fields to update
+        in: body
+        name: session
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateSpeakingSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Speaking session updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.SpeakingSessionResponse'
+              type: object
+        "400":
+          description: Invalid request body or session ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Speaking session not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update speaking session
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a speaking session
+      tags:
+      - speaking
+  /api/v1/speaking/sessions/{id}/turns:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all speaking turns for a specific session
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Speaking turns retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.SpeakingTurnResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid session ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve speaking turns
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List speaking turns by session ID
+      tags:
+      - speaking
+  /api/v1/speaking/turns:
+    post:
+      consumes:
+      - application/json
+      description: Add a new speaking turn to a session
+      parameters:
+      - description: Speaking turn object to create
+        in: body
+        name: turn
+        required: true
+        schema:
+          $ref: '#/definitions/api.createSpeakingTurnRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Speaking turn created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.SpeakingTurnResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create speaking turn
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new speaking turn
+      tags:
+      - speaking
+  /api/v1/speaking/turns/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific speaking turn by its ID
+      parameters:
+      - description: Speaking Turn ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Speaking turn deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid turn ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete speaking turn
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a speaking turn
+      tags:
+      - speaking
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific speaking turn by its ID
+      parameters:
+      - description: Speaking Turn ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Speaking turn retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.SpeakingTurnResponse'
+              type: object
+        "400":
+          description: Invalid turn ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Speaking turn not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve speaking turn
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a speaking turn by ID
+      tags:
+      - speaking
+    put:
+      consumes:
+      - application/json
+      description: Update an existing speaking turn by ID
+      parameters:
+      - description: Speaking Turn ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Speaking turn fields to update
+        in: body
+        name: turn
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateSpeakingTurnRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Speaking turn updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.SpeakingTurnResponse'
+              type: object
+        "400":
+          description: Invalid request body or turn ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Speaking turn not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update speaking turn
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a speaking turn
+      tags:
+      - speaking
+  /api/v1/speaking/users/{user_id}/sessions:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all speaking sessions for a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Speaking sessions retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.SpeakingSessionResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve speaking sessions
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List speaking sessions by user ID
+      tags:
+      - speaking
   /api/v1/user-word-progress:
     post:
       consumes:
@@ -3221,10 +3680,4 @@ paths:
       summary: Get system metrics
       tags:
       - monitoring
-securityDefinitions:
-  ApiKeyAuth:
-    description: 'Bearer JWT token authorization. Format: Bearer {token}'
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"

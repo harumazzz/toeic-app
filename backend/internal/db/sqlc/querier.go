@@ -16,6 +16,8 @@ type Querier interface {
 	CreateGrammar(ctx context.Context, arg CreateGrammarParams) (Grammar, error)
 	CreatePart(ctx context.Context, arg CreatePartParams) (Part, error)
 	CreateQuestion(ctx context.Context, arg CreateQuestionParams) (Question, error)
+	CreateSpeakingSession(ctx context.Context, arg CreateSpeakingSessionParams) (SpeakingSession, error)
+	CreateSpeakingTurn(ctx context.Context, arg CreateSpeakingTurnParams) (SpeakingTurn, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateUserWordProgress(ctx context.Context, arg CreateUserWordProgressParams) (UserWordProgress, error)
 	CreateUserWriting(ctx context.Context, arg CreateUserWritingParams) (UserWriting, error)
@@ -27,6 +29,8 @@ type Querier interface {
 	DeleteGrammar(ctx context.Context, id int32) error
 	DeletePart(ctx context.Context, partID int32) error
 	DeleteQuestion(ctx context.Context, questionID int32) error
+	DeleteSpeakingSession(ctx context.Context, id int32) error
+	DeleteSpeakingTurn(ctx context.Context, id int32) error
 	DeleteUser(ctx context.Context, id int32) error
 	DeleteUserWordProgress(ctx context.Context, arg DeleteUserWordProgressParams) error
 	DeleteUserWriting(ctx context.Context, id int32) error
@@ -39,6 +43,8 @@ type Querier interface {
 	GetPart(ctx context.Context, partID int32) (Part, error)
 	GetQuestion(ctx context.Context, questionID int32) (Question, error)
 	GetRandomGrammar(ctx context.Context) (Grammar, error)
+	GetSpeakingSession(ctx context.Context, id int32) (SpeakingSession, error)
+	GetSpeakingTurn(ctx context.Context, id int32) (SpeakingTurn, error)
 	GetUser(ctx context.Context, id int32) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserWordProgress(ctx context.Context, arg GetUserWordProgressParams) (UserWordProgress, error)
@@ -55,6 +61,8 @@ type Querier interface {
 	ListGrammarsByTag(ctx context.Context, arg ListGrammarsByTagParams) ([]Grammar, error)
 	ListPartsByExam(ctx context.Context, examID int32) ([]Part, error)
 	ListQuestionsByContent(ctx context.Context, contentID int32) ([]Question, error)
+	ListSpeakingSessionsByUserID(ctx context.Context, userID int32) ([]SpeakingSession, error)
+	ListSpeakingTurnsBySessionID(ctx context.Context, sessionID int32) ([]SpeakingTurn, error)
 	ListUserWordProgressByNextReview(ctx context.Context, arg ListUserWordProgressByNextReviewParams) ([]UserWordProgress, error)
 	ListUserWritingsByPromptID(ctx context.Context, promptID sql.NullInt32) ([]UserWriting, error)
 	ListUserWritingsByUserID(ctx context.Context, userID int32) ([]UserWriting, error)
@@ -68,6 +76,8 @@ type Querier interface {
 	UpdateGrammar(ctx context.Context, arg UpdateGrammarParams) (Grammar, error)
 	UpdatePart(ctx context.Context, arg UpdatePartParams) (Part, error)
 	UpdateQuestion(ctx context.Context, arg UpdateQuestionParams) (Question, error)
+	UpdateSpeakingSession(ctx context.Context, arg UpdateSpeakingSessionParams) (SpeakingSession, error)
+	UpdateSpeakingTurn(ctx context.Context, arg UpdateSpeakingTurnParams) (SpeakingTurn, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserWordProgress(ctx context.Context, arg UpdateUserWordProgressParams) (UserWordProgress, error)
 	UpdateUserWriting(ctx context.Context, arg UpdateUserWritingParams) (UserWriting, error)

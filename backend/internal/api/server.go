@@ -161,9 +161,7 @@ func (server *Server) setupRouter() {
 				userWordProgress.DELETE("/:word_id", server.deleteUserWordProgress)
 				userWordProgress.GET("/reviews", server.getWordsForReview)
 				userWordProgress.GET("/word/:word_id", server.getWordWithProgress)
-			}
-
-			// Writing routes
+			} // Writing routes
 			writing := authRoutes.Group("/writing")
 			{ // Writing prompt routes
 				prompts := writing.Group("/prompts")
@@ -189,6 +187,31 @@ func (server *Server) setupRouter() {
 
 				// User-specific writing submissions
 				writing.GET("/users/:user_id/submissions", server.listUserWritingsByUserID)
+			} // Speaking routes
+			speaking := authRoutes.Group("/speaking")
+			{
+				// Speaking session routes
+				sessions := speaking.Group("/sessions")
+				{
+					sessions.POST("", server.createSpeakingSession)
+					sessions.GET("/:id", server.getSpeakingSession)
+					sessions.PUT("/:id", server.updateSpeakingSession)
+					sessions.DELETE("/:id", server.deleteSpeakingSession)
+					// Session turns nested under the specific session
+					sessions.GET("/:id/turns", server.listSpeakingTurnsBySessionID)
+				}
+
+				// User-specific speaking sessions
+				speaking.GET("/users/:user_id/sessions", server.listSpeakingSessionsByUserID)
+
+				// Speaking turn routes
+				turns := speaking.Group("/turns")
+				{
+					turns.POST("", server.createSpeakingTurn)
+					turns.GET("/:id", server.getSpeakingTurn)
+					turns.PUT("/:id", server.updateSpeakingTurn)
+					turns.DELETE("/:id", server.deleteSpeakingTurn)
+				}
 			}
 		}
 	}
