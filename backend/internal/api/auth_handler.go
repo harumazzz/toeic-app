@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/toeic-app/internal/db/sqlc"
+	"github.com/toeic-app/internal/logger"
 	"github.com/toeic-app/internal/token"
 	"github.com/toeic-app/internal/util"
 )
@@ -257,10 +258,15 @@ func (server *Server) refreshToken(ctx *gin.Context) {
 // authMiddleware is a Gin middleware for JWT authentication
 func (server *Server) authMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		path := ctx.Request.URL.Path
+		method := ctx.Request.Method
+		logger.Debug("Auth middleware checking: %s %s", method, path)
+
 		authorizationHeader := ctx.GetHeader(AuthorizationHeaderKey)
 
 		if len(authorizationHeader) == 0 {
 			err := errors.New("authorization header is not provided")
+			logger.Warn("Auth failed - no header: %s %s", method, path)
 			ErrorResponse(ctx, http.StatusUnauthorized, "Unauthorized", err)
 			ctx.Abort()
 			return
@@ -269,6 +275,7 @@ func (server *Server) authMiddleware() gin.HandlerFunc {
 		fields := strings.Fields(authorizationHeader)
 		if len(fields) < 2 {
 			err := errors.New("invalid authorization header format")
+			logger.Warn("Auth failed - invalid format: %s %s", method, path)
 			ErrorResponse(ctx, http.StatusUnauthorized, "Unauthorized", err)
 			ctx.Abort()
 			return
@@ -277,6 +284,7 @@ func (server *Server) authMiddleware() gin.HandlerFunc {
 		authorizationType := strings.ToLower(fields[0])
 		if authorizationType != AuthorizationTypeBearer {
 			err := errors.New("unsupported authorization type")
+			logger.Warn("Auth failed - unsupported type: %s %s - got %s", method, path, authorizationType)
 			ErrorResponse(ctx, http.StatusUnauthorized, "Unauthorized", err)
 			ctx.Abort()
 			return
@@ -285,12 +293,13 @@ func (server *Server) authMiddleware() gin.HandlerFunc {
 		accessToken := fields[1]
 		payload, err := server.tokenMaker.VerifyToken(accessToken)
 		if err != nil {
+			logger.Warn("Auth failed - invalid token: %s %s - %v", method, path, err)
 			ErrorResponse(ctx, http.StatusUnauthorized, "Unauthorized", err)
 			ctx.Abort()
 			return
 		}
-
 		ctx.Set(AuthorizationPayloadKey, payload)
+		logger.Debug("Auth successful - user ID: %d - %s %s", payload.ID, method, path)
 		ctx.Next()
 	}
 }

@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/toeic-app/internal/logger"
 )
 
 // Logger is a middleware that logs request information
@@ -32,24 +32,27 @@ func Logger() gin.HandlerFunc {
 			path = path + "?" + raw
 		}
 
-		// Format the log line
-		logLine := fmt.Sprintf("[GIN] %v | %3d | %13v | %15s | %-7s %s",
-			endTime.Format("2006/01/02 - 15:04:05"),
+		// Format the log line for HTTP request
+		logMsg := "%s | %3d | %13v | %15s | %-7s %s"
+		logArgs := []interface{}{
+			"GIN",
 			statusCode,
 			latency,
 			clientIP,
 			method,
 			path,
-		)
+		}
 
-		// Log with different color based on status code
+		// Log with different level based on status code
 		switch {
+		case statusCode >= 500:
+			logger.Error(logMsg, logArgs...)
 		case statusCode >= 400:
-			fmt.Printf("\033[31m%s\033[0m\n", logLine) // Red for errors
+			logger.Warn(logMsg, logArgs...)
 		case statusCode >= 300:
-			fmt.Printf("\033[33m%s\033[0m\n", logLine) // Yellow for redirects
+			logger.Info(logMsg, logArgs...)
 		default:
-			fmt.Printf("\033[32m%s\033[0m\n", logLine) // Green for success
+			logger.Info(logMsg, logArgs...)
 		}
 	}
 }

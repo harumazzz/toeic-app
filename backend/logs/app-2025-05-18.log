@@ -1,0 +1,71 @@
+[2025/05/18 03:37:24.650] [INFO] [logger.go:192] Starting TOEIC application...
+[2025/05/18 03:37:24.650] [INFO] [logger.go:192] Configuration loaded successfully
+[2025/05/18 03:37:24.651] [DEBUG] [logger.go:187] Custom validators registered
+[2025/05/18 03:37:24.651] [INFO] [logger.go:192] Connecting to database: postgres
+[2025/05/18 03:37:24.673] [FATAL] [logger.go:207] Could not ping database: dial tcp [::1]:5432: connectex: No connection could be made because the target machine actively refused it.
+[2025/05/18 03:38:06.477] [INFO] [logger.go:192] Starting TOEIC application...
+[2025/05/18 03:38:06.477] [INFO] [logger.go:192] Configuration loaded successfully
+[2025/05/18 03:38:06.495] [DEBUG] [logger.go:187] Custom validators registered
+[2025/05/18 03:38:06.495] [INFO] [logger.go:192] Connecting to database: postgres
+[2025/05/18 03:38:06.559] [INFO] [logger.go:192] Successfully connected to database!
+[2025/05/18 03:38:06.559] [INFO] [logger.go:192] Initializing API server...
+[2025/05/18 03:38:06.562] [DEBUG] [logger.go:187] API Routes:
+[2025/05/18 03:38:06.562] [DEBUG] [logger.go:187] Route: GET /api/v1/grammars
+[2025/05/18 03:38:06.562] [DEBUG] [logger.go:187] Route: GET /api/v1/grammars/random
+[2025/05/18 03:38:06.562] [DEBUG] [logger.go:187] Route: GET /api/v1/grammars/level
+[2025/05/18 03:38:06.563] [DEBUG] [logger.go:187] Route: GET /api/v1/grammars/tag
+[2025/05/18 03:38:06.563] [DEBUG] [logger.go:187] Route: GET /api/v1/grammars/search
+[2025/05/18 03:38:06.563] [DEBUG] [logger.go:187] Route: GET /api/v1/grammars/:id
+[2025/05/18 03:38:06.563] [DEBUG] [logger.go:187] Route: GET /api/v1/users
+[2025/05/18 03:38:06.563] [DEBUG] [logger.go:187] Route: GET /api/v1/users/me
+[2025/05/18 03:38:06.563] [DEBUG] [logger.go:187] Route: GET /api/v1/users/:id
+[2025/05/18 03:38:06.563] [DEBUG] [logger.go:187] Route: GET /api/v1/user-word-progress/reviews
+[2025/05/18 03:38:06.563] [DEBUG] [logger.go:187] Route: GET /api/v1/user-word-progress/word/:word_id
+[2025/05/18 03:38:06.563] [DEBUG] [logger.go:187] Route: GET /api/v1/user-word-progress/:word_id
+[2025/05/18 03:38:06.563] [DEBUG] [logger.go:187] Route: GET /api/v1/examples
+[2025/05/18 03:38:06.563] [DEBUG] [logger.go:187] Route: GET /api/v1/examples/:id
+[2025/05/18 03:38:06.564] [DEBUG] [logger.go:187] Route: GET /api/v1/exams
+[2025/05/18 03:38:06.564] [DEBUG] [logger.go:187] Route: GET /api/v1/exams/:id
+[2025/05/18 03:38:06.564] [DEBUG] [logger.go:187] Route: GET /api/v1/exam-parts/:exam_id
+[2025/05/18 03:38:06.564] [DEBUG] [logger.go:187] Route: GET /api/v1/words
+[2025/05/18 03:38:06.564] [DEBUG] [logger.go:187] Route: GET /api/v1/words/:id
+[2025/05/18 03:38:06.564] [DEBUG] [logger.go:187] Route: GET /api/v1/parts/:id
+[2025/05/18 03:38:06.564] [DEBUG] [logger.go:187] Route: GET /api/v1/part-contents/:part_id
+[2025/05/18 03:38:06.564] [DEBUG] [logger.go:187] Route: GET /api/v1/contents/:id
+[2025/05/18 03:38:06.564] [DEBUG] [logger.go:187] Route: GET /api/v1/content-questions/:content_id
+[2025/05/18 03:38:06.564] [DEBUG] [logger.go:187] Route: GET /api/v1/questions/:id
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: GET /health
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: GET /metrics
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: GET /swagger/*any
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: POST /api/v1/examples
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: POST /api/v1/exams
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: POST /api/v1/users
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: POST /api/v1/user-word-progress
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: POST /api/v1/words
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: POST /api/v1/grammars
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: POST /api/v1/parts
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: POST /api/v1/contents
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: POST /api/v1/questions
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: POST /api/register
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: POST /api/refresh-token
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: POST /api/login
+[2025/05/18 03:38:06.565] [DEBUG] [logger.go:187] Route: PUT /api/v1/examples/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: PUT /api/v1/exams/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: PUT /api/v1/users/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: PUT /api/v1/user-word-progress/:word_id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: PUT /api/v1/words/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: PUT /api/v1/grammars/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: PUT /api/v1/parts/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: PUT /api/v1/contents/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: PUT /api/v1/questions/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: DELETE /api/v1/examples/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: DELETE /api/v1/exams/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: DELETE /api/v1/users/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: DELETE /api/v1/user-word-progress/:word_id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: DELETE /api/v1/words/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: DELETE /api/v1/grammars/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: DELETE /api/v1/parts/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: DELETE /api/v1/contents/:id
+[2025/05/18 03:38:06.566] [DEBUG] [logger.go:187] Route: DELETE /api/v1/questions/:id
+[2025/05/18 03:38:06.567] [INFO] [logger.go:192] Starting API server on 127.0.0.1:8000
+[2025/05/18 03:38:06.568] [INFO] [logger.go:192] Starting HTTP server on address: 127.0.0.1:8000

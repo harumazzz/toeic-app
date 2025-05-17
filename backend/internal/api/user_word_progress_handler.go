@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/toeic-app/internal/db/sqlc"
+	"github.com/toeic-app/internal/logger"
 	"github.com/toeic-app/internal/token"
 )
 
@@ -247,30 +248,42 @@ type updateUserWordProgressRequest struct {
 // @Security ApiKeyAuth
 // @Router /api/v1/user-word-progress/{word_id} [put]
 func (server *Server) updateUserWordProgress(ctx *gin.Context) {
-	wordID, err := strconv.ParseInt(ctx.Param("word_id"), 10, 32)
+	wordIDParam := ctx.Param("word_id")
+	logger.Debug("Updating user word progress for word ID: %s", wordIDParam)
+
+	wordID, err := strconv.ParseInt(wordIDParam, 10, 32)
 	if err != nil {
+		logger.Error("Failed to parse word ID: %v", err)
 		ErrorResponse(ctx, http.StatusBadRequest, "Invalid word ID format", err)
 		return
 	}
 
 	var req updateUserWordProgressRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		logger.Error("Failed to bind request JSON: %v", err)
 		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request parameters", err)
 		return
 	}
 
+	logger.Debug("Request data: interval=%d, ease=%f, repetitions=%d",
+		req.IntervalDays, req.EaseFactor, req.Repetitions)
+
 	// Get user ID from authorization payload
 	payload, exists := ctx.Get(AuthorizationPayloadKey)
 	if !exists {
+		logger.Error("Authorization payload not found")
 		ErrorResponse(ctx, http.StatusUnauthorized, "Authorization payload not found", nil)
 		return
 	}
 
 	authPayload, ok := payload.(*token.Payload)
 	if !ok {
+		logger.Error("Invalid authorization payload type")
 		ErrorResponse(ctx, http.StatusUnauthorized, "Invalid authorization payload", nil)
 		return
 	}
+
+	logger.Debug("User ID from token: %d", authPayload.ID)
 
 	// Create LastReviewedAt and NextReviewAt as sql.NullTime
 	var lastReviewedAt sql.NullTime
@@ -281,6 +294,7 @@ func (server *Server) updateUserWordProgress(ctx *gin.Context) {
 			Time:  *req.LastReviewedAt,
 			Valid: true,
 		}
+		logger.Debug("Last reviewed at: %v", req.LastReviewedAt)
 	}
 
 	if req.NextReviewAt != nil {
@@ -288,6 +302,7 @@ func (server *Server) updateUserWordProgress(ctx *gin.Context) {
 			Time:  *req.NextReviewAt,
 			Valid: true,
 		}
+		logger.Debug("Next review at: %v", req.NextReviewAt)
 	}
 
 	arg := db.UpdateUserWordProgressParams{
@@ -300,15 +315,24 @@ func (server *Server) updateUserWordProgress(ctx *gin.Context) {
 		Repetitions:    req.Repetitions,
 	}
 
+	logger.Debug("Calling store.UpdateUserWordProgress for user %d and word %d",
+		authPayload.ID, wordID)
+
 	progress, err := server.store.UpdateUserWordProgress(ctx, arg)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			logger.Warn("User word progress not found for user %d and word %d",
+				authPayload.ID, wordID)
 			ErrorResponse(ctx, http.StatusNotFound, "User word progress not found", err)
 			return
 		}
+		logger.Error("Failed to update user word progress: %v", err)
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to update user word progress", err)
 		return
 	}
+
+	logger.Info("Successfully updated word progress for user %d and word %d",
+		authPayload.ID, wordID)
 
 	progressResp := NewUserWordProgressResponse(progress)
 	SuccessResponse(ctx, http.StatusOK, "User word progress updated successfully", progressResp)

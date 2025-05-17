@@ -6,6 +6,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/toeic-app/internal/config"
 	db "github.com/toeic-app/internal/db/sqlc"
+	"github.com/toeic-app/internal/logger"
 	"github.com/toeic-app/internal/middleware"
 	"github.com/toeic-app/internal/token"
 )
@@ -169,10 +170,17 @@ func (server *Server) setupRouter() {
 	// API documentation with custom URL and configuration options
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// Log all routes for debugging
+	logger.Debug("API Routes:")
+	for _, route := range router.Routes() {
+		logger.Debug("Route: %s %s", route.Method, route.Path)
+	}
+
 	server.router = router
 }
 
 // Start runs the HTTP server on a specific address.
 func (server *Server) Start(address string) error {
+	logger.Info("Starting HTTP server on address: %s", address)
 	return server.router.Run(address)
 }

@@ -29,4 +29,10 @@ test:
 swagger:
 	swag init -g main.go -o ./docs
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc install-tools test swagger
+run:
+	go run main.go
+
+run-with-logs:
+	powershell -ExecutionPolicy Bypass -File ./scripts/run_with_logs.ps1
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc install-tools test swagger run run-with-logs
