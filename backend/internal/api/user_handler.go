@@ -28,7 +28,7 @@ type createUserRequest struct {
 // @Success     201 {object} Response{data=UserResponse} "User created successfully"
 // @Failure     400 {object} Response "Invalid request parameters or validation failure"
 // @Failure     500 {object} Response "Server error during user creation"
-// @Router      /api/users [post]
+// @Router      /api/v1/users [post]
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -79,7 +79,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 // @Failure     404 {object} Response "User not found"
 // @Failure     500 {object} Response "Server error during user retrieval"
 // @Security    ApiKeyAuth
-// @Router      /api/users/{id} [get]
+// @Router      /api/v1/users/{id} [get]
 func (server *Server) getUser(ctx *gin.Context) {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
@@ -118,7 +118,7 @@ type listUsersRequest struct {
 // @Failure     400 {object} Response "Invalid query parameters"
 // @Failure     500 {object} Response "Server error during user listing"
 // @Security    ApiKeyAuth
-// @Router      /api/users [get]
+// @Router      /api/v1/users [get]
 func (server *Server) listUsers(ctx *gin.Context) {
 	var req listUsersRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -164,7 +164,7 @@ type updateUserRequest struct {
 // @Failure     404 {object} Response "User not found"
 // @Failure     500 {object} Response "Server error during user update"
 // @Security    ApiKeyAuth
-// @Router      /api/users/{id} [put]
+// @Router      /api/v1/users/{id} [put]
 func (server *Server) updateUser(ctx *gin.Context) {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
@@ -241,7 +241,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 // @Failure     404 {object} Response "User not found"
 // @Failure     500 {object} Response "Server error during user deletion"
 // @Security    ApiKeyAuth
-// @Router      /api/users/{id} [delete]
+// @Router      /api/v1/users/{id} [delete]
 func (server *Server) deleteUser(ctx *gin.Context) {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {

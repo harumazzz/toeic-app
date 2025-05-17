@@ -1,4 +1,26 @@
 definitions:
+  api.ContentResponse:
+    properties:
+      content_id:
+        type: integer
+      description:
+        type: string
+      part_id:
+        type: integer
+      type:
+        type: string
+    type: object
+  api.ExamResponse:
+    properties:
+      exam_id:
+        type: integer
+      is_unlocked:
+        type: boolean
+      time_limit_minutes:
+        type: integer
+      title:
+        type: string
+    type: object
   api.ExampleResponse:
     properties:
       id:
@@ -66,6 +88,38 @@ definitions:
       uptime:
         type: string
     type: object
+  api.PartResponse:
+    properties:
+      exam_id:
+        type: integer
+      part_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  api.QuestionResponse:
+    properties:
+      content_id:
+        type: integer
+      explanation:
+        type: string
+      image_url:
+        type: string
+      keywords:
+        type: string
+      media_url:
+        type: string
+      possible_answers:
+        items:
+          type: string
+        type: array
+      question_id:
+        type: integer
+      title:
+        type: string
+      true_answer:
+        type: string
+    type: object
   api.Response:
     properties:
       data: {}
@@ -89,9 +143,61 @@ definitions:
       username:
         type: string
     type: object
+  api.UserWordProgressResponse:
+    properties:
+      created_at:
+        example: "2025-05-01T13:45:00Z"
+        format: date-time
+        type: string
+      ease_factor:
+        type: number
+      interval_days:
+        type: integer
+      last_reviewed_at:
+        type: string
+      next_review_at:
+        type: string
+      repetitions:
+        type: integer
+      updated_at:
+        example: "2025-05-01T13:45:00Z"
+        format: date-time
+        type: string
+      user_id:
+        type: integer
+      word_id:
+        type: integer
+    type: object
   api.WordJSONField:
     properties:
       raw: {}
+    type: object
+  api.WordProgressJSONField:
+    properties:
+      raw: {}
+    type: object
+  api.WordProgressResponse:
+    properties:
+      conjugation:
+        $ref: '#/definitions/api.WordProgressJSONField'
+      descript_level:
+        type: string
+      freq:
+        type: number
+      id:
+        type: integer
+      level:
+        type: integer
+      means:
+        $ref: '#/definitions/api.WordProgressJSONField'
+      pronounce:
+        type: string
+      short_mean:
+        type: string
+      snym:
+        $ref: '#/definitions/api.WordProgressJSONField'
+      word:
+        type: string
     type: object
   api.WordResponse:
     properties:
@@ -115,6 +221,40 @@ definitions:
         $ref: '#/definitions/api.WordJSONField'
       word:
         type: string
+    type: object
+  api.WordWithProgressResponse:
+    properties:
+      progress:
+        $ref: '#/definitions/api.UserWordProgressResponse'
+      word:
+        $ref: '#/definitions/api.WordProgressResponse'
+    type: object
+  api.createContentRequest:
+    properties:
+      description:
+        type: string
+      part_id:
+        minimum: 1
+        type: integer
+      type:
+        type: string
+    required:
+    - description
+    - part_id
+    - type
+    type: object
+  api.createExamRequest:
+    properties:
+      is_unlocked:
+        type: boolean
+      time_limit_minutes:
+        minimum: 1
+        type: integer
+      title:
+        type: string
+    required:
+    - time_limit_minutes
+    - title
     type: object
   api.createExampleRequest:
     properties:
@@ -153,6 +293,46 @@ definitions:
     - tag
     - title
     type: object
+  api.createPartRequest:
+    properties:
+      exam_id:
+        minimum: 1
+        type: integer
+      title:
+        type: string
+    required:
+    - exam_id
+    - title
+    type: object
+  api.createQuestionRequest:
+    properties:
+      content_id:
+        minimum: 1
+        type: integer
+      explanation:
+        type: string
+      image_url:
+        type: string
+      keywords:
+        type: string
+      media_url:
+        type: string
+      possible_answers:
+        items:
+          type: string
+        minItems: 1
+        type: array
+      title:
+        type: string
+      true_answer:
+        type: string
+    required:
+    - content_id
+    - explanation
+    - possible_answers
+    - title
+    - true_answer
+    type: object
   api.createUserRequest:
     properties:
       email:
@@ -168,6 +348,26 @@ definitions:
     - email
     - password
     - username
+    type: object
+  api.createUserWordProgressRequest:
+    properties:
+      ease_factor:
+        type: number
+      interval_days:
+        type: integer
+      last_reviewed_at:
+        type: string
+      next_review_at:
+        type: string
+      repetitions:
+        type: integer
+      word_id:
+        type: integer
+    required:
+    - ease_factor
+    - interval_days
+    - repetitions
+    - word_id
     type: object
   api.createWordRequest:
     properties:
@@ -256,6 +456,26 @@ definitions:
       user:
         $ref: '#/definitions/api.UserResponse'
     type: object
+  api.updateContentRequest:
+    properties:
+      description:
+        type: string
+      part_id:
+        minimum: 1
+        type: integer
+      type:
+        type: string
+    type: object
+  api.updateExamRequest:
+    properties:
+      is_unlocked:
+        type: boolean
+      time_limit_minutes:
+        minimum: 1
+        type: integer
+      title:
+        type: string
+    type: object
   api.updateExampleRequest:
     properties:
       meaning:
@@ -291,6 +511,37 @@ definitions:
     required:
     - id
     type: object
+  api.updatePartRequest:
+    properties:
+      exam_id:
+        minimum: 1
+        type: integer
+      title:
+        type: string
+    type: object
+  api.updateQuestionRequest:
+    properties:
+      content_id:
+        minimum: 1
+        type: integer
+      explanation:
+        type: string
+      image_url:
+        type: string
+      keywords:
+        type: string
+      media_url:
+        type: string
+      possible_answers:
+        items:
+          type: string
+        minItems: 1
+        type: array
+      title:
+        type: string
+      true_answer:
+        type: string
+    type: object
   api.updateUserRequest:
     properties:
       email:
@@ -302,6 +553,23 @@ definitions:
         maxLength: 50
         minLength: 3
         type: string
+    type: object
+  api.updateUserWordProgressRequest:
+    properties:
+      ease_factor:
+        type: number
+      interval_days:
+        type: integer
+      last_reviewed_at:
+        type: string
+      next_review_at:
+        type: string
+      repetitions:
+        type: integer
+    required:
+    - ease_factor
+    - interval_days
+    - repetitions
     type: object
   api.updateWordRequest:
     properties:
@@ -445,39 +713,435 @@ paths:
       summary: Register a new user
       tags:
       - auth
-  /api/users:
+  /api/v1/content-questions/{content_id}:
     get:
       consumes:
       - application/json
-      description: Get a list of users with pagination. Allows for browsing through
-        users.
+      description: Get a list of all questions for a specific content
       parameters:
-      - default: 10
-        description: Number of users to return per page
-        in: query
-        maximum: 100
-        minimum: 1
-        name: limit
+      - description: Content ID
+        in: path
+        name: content_id
         required: true
-        type: integer
-      - default: 0
-        description: Offset for pagination
-        in: query
-        minimum: 0
-        name: offset
         type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Users retrieved successfully
+          description: Questions retrieved successfully
           schema:
             allOf:
             - $ref: '#/definitions/api.Response'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/api.UserResponse'
+                    $ref: '#/definitions/api.QuestionResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid content ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve questions
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: List questions by content
+      tags:
+      - questions
+  /api/v1/contents:
+    post:
+      consumes:
+      - application/json
+      description: Add new content to a part
+      parameters:
+      - description: Content object to create
+        in: body
+        name: content
+        required: true
+        schema:
+          $ref: '#/definitions/api.createContentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Content created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ContentResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create content
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create new content
+      tags:
+      - contents
+  /api/v1/contents/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete specific content by its ID
+      parameters:
+      - description: Content ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Content deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid content ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete content
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete content
+      tags:
+      - contents
+    get:
+      consumes:
+      - application/json
+      description: Retrieve specific content by its ID
+      parameters:
+      - description: Content ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Content retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ContentResponse'
+              type: object
+        "400":
+          description: Invalid content ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Content not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve content
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get content by ID
+      tags:
+      - contents
+    put:
+      consumes:
+      - application/json
+      description: Update existing content by ID
+      parameters:
+      - description: Content ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Content fields to update
+        in: body
+        name: content
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateContentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Content updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ContentResponse'
+              type: object
+        "400":
+          description: Invalid request body or content ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Content not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update content
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update content
+      tags:
+      - contents
+  /api/v1/exam-parts/{exam_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all parts for a specific exam
+      parameters:
+      - description: Exam ID
+        in: path
+        name: exam_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Parts retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.PartResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid exam ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve parts
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: List parts by exam
+      tags:
+      - parts
+  /api/v1/examples:
+    get:
+      description: Get a list of all examples
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Examples retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.ExampleResponse'
+                  type: array
+              type: object
+        "500":
+          description: Failed to retrieve examples
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: List examples
+      tags:
+      - examples
+    post:
+      consumes:
+      - application/json
+      description: Create a new example
+      parameters:
+      - description: Example details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.createExampleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Example created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExampleResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create example
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create example
+      tags:
+      - examples
+  /api/v1/examples/{id}:
+    delete:
+      description: Delete an existing example
+      parameters:
+      - description: Example ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Example deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid example ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete example
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete example
+      tags:
+      - examples
+    get:
+      description: Get details of an example by its ID
+      parameters:
+      - description: Example ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Example retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExampleResponse'
+              type: object
+        "400":
+          description: Invalid example ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Example not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve example
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get example by ID
+      tags:
+      - examples
+    put:
+      consumes:
+      - application/json
+      description: Update an existing example
+      parameters:
+      - description: Example ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Example details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateExampleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Example updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExampleResponse'
+              type: object
+        "400":
+          description: Invalid request body or example ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Example not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update example
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update example
+      tags:
+      - examples
+  /api/v1/exams:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all exams with pagination
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Exams retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.ExamResponse'
                   type: array
               type: object
         "400":
@@ -485,56 +1149,55 @@ paths:
           schema:
             $ref: '#/definitions/api.Response'
         "500":
-          description: Server error during user listing
+          description: Failed to retrieve exams
           schema:
             $ref: '#/definitions/api.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: List users
+      summary: List exams
       tags:
-      - users
+      - exams
     post:
       consumes:
       - application/json
-      description: Create a new user in the system. This endpoint is typically used
-        for user registration.
+      description: Add a new exam to the database
       parameters:
-      - description: User information for registration
+      - description: Exam object to create
         in: body
-        name: user
+        name: exam
         required: true
         schema:
-          $ref: '#/definitions/api.createUserRequest'
+          $ref: '#/definitions/api.createExamRequest'
       produces:
       - application/json
       responses:
         "201":
-          description: User created successfully
+          description: Exam created successfully
           schema:
             allOf:
             - $ref: '#/definitions/api.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/api.UserResponse'
+                  $ref: '#/definitions/api.ExamResponse'
               type: object
         "400":
-          description: Invalid request parameters or validation failure
+          description: Invalid request body
           schema:
             $ref: '#/definitions/api.Response'
         "500":
-          description: Server error during user creation
+          description: Failed to create exam
           schema:
             $ref: '#/definitions/api.Response'
-      summary: Create a new user
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new exam
       tags:
-      - users
-  /api/users/{id}:
+      - exams
+  /api/v1/exams/{id}:
     delete:
       consumes:
       - application/json
-      description: Delete a user by their ID.
+      description: Delete a specific exam by its ID
       parameters:
-      - description: User ID of the user to delete
+      - description: Exam ID
         in: path
         name: id
         required: true
@@ -543,32 +1206,28 @@ paths:
       - application/json
       responses:
         "200":
-          description: User deleted successfully
+          description: Exam deleted successfully
           schema:
             $ref: '#/definitions/api.Response'
         "400":
-          description: Invalid user ID format
-          schema:
-            $ref: '#/definitions/api.Response'
-        "404":
-          description: User not found
+          description: Invalid exam ID
           schema:
             $ref: '#/definitions/api.Response'
         "500":
-          description: Server error during user deletion
+          description: Failed to delete exam
           schema:
             $ref: '#/definitions/api.Response'
       security:
       - ApiKeyAuth: []
-      summary: Delete a user
+      summary: Delete an exam
       tags:
-      - users
+      - exams
     get:
       consumes:
       - application/json
-      description: Retrieve a specific user's details by their ID.
+      description: Retrieve a specific exam entry by its ID
       parameters:
-      - description: User ID
+      - description: Exam ID
         in: path
         name: id
         required: true
@@ -577,76 +1236,74 @@ paths:
       - application/json
       responses:
         "200":
-          description: User retrieved successfully
+          description: Exam retrieved successfully
           schema:
             allOf:
             - $ref: '#/definitions/api.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/api.UserResponse'
+                  $ref: '#/definitions/api.ExamResponse'
               type: object
         "400":
-          description: Invalid user ID format
+          description: Invalid exam ID
           schema:
             $ref: '#/definitions/api.Response'
         "404":
-          description: User not found
+          description: Exam not found
           schema:
             $ref: '#/definitions/api.Response'
         "500":
-          description: Server error during user retrieval
+          description: Failed to retrieve exam
           schema:
             $ref: '#/definitions/api.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Get a user by ID
+      summary: Get an exam by ID
       tags:
-      - users
+      - exams
     put:
       consumes:
       - application/json
-      description: Update an existing user's information by their ID.
+      description: Update an existing exam by ID
       parameters:
-      - description: User ID of the user to update
+      - description: Exam ID
         in: path
         name: id
         required: true
         type: integer
-      - description: User information to update. Only provided fields are updated.
+      - description: Exam fields to update
         in: body
-        name: user
+        name: exam
         required: true
         schema:
-          $ref: '#/definitions/api.updateUserRequest'
+          $ref: '#/definitions/api.updateExamRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: User updated successfully
+          description: Exam updated successfully
           schema:
             allOf:
             - $ref: '#/definitions/api.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/api.UserResponse'
+                  $ref: '#/definitions/api.ExamResponse'
               type: object
         "400":
-          description: Invalid request parameters or user ID format
+          description: Invalid request body or exam ID
           schema:
             $ref: '#/definitions/api.Response'
         "404":
-          description: User not found
+          description: Exam not found
           schema:
             $ref: '#/definitions/api.Response'
         "500":
-          description: Server error during user update
+          description: Failed to update exam
           schema:
             $ref: '#/definitions/api.Response'
       security:
       - ApiKeyAuth: []
-      summary: Update a user
+      summary: Update an exam
       tags:
-      - users
+      - exams
   /api/v1/grammars:
     get:
       consumes:
@@ -1007,6 +1664,794 @@ paths:
       summary: List grammars by tag
       tags:
       - grammars
+  /api/v1/part-contents/{part_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all contents for a specific part
+      parameters:
+      - description: Part ID
+        in: path
+        name: part_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contents retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.ContentResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid part ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve contents
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: List contents by part
+      tags:
+      - contents
+  /api/v1/parts:
+    post:
+      consumes:
+      - application/json
+      description: Add a new part to an exam
+      parameters:
+      - description: Part object to create
+        in: body
+        name: part
+        required: true
+        schema:
+          $ref: '#/definitions/api.createPartRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Part created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.PartResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create part
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new part
+      tags:
+      - parts
+  /api/v1/parts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific part by its ID
+      parameters:
+      - description: Part ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Part deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid part ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete part
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a part
+      tags:
+      - parts
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific part by its ID
+      parameters:
+      - description: Part ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Part retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.PartResponse'
+              type: object
+        "400":
+          description: Invalid part ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Part not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve part
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get a part by ID
+      tags:
+      - parts
+    put:
+      consumes:
+      - application/json
+      description: Update an existing part by ID
+      parameters:
+      - description: Part ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Part fields to update
+        in: body
+        name: part
+        required: true
+        schema:
+          $ref: '#/definitions/api.updatePartRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Part updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.PartResponse'
+              type: object
+        "400":
+          description: Invalid request body or part ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Part not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update part
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a part
+      tags:
+      - parts
+  /api/v1/questions:
+    post:
+      consumes:
+      - application/json
+      description: Add a new question to content
+      parameters:
+      - description: Question object to create
+        in: body
+        name: question
+        required: true
+        schema:
+          $ref: '#/definitions/api.createQuestionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Question created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.QuestionResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create question
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new question
+      tags:
+      - questions
+  /api/v1/questions/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific question by its ID
+      parameters:
+      - description: Question ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Question deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid question ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete question
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a question
+      tags:
+      - questions
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific question by its ID
+      parameters:
+      - description: Question ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Question retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.QuestionResponse'
+              type: object
+        "400":
+          description: Invalid question ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Question not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve question
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get a question by ID
+      tags:
+      - questions
+    put:
+      consumes:
+      - application/json
+      description: Update an existing question by ID
+      parameters:
+      - description: Question ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Question fields to update
+        in: body
+        name: question
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateQuestionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Question updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.QuestionResponse'
+              type: object
+        "400":
+          description: Invalid request body or question ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Question not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update question
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a question
+      tags:
+      - questions
+  /api/v1/user-word-progress:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user word progress record
+      parameters:
+      - description: User word progress data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.createUserWordProgressRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User word progress created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserWordProgressResponse'
+              type: object
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create user word progress
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create user word progress
+      tags:
+      - user-word-progress
+  /api/v1/user-word-progress/{word_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a word progress record for the current user
+      parameters:
+      - description: Word ID
+        in: path
+        name: word_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User word progress deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid word ID format
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete user word progress
+      tags:
+      - user-word-progress
+    get:
+      consumes:
+      - application/json
+      description: Get a specific word progress record for the current user
+      parameters:
+      - description: Word ID
+        in: path
+        name: word_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User word progress retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserWordProgressResponse'
+              type: object
+        "400":
+          description: Invalid word ID format
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User word progress not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user word progress
+      tags:
+      - user-word-progress
+    put:
+      consumes:
+      - application/json
+      description: Update a word progress record for the current user
+      parameters:
+      - description: Word ID
+        in: path
+        name: word_id
+        required: true
+        type: integer
+      - description: User word progress data to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateUserWordProgressRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User word progress updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserWordProgressResponse'
+              type: object
+        "400":
+          description: Invalid request parameters or word ID format
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User word progress not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update user word progress
+      tags:
+      - user-word-progress
+  /api/v1/user-word-progress/reviews:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of words that are due for review for the current user
+      parameters:
+      - description: Maximum number of words to return (optional)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Words for review retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.WordWithProgressResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get words for review
+      tags:
+      - user-word-progress
+  /api/v1/user-word-progress/word/{word_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific word with its progress information for the current
+        user
+      parameters:
+      - description: Word ID
+        in: path
+        name: word_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Word with progress retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.WordWithProgressResponse'
+              type: object
+        "400":
+          description: Invalid word ID format
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Word not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get word with progress
+      tags:
+      - user-word-progress
+  /api/v1/users:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of users with pagination. Allows for browsing through
+        users.
+      parameters:
+      - default: 10
+        description: Number of users to return per page
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        required: true
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.UserResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error during user listing
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user in the system. This endpoint is typically used
+        for user registration.
+      parameters:
+      - description: User information for registration
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/api.createUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserResponse'
+              type: object
+        "400":
+          description: Invalid request parameters or validation failure
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error during user creation
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Create a new user
+      tags:
+      - users
+  /api/v1/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user by their ID.
+      parameters:
+      - description: User ID of the user to delete
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid user ID format
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error during user deletion
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a user
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific user's details by their ID.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserResponse'
+              type: object
+        "400":
+          description: Invalid user ID format
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error during user retrieval
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a user by ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update an existing user's information by their ID.
+      parameters:
+      - description: User ID of the user to update
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User information to update. Only provided fields are updated.
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserResponse'
+              type: object
+        "400":
+          description: Invalid request parameters or user ID format
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error during user update
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a user
+      tags:
+      - users
   /api/v1/users/me:
     get:
       consumes:
@@ -1235,185 +2680,6 @@ paths:
       summary: Update a word
       tags:
       - words
-  /examples:
-    get:
-      description: Get a list of all examples
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Examples retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/api.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/api.ExampleResponse'
-                  type: array
-              type: object
-        "500":
-          description: Failed to retrieve examples
-          schema:
-            $ref: '#/definitions/api.Response'
-      summary: List examples
-      tags:
-      - examples
-    post:
-      consumes:
-      - application/json
-      description: Create a new example
-      parameters:
-      - description: Example details
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/api.createExampleRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Example created successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/api.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/api.ExampleResponse'
-              type: object
-        "400":
-          description: Invalid request body
-          schema:
-            $ref: '#/definitions/api.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/api.Response'
-        "500":
-          description: Failed to create example
-          schema:
-            $ref: '#/definitions/api.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Create example
-      tags:
-      - examples
-  /examples/{id}:
-    delete:
-      description: Delete an existing example
-      parameters:
-      - description: Example ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: Example deleted successfully
-          schema:
-            $ref: '#/definitions/api.Response'
-        "400":
-          description: Invalid example ID
-          schema:
-            $ref: '#/definitions/api.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/api.Response'
-        "500":
-          description: Failed to delete example
-          schema:
-            $ref: '#/definitions/api.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Delete example
-      tags:
-      - examples
-    get:
-      description: Get details of an example by its ID
-      parameters:
-      - description: Example ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Example retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/api.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/api.ExampleResponse'
-              type: object
-        "400":
-          description: Invalid example ID
-          schema:
-            $ref: '#/definitions/api.Response'
-        "404":
-          description: Example not found
-          schema:
-            $ref: '#/definitions/api.Response'
-        "500":
-          description: Failed to retrieve example
-          schema:
-            $ref: '#/definitions/api.Response'
-      summary: Get example by ID
-      tags:
-      - examples
-    put:
-      consumes:
-      - application/json
-      description: Update an existing example
-      parameters:
-      - description: Example ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Example details
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/api.updateExampleRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Example updated successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/api.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/api.ExampleResponse'
-              type: object
-        "400":
-          description: Invalid request body or example ID
-          schema:
-            $ref: '#/definitions/api.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/api.Response'
-        "404":
-          description: Example not found
-          schema:
-            $ref: '#/definitions/api.Response'
-        "500":
-          description: Failed to update example
-          schema:
-            $ref: '#/definitions/api.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Update example
-      tags:
-      - examples
   /health:
     get:
       consumes:

@@ -101,9 +101,7 @@ func (server *Server) setupRouter() {
 				grammarsProtected.POST("", server.createGrammar)
 				grammarsProtected.PUT("/:id", server.updateGrammar)
 				grammarsProtected.DELETE("/:id", server.deleteGrammar)
-			}
-
-			// Example routes
+			} // Example routes
 			examples := authRoutes.Group("/examples")
 			{
 				examples.GET("/:id", server.getExample)
@@ -111,27 +109,61 @@ func (server *Server) setupRouter() {
 				examples.POST("", server.createExample)
 				examples.PUT("/:id", server.updateExample)
 				examples.DELETE("/:id", server.deleteExample)
+			} // Exam routes
+			exams := authRoutes.Group("/exams")
+			{
+				exams.POST("", server.createExam)
+				exams.GET("/:id", server.getExam)
+				exams.GET("", server.listExams)
+				exams.PUT("/:id", server.updateExam)
+				exams.DELETE("/:id", server.deleteExam)
 			}
 
-			// Protected Example routes (if needed for admin/specific users)
-			// examplesProtected := authRoutes.Group("/examples")
-			// {
-			// 	// Add protected example routes here if necessary
-			// }
+			// Exam Parts route (separate to avoid wildcard conflict)
+			authRoutes.GET("/exam-parts/:exam_id", server.listPartsByExam)
+
+			// Part routes
+			parts := authRoutes.Group("/parts")
+			{
+				parts.POST("", server.createPart)
+				parts.GET("/:id", server.getPart)
+				parts.PUT("/:id", server.updatePart)
+				parts.DELETE("/:id", server.deletePart)
+			}
+
+			// Part Contents route (separate to avoid wildcard conflict)
+			authRoutes.GET("/part-contents/:part_id", server.listContentsByPart)
+
+			// Content routes
+			contents := authRoutes.Group("/contents")
+			{
+				contents.POST("", server.createContent)
+				contents.GET("/:id", server.getContent)
+				contents.PUT("/:id", server.updateContent)
+				contents.DELETE("/:id", server.deleteContent)
+			}
+
+			// Content Questions route (separate to avoid wildcard conflict)
+			authRoutes.GET("/content-questions/:content_id", server.listQuestionsByContent) // Question routes
+			questions := authRoutes.Group("/questions")
+			{
+				questions.POST("", server.createQuestion)
+				questions.GET("/:id", server.getQuestion)
+				questions.PUT("/:id", server.updateQuestion)
+				questions.DELETE("/:id", server.deleteQuestion)
+			}
+
+			// User Word Progress routes
+			userWordProgress := authRoutes.Group("/user-word-progress")
+			{
+				userWordProgress.POST("", server.createUserWordProgress)
+				userWordProgress.GET("/:word_id", server.getUserWordProgress)
+				userWordProgress.PUT("/:word_id", server.updateUserWordProgress)
+				userWordProgress.DELETE("/:word_id", server.deleteUserWordProgress)
+				userWordProgress.GET("/reviews", server.getWordsForReview)
+				userWordProgress.GET("/word/:word_id", server.getWordWithProgress)
+			}
 		}
-	}
-
-	// Legacy routes for backward compatibility
-	router.POST("/api/users", server.createUser)
-
-	// Legacy protected routes
-	legacyAuth := router.Group("/api")
-	legacyAuth.Use(server.authMiddleware())
-	{
-		legacyAuth.GET("/users/:id", server.getUser)
-		legacyAuth.GET("/users", server.listUsers)
-		legacyAuth.PUT("/users/:id", server.updateUser)
-		legacyAuth.DELETE("/users/:id", server.deleteUser)
 	}
 
 	// API documentation with custom URL and configuration options

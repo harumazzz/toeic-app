@@ -9,30 +9,57 @@ import (
 )
 
 type Querier interface {
+	CreateContent(ctx context.Context, arg CreateContentParams) (Content, error)
+	CreateExam(ctx context.Context, arg CreateExamParams) (Exam, error)
 	CreateExample(ctx context.Context, arg CreateExampleParams) (Example, error)
 	CreateGrammar(ctx context.Context, arg CreateGrammarParams) (Grammar, error)
+	CreatePart(ctx context.Context, arg CreatePartParams) (Part, error)
+	CreateQuestion(ctx context.Context, arg CreateQuestionParams) (Question, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	CreateUserWordProgress(ctx context.Context, arg CreateUserWordProgressParams) (UserWordProgress, error)
 	CreateWord(ctx context.Context, arg CreateWordParams) (Word, error)
+	DeleteContent(ctx context.Context, contentID int32) error
+	DeleteExam(ctx context.Context, examID int32) error
 	DeleteExample(ctx context.Context, id int32) error
 	DeleteGrammar(ctx context.Context, id int32) error
+	DeletePart(ctx context.Context, partID int32) error
+	DeleteQuestion(ctx context.Context, questionID int32) error
 	DeleteUser(ctx context.Context, id int32) error
+	DeleteUserWordProgress(ctx context.Context, arg DeleteUserWordProgressParams) error
 	DeleteWord(ctx context.Context, id int32) error
+	GetContent(ctx context.Context, contentID int32) (Content, error)
+	GetExam(ctx context.Context, examID int32) (Exam, error)
 	GetExample(ctx context.Context, id int32) (Example, error)
 	GetGrammar(ctx context.Context, id int32) (Grammar, error)
+	GetPart(ctx context.Context, partID int32) (Part, error)
+	GetQuestion(ctx context.Context, questionID int32) (Question, error)
 	GetRandomGrammar(ctx context.Context) (Grammar, error)
 	GetUser(ctx context.Context, id int32) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserWordProgress(ctx context.Context, arg GetUserWordProgressParams) (UserWordProgress, error)
 	GetWord(ctx context.Context, id int32) (Word, error)
+	GetWordWithProgress(ctx context.Context, arg GetWordWithProgressParams) (GetWordWithProgressRow, error)
+	GetWordsForReview(ctx context.Context, userID int32) ([]GetWordsForReviewRow, error)
+	ListContentsByPart(ctx context.Context, partID int32) ([]Content, error)
 	ListExamples(ctx context.Context) ([]Example, error)
+	ListExams(ctx context.Context) ([]Exam, error)
 	ListGrammars(ctx context.Context, arg ListGrammarsParams) ([]Grammar, error)
 	ListGrammarsByLevel(ctx context.Context, arg ListGrammarsByLevelParams) ([]Grammar, error)
 	ListGrammarsByTag(ctx context.Context, arg ListGrammarsByTagParams) ([]Grammar, error)
+	ListPartsByExam(ctx context.Context, examID int32) ([]Part, error)
+	ListQuestionsByContent(ctx context.Context, contentID int32) ([]Question, error)
+	ListUserWordProgressByNextReview(ctx context.Context, arg ListUserWordProgressByNextReviewParams) ([]UserWordProgress, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	ListWords(ctx context.Context, arg ListWordsParams) ([]Word, error)
 	SearchGrammars(ctx context.Context, arg SearchGrammarsParams) ([]Grammar, error)
+	UpdateContent(ctx context.Context, arg UpdateContentParams) (Content, error)
+	UpdateExam(ctx context.Context, arg UpdateExamParams) (Exam, error)
 	UpdateExample(ctx context.Context, arg UpdateExampleParams) (Example, error)
 	UpdateGrammar(ctx context.Context, arg UpdateGrammarParams) (Grammar, error)
+	UpdatePart(ctx context.Context, arg UpdatePartParams) (Part, error)
+	UpdateQuestion(ctx context.Context, arg UpdateQuestionParams) (Question, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	UpdateUserWordProgress(ctx context.Context, arg UpdateUserWordProgressParams) (UserWordProgress, error)
 	UpdateWord(ctx context.Context, arg UpdateWordParams) (Word, error)
 }
 

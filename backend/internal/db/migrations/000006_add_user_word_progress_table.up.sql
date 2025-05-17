@@ -1,0 +1,12 @@
+CREATE TABLE user_word_progress (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  word_id INTEGER NOT NULL REFERENCES words(id) ON DELETE CASCADE,
+  last_reviewed_at TIMESTAMP WITH TIME ZONE,
+  next_review_at TIMESTAMP WITH TIME ZONE,
+  interval_days INTEGER DEFAULT 0 NOT NULL,
+  ease_factor REAL DEFAULT 2.5 NOT NULL,
+  repetitions INTEGER DEFAULT 0 NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+  PRIMARY KEY (user_id, word_id)
+);

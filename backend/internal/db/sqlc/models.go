@@ -12,6 +12,20 @@ import (
 	"github.com/sqlc-dev/pqtype"
 )
 
+type Content struct {
+	ContentID   int32  `json:"content_id"`
+	PartID      int32  `json:"part_id"`
+	Type        string `json:"type"`
+	Description string `json:"description"`
+}
+
+type Exam struct {
+	ExamID           int32  `json:"exam_id"`
+	Title            string `json:"title"`
+	TimeLimitMinutes int32  `json:"time_limit_minutes"`
+	IsUnlocked       bool   `json:"is_unlocked"`
+}
+
 type Example struct {
 	ID      int32  `json:"id"`
 	Title   string `json:"title"`
@@ -26,6 +40,24 @@ type Grammar struct {
 	GrammarKey string          `json:"grammar_key"`
 	Related    []int32         `json:"related"`
 	Contents   json.RawMessage `json:"contents"`
+}
+
+type Part struct {
+	PartID int32  `json:"part_id"`
+	ExamID int32  `json:"exam_id"`
+	Title  string `json:"title"`
+}
+
+type Question struct {
+	QuestionID      int32          `json:"question_id"`
+	ContentID       int32          `json:"content_id"`
+	Title           string         `json:"title"`
+	MediaUrl        sql.NullString `json:"media_url"`
+	ImageUrl        sql.NullString `json:"image_url"`
+	PossibleAnswers []string       `json:"possible_answers"`
+	TrueAnswer      string         `json:"true_answer"`
+	Explanation     string         `json:"explanation"`
+	Keywords        sql.NullString `json:"keywords"`
 }
 
 type User struct {
@@ -45,6 +77,18 @@ type UserProfile struct {
 	AvatarUrl sql.NullString `json:"avatar_url"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
+}
+
+type UserWordProgress struct {
+	UserID         int32        `json:"user_id"`
+	WordID         int32        `json:"word_id"`
+	LastReviewedAt sql.NullTime `json:"last_reviewed_at"`
+	NextReviewAt   sql.NullTime `json:"next_review_at"`
+	IntervalDays   int32        `json:"interval_days"`
+	EaseFactor     float32      `json:"ease_factor"`
+	Repetitions    int32        `json:"repetitions"`
+	CreatedAt      time.Time    `json:"created_at"`
+	UpdatedAt      time.Time    `json:"updated_at"`
 }
 
 type Word struct {

@@ -41,7 +41,7 @@ func NewExampleResponse(example db.Example) ExampleResponse {
 // @Failure 401 {object} Response "Unauthorized"
 // @Failure 500 {object} Response "Failed to create example"
 // @Security ApiKeyAuth
-// @Router /examples [post]
+// @Router /api/v1/examples [post]
 func (server *Server) createExample(ctx *gin.Context) {
 	var req createExampleRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -72,7 +72,7 @@ func (server *Server) createExample(ctx *gin.Context) {
 // @Failure 400 {object} Response "Invalid example ID"
 // @Failure 404 {object} Response "Example not found"
 // @Failure 500 {object} Response "Failed to retrieve example"
-// @Router /examples/{id} [get]
+// @Router /api/v1/examples/{id} [get]
 func (server *Server) getExample(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -100,7 +100,7 @@ func (server *Server) getExample(ctx *gin.Context) {
 // @Produce json
 // @Success 200 {object} Response{data=[]ExampleResponse} "Examples retrieved successfully"
 // @Failure 500 {object} Response "Failed to retrieve examples"
-// @Router /examples [get]
+// @Router /api/v1/examples [get]
 func (server *Server) listExamples(ctx *gin.Context) {
 	examples, err := server.store.ListExamples(ctx)
 	if err != nil {
@@ -134,7 +134,7 @@ type updateExampleRequest struct {
 // @Failure 404 {object} Response "Example not found"
 // @Failure 500 {object} Response "Failed to update example"
 // @Security ApiKeyAuth
-// @Router /examples/{id} [put]
+// @Router /api/v1/examples/{id} [put]
 func (server *Server) updateExample(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -177,7 +177,7 @@ func (server *Server) updateExample(ctx *gin.Context) {
 // @Failure 401 {object} Response "Unauthorized"
 // @Failure 500 {object} Response "Failed to delete example"
 // @Security ApiKeyAuth
-// @Router /examples/{id} [delete]
+// @Router /api/v1/examples/{id} [delete]
 func (server *Server) deleteExample(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
