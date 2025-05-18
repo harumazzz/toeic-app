@@ -1,0 +1,77 @@
+{
+  "login": {
+    "success": "Đăng nhập thành công!",
+    "fail": "Tài khoản hoặc mật khẩu không đúng!",
+    "candidateOnly": "Vui lòng sử dụng tài khoản Ứng viên!",
+    "logout": "Bạn vừa đăng xuất!"
+  },
+  "registration": {
+    "success": "Đăng kí tài khoản thành công!",
+    "emailExists": "Email đã đăng ký!"
+  },
+  "password": {
+    "changeSuccess": "Đổi mật khẩu thành công!",
+    "currentIncorrect": "Mật khẩu hiện tại không đúng"
+  },
+  "profile": {
+    "updateSuccess": "Cập nhật thông tin thành công!"
+  },
+  "job": {
+    "saveSuccess": "Lưu việc làm thành công!",
+    "unsaveSuccess": "Hủy lưu việc làm thành công!",
+    "applicationSuccess": "Ứng tuyển thành công!",
+    "unsavedOne": "Đã hủy lưu 1 việc làm."
+  },
+  "validation": {
+    "required": {
+      "email": "Vui lòng nhập địa chỉ email",
+      "password": "Vui lòng nhập mật khẩu",
+      "firstName": "Vui lòng nhập họ và tên lót",
+      "lastName": "Vui lòng nhập tên",
+      "confirmPassword": "Vui lòng xác nhận lại mật khẩu",
+      "phone": "Vui lòng nhập số điện thoại",
+      "currentPassword": "Vui lòng nhập mật khẩu hiện tại",
+      "avatar": "Vui lòng cập nhật ảnh đại diện",
+      "birthDate": "Vui lòng chọn ngày sinh",
+      "gender": "Vui lòng chọn giới tính",
+      "province": "Vui lòng chọn Tỉnh/ Thành phố",
+      "district": "Vui lòng chọn Quận/ Huyện",
+      "desiredJob": "Vui lòng nhập công việc mong muốn",
+      "jobPosition": "Vui lòng chọn ví trí làm việc",
+      "specialization": "Vui lòng chọn chuyên ngành",
+      "workType": "Vui lòng chọn hình thức làm việc",
+      "workLocation": "Vui lòng chọn địa điểm làm việc",
+      "cv": "Vui lòng tải lên CV đính kèm"
+    },
+    "length": {
+      "firstName": "Họ và tên lót phải có độ dài từ 2 đến 32 ký tự",
+      "lastName": "Tên phải có độ dài từ 2 đến 32 ký tự",
+      "email": {
+        "min": "Vui lòng nhập tối thiểu 6 ký tự",
+        "max": "Vui lòng nhập tối đa 256 ký tự"
+      },
+      "password": "Mật khẩu phải có độ dài từ 6 đến 32 ký tự",
+      "phone": "Số điện thoại phải có độ dài từ 8 đến 13 ký tự",
+      "address": "Địa chỉ nơi ở phải có độ dài từ 8 đến 255 ký tự",
+      "desiredJob": "Công việc mong muốn phải có độ dài từ 8 đến 255 ký tự"
+    },
+    "format": {
+      "email": "Địa chỉ email không đúng",
+      "emailExists": "Địa chỉ email này đã tồn tại",
+      "password": {
+        "uppercase": "Vui lòng nhập ít nhất 1 chữ in hoa",
+        "number": "Vui lòng nhập ít nhất 1 số"
+      },
+      "passwordMismatch": "Mật khẩu chưa khớp",
+      "noTrailingSpace": "Vui lòng không kết thúc bằng dấu cách",
+      "noSpace": "Vui lòng không không kết thúc bằng dấu cách",
+      "address": "Vui lòng nhập đúng định dạng địa chỉ nơi ở",
+      "credentials": "Địa chỉ email hoặc mật khẩu không đúng",
+      "passwordIncorrect": "Mật khẩu không đúng"
+    },
+    "file": {
+      "avatarSize": "Ảnh đại diện có dung lượng <= 512KB",
+      "cvFormat": "Chỉ hỗ trợ file .doc, .docx và .pdf và tối đa 512KB"
+    }
+  }
+}

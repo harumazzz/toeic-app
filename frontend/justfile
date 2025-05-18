@@ -1,0 +1,20 @@
+set shell := ["powershell.exe", "-c"]
+
+build:
+    dart run build_runner build --delete-conflicting-outputs
+run:
+    flutter run
+build-android:
+    flutter build apk
+download:
+    flutter pub get
+analyze:
+    flutter analyze
+format:
+    flutter format .
+clean:
+    flutter clean
+fix:
+    dart fix --apply
+test:
+    flutter test
