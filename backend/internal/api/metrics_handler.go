@@ -10,10 +10,11 @@ import (
 
 // MetricsResponse contains the system metrics
 type MetricsResponse struct {
-	Uptime       string    `json:"uptime"`
-	NumGoroutine int       `json:"num_goroutine"`
-	MemStats     MemStats  `json:"mem_stats"`
-	Timestamp    time.Time `json:"timestamp"`
+	Uptime            string    `json:"uptime"`
+	NumGoroutine      int       `json:"num_goroutine"`
+	MemStats          MemStats  `json:"mem_stats"`
+	BlacklistedTokens int       `json:"blacklisted_tokens"`
+	Timestamp         time.Time `json:"timestamp"`
 }
 
 // MemStats contains memory-related metrics
@@ -38,7 +39,6 @@ var startTime = time.Now()
 func (server *Server) getMetrics(ctx *gin.Context) {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-
 	metrics := MetricsResponse{
 		Uptime:       time.Since(startTime).String(),
 		NumGoroutine: runtime.NumGoroutine(),
@@ -49,7 +49,8 @@ func (server *Server) getMetrics(ctx *gin.Context) {
 			NumGC:        m.NumGC,
 			PauseTotalNs: m.PauseTotalNs,
 		},
-		Timestamp: time.Now(),
+		BlacklistedTokens: server.tokenMaker.BlacklistCount(),
+		Timestamp:         time.Now(),
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "Metrics retrieved successfully", metrics)

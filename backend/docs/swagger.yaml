@@ -79,6 +79,8 @@ definitions:
     type: object
   api.MetricsResponse:
     properties:
+      blacklisted_tokens:
+        type: integer
       mem_stats:
         $ref: '#/definitions/api.MemStats'
       num_goroutine:
@@ -556,6 +558,11 @@ definitions:
       user:
         $ref: '#/definitions/api.UserResponse'
     type: object
+  api.logoutRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
   api.refreshTokenRequest:
     properties:
       refresh_token:
@@ -820,6 +827,37 @@ paths:
           schema:
             $ref: '#/definitions/api.Response'
       summary: Login user
+      tags:
+      - auth
+  /api/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout a user by invalidating their access and refresh tokens
+      parameters:
+      - description: Logout request with optional refresh token
+        in: body
+        name: logout
+        schema:
+          $ref: '#/definitions/api.logoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized if the user is not authenticated
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Logout user
       tags:
       - auth
   /api/refresh-token:

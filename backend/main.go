@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
+	"time"
 
 	_ "github.com/lib/pq"
 	_ "github.com/toeic-app/docs"
@@ -59,10 +64,30 @@ func main() {
 	if err != nil {
 		logger.Fatal("Cannot create server: %v", err)
 	}
-
 	logger.Info("Starting API server on %s", cfg.ServerAddress)
-	err = server.Start(cfg.ServerAddress)
-	if err != nil {
-		logger.Fatal("Could not start server: %v", err)
+
+	// Set up graceful shutdown
+	go func() {
+		if err := server.Start(cfg.ServerAddress); err != nil && err != http.ErrServerClosed {
+			logger.Fatal("Could not start server: %v", err)
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	logger.Info("Shutting down server...")
+
+	// Create a deadline to wait for current operations to complete
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		logger.Fatal("Server forced to shutdown: %v", err)
 	}
+	server.SetReleaseMode()
+
+	logger.Info("Server exited gracefully")
 }

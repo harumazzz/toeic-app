@@ -20,6 +20,17 @@ type Config struct {
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration int64         `mapstructure:"REFRESH_TOKEN_DURATION"`
 	CloudinaryURL        string        `mapstructure:"CLOUDINARY_URL"`
+
+	// Rate limiting configuration
+	RateLimitEnabled   bool          `mapstructure:"RATE_LIMIT_ENABLED"`
+	RateLimitRequests  int           `mapstructure:"RATE_LIMIT_REQUESTS"`   // Requests per second
+	RateLimitBurst     int           `mapstructure:"RATE_LIMIT_BURST"`      // Maximum burst size
+	RateLimitExpiresIn time.Duration `mapstructure:"RATE_LIMIT_EXPIRES_IN"` // Expiration time for visitor entries
+
+	// Auth rate limiting configuration (for login/register endpoints)
+	AuthRateLimitEnabled  bool `mapstructure:"AUTH_RATE_LIMIT_ENABLED"`
+	AuthRateLimitRequests int  `mapstructure:"AUTH_RATE_LIMIT_REQUESTS"` // Requests per second
+	AuthRateLimitBurst    int  `mapstructure:"AUTH_RATE_LIMIT_BURST"`    // Maximum burst size
 }
 
 // LoadEnv loads environment variables from .env file
@@ -88,6 +99,16 @@ func DefaultConfig() Config {
 	if cloudinaryURL == "" {
 		log.Fatal("CLOUDINARY_URL environment variable is required")
 	}
+	// Get rate limiting configuration
+	rateLimitEnabled := GetEnv("RATE_LIMIT_ENABLED", "true") == "true"
+	rateLimitRequests := int(GetEnvAsInt("RATE_LIMIT_REQUESTS", 10))                              // 10 reqs/sec by default
+	rateLimitBurst := int(GetEnvAsInt("RATE_LIMIT_BURST", 20))                                    // 20 burst by default
+	rateLimitExpiresIn := time.Duration(GetEnvAsInt("RATE_LIMIT_EXPIRES_IN", 3600)) * time.Second // 1 hour by default
+
+	// Get auth rate limiting configuration
+	authRateLimitEnabled := GetEnv("AUTH_RATE_LIMIT_ENABLED", "true") == "true"
+	authRateLimitRequests := int(GetEnvAsInt("AUTH_RATE_LIMIT_REQUESTS", 3)) // 3 reqs/sec by default (more restricted)
+	authRateLimitBurst := int(GetEnvAsInt("AUTH_RATE_LIMIT_BURST", 5))       // 5 burst by default
 
 	return Config{
 		DBDriver:             dbDriver,
@@ -97,5 +118,16 @@ func DefaultConfig() Config {
 		AccessTokenDuration:  accessTokenDuration,
 		RefreshTokenDuration: refreshTokenDuration,
 		CloudinaryURL:        cloudinaryURL,
+
+		// Rate limiting configuration
+		RateLimitEnabled:   rateLimitEnabled,
+		RateLimitRequests:  rateLimitRequests,
+		RateLimitBurst:     rateLimitBurst,
+		RateLimitExpiresIn: rateLimitExpiresIn,
+
+		// Auth rate limiting configuration
+		AuthRateLimitEnabled:  authRateLimitEnabled,
+		AuthRateLimitRequests: authRateLimitRequests,
+		AuthRateLimitBurst:    authRateLimitBurst,
 	}
 }

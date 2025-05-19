@@ -79,6 +79,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/logout": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Logout a user by invalidating their access and refresh tokens",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout user",
+                "parameters": [
+                    {
+                        "description": "Logout request with optional refresh token",
+                        "name": "logout",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/api.logoutRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Logout successful",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized if the user is not authenticated",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/refresh-token": {
             "post": {
                 "description": "Get a new access token using a refresh token",
@@ -4989,6 +5039,9 @@ const docTemplate = `{
         "api.MetricsResponse": {
             "type": "object",
             "properties": {
+                "blacklisted_tokens": {
+                    "type": "integer"
+                },
                 "mem_stats": {
                     "$ref": "#/definitions/api.MemStats"
                 },
@@ -5690,6 +5743,14 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/api.UserResponse"
+                }
+            }
+        },
+        "api.logoutRequest": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
                 }
             }
         },

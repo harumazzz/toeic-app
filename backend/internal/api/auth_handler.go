@@ -205,6 +205,73 @@ type refreshTokenResponse struct {
 	User        UserResponse `json:"user"`
 }
 
+// logoutRequest defines the structure for logout requests.
+// It includes the refresh token, which is optional.
+type logoutRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+// @Summary     Logout user
+// @Description Logout a user by invalidating their access and refresh tokens
+// @Tags        auth
+// @Accept      json
+// @Produce     json
+// @Param       logout body logoutRequest false "Logout request with optional refresh token"
+// @Success     200 {object} Response "Logout successful"
+// @Failure     401 {object} Response "Unauthorized if the user is not authenticated"
+// @Failure     500 {object} Response "Server error"
+// @Security    ApiKeyAuth
+// @Router      /api/logout [post]
+func (server *Server) logoutUser(ctx *gin.Context) {
+	// Extract auth header
+	authorizationHeader := ctx.GetHeader(AuthorizationHeaderKey)
+	if len(authorizationHeader) == 0 {
+		ErrorResponse(ctx, http.StatusUnauthorized, "Authorization header is not provided", nil)
+		return
+	}
+
+	fields := strings.Fields(authorizationHeader)
+	if len(fields) < 2 {
+		ErrorResponse(ctx, http.StatusUnauthorized, "Invalid authorization header format", nil)
+		return
+	}
+
+	authorizationType := strings.ToLower(fields[0])
+	if authorizationType != AuthorizationTypeBearer {
+		ErrorResponse(ctx, http.StatusUnauthorized, "Unsupported authorization type", nil)
+		return
+	}
+
+	accessToken := fields[1]
+
+	// Blacklist the access token
+	err := server.tokenMaker.BlacklistToken(accessToken)
+	if err != nil {
+		// Don't return an error if the token is already invalid or expired
+		if err != token.ErrExpiredToken {
+			ErrorResponse(ctx, http.StatusInternalServerError, "Failed to invalidate access token", err)
+			return
+		}
+		logger.Debug("Access token already expired during logout")
+	}
+
+	// Check if there's a refresh token in the request body
+	var req logoutRequest
+	if err := ctx.ShouldBindJSON(&req); err == nil && req.RefreshToken != "" {
+		// If refresh token exists, blacklist it too
+		err = server.tokenMaker.BlacklistToken(req.RefreshToken)
+		if err != nil {
+			if err != token.ErrExpiredToken {
+				logger.Warn("Failed to blacklist refresh token: %v", err)
+			} else {
+				logger.Debug("Refresh token already expired during logout")
+			}
+		}
+	}
+
+	SuccessResponse(ctx, http.StatusOK, "Logout successful", nil)
+}
+
 // @Summary     Refresh access token
 // @Description Get a new access token using a refresh token
 // @Tags        auth

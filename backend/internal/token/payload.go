@@ -45,4 +45,11 @@ type Maker interface {
 
 	// VerifyToken checks if the token is valid or not
 	VerifyToken(token string) (*Payload, error)
+	// BlacklistToken adds a token to the blacklist
+	BlacklistToken(token string) error
+	// Stop cleans up resources used by the token maker
+	Stop()
+
+	// BlacklistCount returns the number of tokens in the blacklist
+	BlacklistCount() int
 }

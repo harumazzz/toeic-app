@@ -1,7 +1,9 @@
 package api
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -22,11 +24,12 @@ import (
 
 // Server serves HTTP requests for our banking service.
 type Server struct {
-	config     config.Config
-	store      db.Querier
-	tokenMaker token.Maker
-	router     *gin.Engine
-	uploader   *uploader.CloudinaryUploader
+	config      config.Config
+	store       db.Querier
+	tokenMaker  token.Maker
+	router      *gin.Engine
+	uploader    *uploader.CloudinaryUploader
+	rateLimiter *middleware.AdvancedRateLimit // Store the rate limiter instance
 }
 
 // NewServer creates a new HTTP server and setup routing.
@@ -41,6 +44,7 @@ func NewServer(config config.Config, store db.Querier) (*Server, error) {
 		return nil, err
 	}
 
+	// Initialize the server
 	server := &Server{
 		config:     config,
 		store:      store,
@@ -48,6 +52,14 @@ func NewServer(config config.Config, store db.Querier) (*Server, error) {
 		uploader:   cloudinaryUploader,
 	}
 
+	// Initialize rate limiter if enabled
+	if config.RateLimitEnabled {
+		server.rateLimiter = middleware.NewAdvancedRateLimit(config, tokenMaker)
+		logger.Info("Rate limiting initialized with %d requests/sec, %d burst",
+			config.RateLimitRequests, config.RateLimitBurst)
+	}
+
+	// Setup routes
 	server.setupRouter()
 	return server, nil
 }
@@ -137,15 +149,25 @@ func (server *Server) setupRouter() {
 	// Apply middleware
 	router.Use(gin.Recovery())      // Recovery middleware recovers from panics
 	router.Use(middleware.Logger()) // Our custom logger
-	router.Use(middleware.CORS())
+	router.Use(middleware.CORS())   // Enable CORS
+
+	// Apply rate limiting middleware based on config
+	if server.config.RateLimitEnabled {
+		logger.Info("Enabling rate limiting with %d requests/sec, %d burst",
+			server.config.RateLimitRequests, server.config.RateLimitBurst)
+
+		// Initialize advanced rate limiter
+		advancedLimiter := middleware.NewAdvancedRateLimit(server.config, server.tokenMaker)
+		router.Use(advancedLimiter.Middleware())
+	}
+
 	// Health check and metrics routes
 	router.GET("/health", server.healthCheck)
-	router.GET("/metrics", server.getMetrics)
-
-	// Authentication routes
+	router.GET("/metrics", server.getMetrics) // Authentication routes
 	router.POST("/api/login", server.loginUser)
 	router.POST("/api/register", server.registerUser)
 	router.POST("/api/refresh-token", server.refreshToken)
+	router.POST("/api/logout", server.logoutUser)
 
 	// API v1 group
 	v1 := router.Group("/api/v1")
@@ -322,5 +344,39 @@ func (server *Server) setupRouter() {
 // Start runs the HTTP server on a specific address.
 func (server *Server) Start(address string) error {
 	logger.Info("Starting HTTP server on address: %s", address)
-	return server.router.Run(address)
+
+	// Create a proper http.Server with reasonable timeouts
+	srv := &http.Server{
+		Addr:         address,
+		Handler:      server.router,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+
+	// Run the server
+	return srv.ListenAndServe()
+}
+
+// Shutdown gracefully stops the server and cleans up resources
+func (server *Server) Shutdown(ctx context.Context) error {
+	logger.Info("Shutting down HTTP server...")
+
+	// Clean up rate limiter resources if enabled
+	if server.config.RateLimitEnabled && server.rateLimiter != nil {
+		server.rateLimiter.Stop()
+		logger.Info("Rate limiter shutdown complete")
+	}
+
+	// Stop the token maker to clean up blacklist resources
+	if server.tokenMaker != nil {
+		server.tokenMaker.Stop()
+		logger.Info("Token blacklist cleanup stopped")
+	}
+
+	return nil
+}
+
+func (server *Server) SetReleaseMode() {
+	gin.SetMode(gin.ReleaseMode)
 }
