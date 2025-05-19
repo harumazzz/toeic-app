@@ -30,6 +30,7 @@ type Server struct {
 	router      *gin.Engine
 	uploader    *uploader.CloudinaryUploader
 	rateLimiter *middleware.AdvancedRateLimit // Store the rate limiter instance
+	httpServer  *http.Server                  // Store the HTTP server instance
 }
 
 // NewServer creates a new HTTP server and setup routing.
@@ -346,7 +347,7 @@ func (server *Server) Start(address string) error {
 	logger.Info("Starting HTTP server on address: %s", address)
 
 	// Create a proper http.Server with reasonable timeouts
-	srv := &http.Server{
+	server.httpServer = &http.Server{
 		Addr:         address,
 		Handler:      server.router,
 		ReadTimeout:  10 * time.Second,
@@ -355,12 +356,24 @@ func (server *Server) Start(address string) error {
 	}
 
 	// Run the server
-	return srv.ListenAndServe()
+	return server.httpServer.ListenAndServe()
 }
 
 // Shutdown gracefully stops the server and cleans up resources
 func (server *Server) Shutdown(ctx context.Context) error {
 	logger.Info("Shutting down HTTP server...")
+
+	// Shut down the HTTP server first, so it stops accepting new requests
+	var err error
+	if server.httpServer != nil {
+		// First shut down the HTTP server
+		if err = server.httpServer.Shutdown(ctx); err != nil {
+			logger.Error("HTTP server shutdown error: %v", err)
+			// Continue with other cleanup even if HTTP shutdown fails
+		} else {
+			logger.Info("HTTP server shutdown complete")
+		}
+	}
 
 	// Clean up rate limiter resources if enabled
 	if server.config.RateLimitEnabled && server.rateLimiter != nil {
@@ -374,7 +387,10 @@ func (server *Server) Shutdown(ctx context.Context) error {
 		logger.Info("Token blacklist cleanup stopped")
 	}
 
-	return nil
+	// Close database connections if needed
+	// This would be implemented here if we needed to close DB connections
+
+	return err
 }
 
 func (server *Server) SetReleaseMode() {

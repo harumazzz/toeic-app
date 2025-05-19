@@ -72,22 +72,35 @@ func main() {
 			logger.Fatal("Could not start server: %v", err)
 		}
 	}()
-
 	// Wait for interrupt signal to gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
+	// Listen for interrupt and SIGTERM signals
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 
-	logger.Info("Shutting down server...")
+	logger.Info("Shutdown signal received...")
 
 	// Create a deadline to wait for current operations to complete
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// First shut down the server
 	if err := server.Shutdown(ctx); err != nil {
 		logger.Fatal("Server forced to shutdown: %v", err)
 	}
+
+	// Set release mode
 	server.SetReleaseMode()
+
+	// Then close the database connection
+	if conn != nil {
+		logger.Info("Closing database connection...")
+		if err := conn.Close(); err != nil {
+			logger.Error("Error closing database connection: %v", err)
+		} else {
+			logger.Info("Database connection closed successfully")
+		}
+	}
 
 	logger.Info("Server exited gracefully")
 }
