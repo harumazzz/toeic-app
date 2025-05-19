@@ -51,6 +51,7 @@ func main() {
 	if err != nil {
 		logger.Fatal("Could not ping database: %v", err)
 	}
+	config.SetupPool(conn)
 
 	logger.Info("Successfully connected to database!")
 
