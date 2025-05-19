@@ -35,4 +35,24 @@ run:
 run-with-logs:
 	powershell -ExecutionPolicy Bypass -File ./scripts/run_with_logs.ps1
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc install-tools test swagger run run-with-logs
+backup:
+	@echo "Creating database backup..."
+	docker exec -it toeic_postgres pg_dump -U root -d toeic_db --clean --if-exists --no-owner --no-privileges -f /tmp/backup.sql
+	docker cp toeic_postgres:/tmp/backup.sql ./backups/toeic_db_$(shell date +%Y%m%d_%H%M%S).sql
+	@echo "Backup created: ./backups/toeic_db_$(shell date +%Y%m%d_%H%M%S).sql"
+
+restore:
+	@if [ -z "$(file)" ]; then \
+		echo "Usage: make restore file=backups/your_backup.sql"; \
+		exit 1; \
+	fi
+	@echo "Restoring database from $(file)..."
+	docker cp $(file) toeic_postgres:/tmp/restore.sql
+	docker exec -it toeic_postgres psql -U root -d toeic_db -f /tmp/restore.sql
+	@echo "Database restored from $(file)"
+
+backup-list:
+	@echo "Available backup files:"
+	@ls -lh backups/*.sql 2>/dev/null || echo "No backup files found."
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc install-tools test swagger run run-with-logs backup restore backup-list

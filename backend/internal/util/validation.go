@@ -39,6 +39,6 @@ func IsStrongPassword(password string) bool {
 // SanitizeName cleans a username or name input
 func SanitizeName(name string) string {
 	// Remove any potentially harmful characters
-	reg := regexp.MustCompile("[^a-zA-Z0-9_\\s]")
+	reg := regexp.MustCompile(`[^a-zA-Z0-9_\s]`)
 	return reg.ReplaceAllString(name, "")
 }

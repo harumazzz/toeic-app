@@ -12,6 +12,7 @@ This is a backend service for a TOEIC application using Go, PostgreSQL, and sqlc
 - Input validation using custom validators
 - CORS support
 - Health and metrics endpoints for monitoring
+- Database backup and restore functionality
 
 ## Prerequisites
 
@@ -114,6 +115,44 @@ go run main.go
 - Password: `password`
 - Database: `toeic_db`
 - Adminer (database management tool) is available at `http://localhost:8080`
+
+## Database Backup and Restore
+
+### Via API (Admin only)
+
+The application provides a REST API for database backup and restore operations:
+
+- `POST /api/v1/admin/backups` - Create a new backup
+- `GET /api/v1/admin/backups` - List all backups
+- `GET /api/v1/admin/backups/download/{filename}` - Download a backup
+- `DELETE /api/v1/admin/backups/{filename}` - Delete a backup
+- `POST /api/v1/admin/backups/restore` - Restore from a backup
+- `POST /api/v1/admin/backups/upload` - Upload a backup file
+
+These endpoints are accessible only to admin users and require authentication.
+
+### Via Makefile
+
+For convenience, you can use the following Makefile commands:
+
+```bash
+# Create a backup
+make backup
+
+# List all backups
+make backup-list
+
+# Restore from a backup
+make restore file=backups/your_backup.sql
+```
+
+### Requirements
+
+The backup/restore functionality requires PostgreSQL client tools (`pg_dump` and `psql`) to be installed on the server:
+
+- For Windows: Install PostgreSQL and make sure the bin directory is in your PATH
+- For Linux: `apt-get install postgresql-client`
+- For macOS: `brew install postgresql`
 
 ## Docker command
 - ` docker exec -it toeic_postgres psql -U root -d toeic_db`

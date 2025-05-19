@@ -18,6 +18,7 @@ import (
 	db "github.com/toeic-app/internal/db/sqlc"
 	"github.com/toeic-app/internal/logger"
 	"github.com/toeic-app/internal/middleware"
+	"github.com/toeic-app/internal/util"
 )
 
 func main() {
@@ -38,6 +39,13 @@ func main() {
 	// Register custom validators
 	middleware.RegisterValidators()
 	logger.Debug("Custom validators registered")
+
+	// Check if database tools (pg_dump, psql) are available
+	// This is optional - if tools are not available, the backup/restore features won't work
+	if err := util.CheckDatabaseTools(); err != nil {
+		logger.Warn("Database backup/restore tools not available: %v", err)
+		logger.Warn("Backup/restore functionality will be limited")
+	}
 
 	// Open a connection to the database
 	logger.Info("Connecting to database: %s", cfg.DBDriver)
@@ -65,6 +73,42 @@ func main() {
 	if err != nil {
 		logger.Fatal("Cannot create server: %v", err)
 	}
+
+	// Create a background context for automatic backups
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Setup automatic database backups
+	if err := server.StartAutomaticBackups(ctx); err != nil {
+		logger.Warn("Failed to setup automatic backups: %v", err)
+		logger.Warn("Will continue without automatic backups")
+	} else {
+		logger.Info("Automatic database backups configured successfully")
+
+		// Setup cleanup of old backups (keep backups for 30 days)
+		go func() {
+			// Initial cleanup
+			if err := server.CleanupOldBackups(30 * 24 * time.Hour); err != nil {
+				logger.Warn("Failed to clean up old backups: %v", err)
+			}
+
+			// Periodic cleanup (once a day)
+			ticker := time.NewTicker(24 * time.Hour)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-ticker.C:
+					if err := server.CleanupOldBackups(30 * 24 * time.Hour); err != nil {
+						logger.Warn("Failed to clean up old backups: %v", err)
+					}
+				case <-ctx.Done():
+					return
+				}
+			}
+		}()
+	}
+
 	logger.Info("Starting API server on %s", cfg.ServerAddress)
 
 	// Set up graceful shutdown
@@ -82,7 +126,7 @@ func main() {
 	logger.Info("Shutdown signal received...")
 
 	// Create a deadline to wait for current operations to complete
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	// First shut down the server

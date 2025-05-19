@@ -13,8 +13,15 @@ import (
 // Config stores all configuration of the application.
 // The values are read from environment variables or .env file.
 type Config struct {
-	DBDriver             string        `mapstructure:"DB_DRIVER"`
-	DBSource             string        `mapstructure:"DB_SOURCE"`
+	// Database configuration
+	DBDriver   string `mapstructure:"DB_DRIVER"`
+	DBSource   string `mapstructure:"DB_SOURCE"`
+	DBHost     string `mapstructure:"DB_HOST"`
+	DBPort     string `mapstructure:"DB_PORT"`
+	DBUser     string `mapstructure:"DB_USER"`
+	DBPassword string `mapstructure:"DB_PASSWORD"`
+	DBName     string `mapstructure:"DB_NAME"`
+
 	ServerAddress        string        `mapstructure:"SERVER_ADDRESS"`
 	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
@@ -76,7 +83,6 @@ func GetEnvAsInt(key string, defaultValue int64) int64 {
 func DefaultConfig() Config {
 	// Load environment variables from .env file
 	LoadEnv()
-
 	// Get database configuration
 	dbDriver := GetEnv("DB_DRIVER", "postgres")
 	dbHost := GetEnv("DB_HOST", "localhost")
@@ -109,10 +115,16 @@ func DefaultConfig() Config {
 	authRateLimitEnabled := GetEnv("AUTH_RATE_LIMIT_ENABLED", "true") == "true"
 	authRateLimitRequests := int(GetEnvAsInt("AUTH_RATE_LIMIT_REQUESTS", 3)) // 3 reqs/sec by default (more restricted)
 	authRateLimitBurst := int(GetEnvAsInt("AUTH_RATE_LIMIT_BURST", 5))       // 5 burst by default
-
 	return Config{
-		DBDriver:             dbDriver,
-		DBSource:             GetDBSource(dbHost, dbPort, dbUser, dbPassword, dbName),
+		// Database configuration
+		DBDriver:   dbDriver,
+		DBSource:   GetDBSource(dbHost, dbPort, dbUser, dbPassword, dbName),
+		DBHost:     dbHost,
+		DBPort:     dbPort,
+		DBUser:     dbUser,
+		DBPassword: dbPassword,
+		DBName:     dbName,
+
 		ServerAddress:        serverAddress,
 		TokenSymmetricKey:    tokenKey,
 		AccessTokenDuration:  accessTokenDuration,

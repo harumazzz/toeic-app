@@ -2,7 +2,10 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -12,6 +15,7 @@ import (
 	db "github.com/toeic-app/internal/db/sqlc"
 	"github.com/toeic-app/internal/logger"
 	"github.com/toeic-app/internal/middleware"
+	"github.com/toeic-app/internal/scheduler"
 	"github.com/toeic-app/internal/token"
 	"github.com/toeic-app/internal/uploader"
 )
@@ -24,13 +28,14 @@ import (
 
 // Server serves HTTP requests for our banking service.
 type Server struct {
-	config      config.Config
-	store       db.Querier
-	tokenMaker  token.Maker
-	router      *gin.Engine
-	uploader    *uploader.CloudinaryUploader
-	rateLimiter *middleware.AdvancedRateLimit // Store the rate limiter instance
-	httpServer  *http.Server                  // Store the HTTP server instance
+	config          config.Config
+	store           db.Querier
+	tokenMaker      token.Maker
+	router          *gin.Engine
+	uploader        *uploader.CloudinaryUploader
+	rateLimiter     *middleware.AdvancedRateLimit // Store the rate limiter instance
+	httpServer      *http.Server                  // Store the HTTP server instance
+	backupScheduler *scheduler.BackupScheduler    // Automated backup scheduler
 }
 
 // NewServer creates a new HTTP server and setup routing.
@@ -192,7 +197,21 @@ func (server *Server) setupRouter() {
 		// Protected routes requiring authentication
 		authRoutes := v1.Group("/")
 		authRoutes.Use(server.authMiddleware())
-		{
+		{ // Admin routes for database management
+			adminRoutes := authRoutes.Group("/admin")
+			adminRoutes.Use(middleware.AdminOnly(server.IsUserAdmin))
+			{
+				backups := adminRoutes.Group("/backups")
+				{
+					backups.POST("", server.createBackup)                     // Create a new backup
+					backups.GET("", server.listBackups)                       // List all backups
+					backups.GET("/download/:filename", server.downloadBackup) // Download a backup
+					backups.DELETE("/:filename", server.deleteBackup)         // Delete a backup
+					backups.POST("/restore", server.restoreBackup)            // Restore from a backup
+					backups.POST("/upload", server.uploadBackup)              // Upload a backup file
+				}
+			}
+
 			users := authRoutes.Group("/users")
 			{
 				users.GET("/me", server.getCurrentUser)
@@ -387,10 +406,115 @@ func (server *Server) Shutdown(ctx context.Context) error {
 		logger.Info("Token blacklist cleanup stopped")
 	}
 
+	// Stop automatic backups
+	if err := server.StopAutomaticBackups(); err != nil {
+		logger.Error("Error stopping automatic backups: %v", err)
+	}
+
 	// Close database connections if needed
 	// This would be implemented here if we needed to close DB connections
 
 	return err
+}
+
+// StartAutomaticBackups initializes and starts the automated backup scheduler
+func (server *Server) StartAutomaticBackups(ctx context.Context) error {
+	logger.Info("Setting up automatic database backups")
+
+	// Create backup function that will be called by the scheduler
+	backupFunc := func() error {
+		backupID := time.Now().Format("20060102_150405")
+		filename := fmt.Sprintf("auto_backup_%s.sql", backupID)
+		description := "Automated scheduled backup"
+
+		logger.Info("Running scheduled backup: %s", filename)
+		_, err := server.createBackupWithTransaction(filename, description)
+		return err
+	}
+
+	// Get backup interval from config (default to 24 hours)
+	interval := 24 * time.Hour
+
+	// Initialize the scheduler
+	server.backupScheduler = scheduler.NewBackupScheduler(
+		interval,
+		backupFunc,
+		"Daily automated database backup",
+	)
+
+	// Start the scheduler
+	err := server.backupScheduler.Start()
+	if err != nil {
+		return fmt.Errorf("failed to start backup scheduler: %w", err)
+	}
+
+	logger.Info("Automatic database backups started with interval: %v", interval)
+	return nil
+}
+
+// StopAutomaticBackups stops the backup scheduler
+func (server *Server) StopAutomaticBackups() error {
+	if server.backupScheduler != nil && server.backupScheduler.IsRunning() {
+		logger.Info("Stopping automatic database backups")
+		return server.backupScheduler.Stop()
+	}
+	return nil
+}
+
+// CleanupOldBackups removes backups older than the specified retention period
+func (server *Server) CleanupOldBackups(maxAge time.Duration) error {
+	backupDir := filepath.Join(".", "backups")
+	logger.Info("Cleaning up old backups older than %v", maxAge)
+
+	// Ensure the backup directory exists
+	if err := ensureBackupDir(backupDir); err != nil {
+		return err
+	}
+
+	// Get all backup files
+	files, err := os.ReadDir(backupDir)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+	deletedCount := 0
+
+	for _, file := range files {
+		// Skip directories
+		if file.IsDir() {
+			continue
+		}
+
+		// Skip non-SQL files
+		if filepath.Ext(file.Name()) != ".sql" {
+			continue
+		}
+
+		// Get file info
+		fileInfo, err := file.Info()
+		if err != nil {
+			logger.Warn("Failed to get file info for %s: %v", file.Name(), err)
+			continue
+		}
+
+		// Check if file is older than the retention period
+		if now.Sub(fileInfo.ModTime()) > maxAge {
+			filePath := filepath.Join(backupDir, file.Name())
+
+			// Delete the file
+			if err := os.Remove(filePath); err != nil {
+				logger.Warn("Failed to delete old backup %s: %v", file.Name(), err)
+				continue
+			}
+
+			logger.Debug("Deleted old backup: %s (age: %v)", file.Name(), now.Sub(fileInfo.ModTime()))
+			deletedCount++
+		}
+	}
+
+	logger.Info("Backup cleanup complete: removed %d old backups", deletedCount)
+	return nil
 }
 
 func (server *Server) SetReleaseMode() {

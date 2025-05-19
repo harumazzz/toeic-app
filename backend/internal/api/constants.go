@@ -1,8 +1,12 @@
 package api
 
-// Auth related constants
+import (
+	"github.com/toeic-app/internal/constants"
+)
+
+// Auth related constants - reexported from constants package for backward compatibility
 const (
-	AuthorizationHeaderKey  = "authorization"
-	AuthorizationTypeBearer = "bearer"
-	AuthorizationPayloadKey = "authorization_payload"
+	AuthorizationHeaderKey  = constants.AuthorizationHeaderKey
+	AuthorizationTypeBearer = constants.AuthorizationTypeBearer
+	AuthorizationPayloadKey = constants.AuthorizationPayloadKey
 )
