@@ -4,5 +4,8 @@ import 'package:injectable/injectable.dart';
 @module
 abstract class StorageModule {
   @lazySingleton
-  FlutterSecureStorage get flutterSecureStorage => const FlutterSecureStorage();
+  FlutterSecureStorage get flutterSecureStorage => const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+  );
 }
