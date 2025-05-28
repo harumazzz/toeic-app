@@ -17,3 +17,21 @@ class AuthenticationException implements Exception {
   const AuthenticationException({this.message = 'Authentication Error'});
   final String message;
 }
+
+class ApiException implements Exception {
+  const ApiException({
+    required this.message,
+    this.error,
+  });
+
+  final String message;
+  final String? error;
+
+  @override
+  String toString() {
+    if (error != null && error!.isNotEmpty) {
+      return 'ApiException: $message - $error';
+    }
+    return 'ApiException: $message';
+  }
+}

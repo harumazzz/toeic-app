@@ -17,7 +17,7 @@ RegisterUser registerUser(final Ref ref) {
   return RegisterUser(repository);
 }
 
-final class RegisterUser implements UseCase<User, RegisterParams> {
+class RegisterUser implements UseCase<User, RegisterParams> {
   const RegisterUser(this.repository);
   final AuthRepository repository;
 
@@ -27,7 +27,7 @@ final class RegisterUser implements UseCase<User, RegisterParams> {
   ) async => repository.register(
     params.email,
     params.password,
-    params.name,
+    params.username,
   );
 }
 
@@ -36,6 +36,6 @@ sealed class RegisterParams with _$RegisterParams {
   const factory RegisterParams({
     required final String email,
     required final String password,
-    required final String name,
+    required final String username,
   }) = _RegisterParams;
 }

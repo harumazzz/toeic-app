@@ -20,43 +20,43 @@ class LoggerService {
   }
   late Logger logger;
 
-  void d(
+  Future<void> d(
     final String message, [
     final dynamic error,
     final StackTrace? stackTrace,
-  ]) {
+  ]) async {
     logger.d(message, error: error, stackTrace: stackTrace);
   }
 
-  void i(
+  Future<void> i(
     final String message, [
     final dynamic error,
     final StackTrace? stackTrace,
-  ]) {
+  ]) async {
     logger.i(message, error: error, stackTrace: stackTrace);
   }
 
-  void w(
+  Future<void> w(
     final String message, [
     final dynamic error,
     final StackTrace? stackTrace,
-  ]) {
+  ]) async {
     logger.w(message, error: error, stackTrace: stackTrace);
   }
 
-  void e(
+  Future<void> e(
     final String message, [
     final dynamic error,
     final StackTrace? stackTrace,
-  ]) {
+  ]) async {
     logger.e(message, error: error, stackTrace: stackTrace);
   }
 
-  void wtf(
+  Future<void> wtf(
     final String message, [
     final dynamic error,
     final StackTrace? stackTrace,
-  ]) {
+  ]) async {
     logger.f(message, error: error, stackTrace: stackTrace);
   }
 }

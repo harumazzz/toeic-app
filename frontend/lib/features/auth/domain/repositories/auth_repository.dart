@@ -14,16 +14,5 @@ abstract class AuthRepository {
     final String name,
   );
 
-  Future<Either<Failure, bool>> forgotPassword(
-    final String email,
-  );
-
-  Future<Either<Failure, bool>> verifyOtp(
-    final String email,
-    final String otp,
-  );
-
-  Future<void> logout();
-
-  Future<Either<Failure, User?>> getCurrentUser();
+  Future<Either<Failure, Success>> logout();
 }

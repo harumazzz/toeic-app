@@ -1,77 +1,24 @@
 {
-  "login": {
-    "success": "Logged in successfully",
-    "fail": "Username or password incorrect",
-    "candidateOnly": "Please use a Candidate account",
-    "logout": "You have logged out"
+  "common": {
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "cancel": "Cancel",
+    "username": "Username"
   },
-  "registration": {
-    "success": "Account registration successful",
-    "emailExists": "Email already registered"
+  "hint": {
+    "email": "Enter your email",
+    "password": "Enter your password",
+    "username": "Enter your username"
   },
-  "password": {
-    "changeSuccess": "Password changed successfully",
-    "currentIncorrect": "Current password is incorrect"
+  "page": {
+    "login": "Login",
+    "register": "Register"
   },
-  "profile": {
-    "updateSuccess": "Information updated successfully"
-  },
-  "job": {
-    "saveSuccess": "Job saved successfully",
-    "unsaveSuccess": "Job unsaved successfully",
-    "applicationSuccess": "Application submitted successfully",
-    "unsavedOne": "Unsaved 1 job"
-  },
-  "validation": {
-    "required": {
-      "email": "Please enter email address",
-      "password": "Please enter password",
-      "firstName": "Please enter first name",
-      "lastName": "Please enter last name",
-      "confirmPassword": "Please confirm password",
-      "phone": "Please enter phone number",
-      "currentPassword": "Please enter current password",
-      "avatar": "Please update profile picture",
-      "birthDate": "Please select date of birth",
-      "gender": "Please select gender",
-      "province": "Please select province/city",
-      "district": "Please select district",
-      "desiredJob": "Please enter desired job",
-      "jobPosition": "Please select job position",
-      "specialization": "Please select specialization",
-      "workType": "Please select work type",
-      "workLocation": "Please select work location",
-      "cv": "Please upload your CV"
-    },
-    "length": {
-      "firstName": "First name must be between 2 and 32 characters",
-      "lastName": "Last name must be between 2 and 32 characters",
-      "email": {
-        "min": "Please enter at least 6 characters",
-        "max": "Please enter maximum 256 characters"
-      },
-      "password": "Password must be between 6 and 32 characters",
-      "phone": "Phone number must be between 8 and 13 characters",
-      "address": "Address must be between 8 and 255 characters",
-      "desiredJob": "Desired job must be between 8 and 255 characters"
-    },
-    "format": {
-      "email": "Invalid email address",
-      "emailExists": "This email address already exists",
-      "password": {
-        "uppercase": "Please include at least 1 uppercase letter",
-        "number": "Please include at least 1 number"
-      },
-      "passwordMismatch": "Passwords do not match",
-      "noTrailingSpace": "Please do not end with a space",
-      "noSpace": "Please do not end with a space",
-      "address": "Please enter a valid address format",
-      "credentials": "Email or password incorrect",
-      "passwordIncorrect": "Password is incorrect"
-    },
-    "file": {
-      "avatarSize": "Profile picture must be <= 512KB",
-      "cvFormat": "Only .doc, .docx and .pdf files and maximum 512KB are supported"
-    }
+  "subtitle": {
+    "login": "Login to continue learn TOEIC",
+    "register": "Register to start learning TOEIC"
   }
 }

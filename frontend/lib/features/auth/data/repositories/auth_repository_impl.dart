@@ -1,62 +1,134 @@
 import 'package:dart_either/dart_either.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/storage/secure_storage_service.dart';
+import '../../../../injection_container.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
+import '../models/user_model.dart';
 
 part 'auth_repository_impl.g.dart';
 
 @riverpod
 AuthRepository authRepository(final Ref ref) {
   final remoteDataSource = ref.watch(authRemoteDataSourceProvider);
-  return AuthRepositoryImpl(remoteDataSource: remoteDataSource);
+  final secureStorageService = InjectionContainer.get<SecureStorageService>();
+  return AuthRepositoryImpl(
+    remoteDataSource: remoteDataSource,
+    secureStorageService: secureStorageService,
+  );
 }
 
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl({required this.remoteDataSource});
+  const AuthRepositoryImpl({
+    required this.remoteDataSource,
+    required this.secureStorageService,
+  });
+
   final AuthRemoteDataSource remoteDataSource;
+
+  final SecureStorageService secureStorageService;
 
   @override
   Future<Either<Failure, User>> login(
     final String email,
     final String password,
   ) async {
-    throw Exception('Not implemented');
+    try {
+      final result = await remoteDataSource.login(
+        LoginRequest(
+          email: email,
+          password: password,
+        ),
+      );
+      await Future.wait([
+        secureStorageService.saveAccessToken(result.accessToken),
+        secureStorageService.saveRefreshToken(result.refreshToken),
+      ]);
+      return Right(result.user.toEntity());
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        return const Left(
+          Failure.authenticationFailure(message: 'Invalid credentials'),
+        );
+      } else if (e.response?.statusCode == 500) {
+        return const Left(
+          Failure.serverFailure(
+            message: 'Server error, please try again later',
+          ),
+        );
+      } else {
+        return Left(
+          Failure.networkFailure(message: e.message ?? 'Network error'),
+        );
+      }
+    } on Exception catch (e) {
+      return Left(Failure.authenticationFailure(message: e.toString()));
+    }
   }
 
   @override
   Future<Either<Failure, User>> register(
     final String email,
     final String password,
-    final String name,
+    final String username,
   ) async {
-    throw Exception('Not implemented');
+    try {
+      final user = await remoteDataSource.register(
+        RegisterRequest(
+          email: email,
+          password: password,
+          username: username,
+        ),
+      );
+      return Right(user.user.toEntity());
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        return const Left(
+          Failure.authenticationFailure(message: 'Invalid registration data'),
+        );
+      } else if (e.response?.statusCode == 500) {
+        return const Left(
+          Failure.serverFailure(
+            message: 'Server error, please try again later',
+          ),
+        );
+      } else {
+        return Left(
+          Failure.networkFailure(message: e.message ?? 'Network error'),
+        );
+      }
+    } on Exception catch (e) {
+      return Left(Failure.authenticationFailure(message: e.toString()));
+    }
   }
 
   @override
-  Future<Either<Failure, bool>> forgotPassword(
-    final String email,
-  ) async {
-    throw Exception('Not implemented');
-  }
-
-  @override
-  Future<Either<Failure, bool>> verifyOtp(
-    final String email,
-    final String otp,
-  ) async {
-    throw Exception('Not implemented');
-  }
-
-  @override
-  Future<void> logout() async {
-    await remoteDataSource.logout();
-  }
-
-  @override
-  Future<Either<Failure, User?>> getCurrentUser() async {
-    throw Exception('Not implemented');
+  Future<Either<Failure, Success>> logout() async {
+    try {
+      await remoteDataSource.logout();
+      return const Right(Success());
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        return const Left(
+          Failure.authenticationFailure(message: 'Not authenticated'),
+        );
+      } else if (e.response?.statusCode == 500) {
+        return const Left(
+          Failure.serverFailure(
+            message: 'Server error, please try again later',
+          ),
+        );
+      } else {
+        return Left(
+          Failure.networkFailure(message: e.message ?? 'Network error'),
+        );
+      }
+    } on Exception catch (e) {
+      return Left(Failure.authenticationFailure(message: e.toString()));
+    }
   }
 }

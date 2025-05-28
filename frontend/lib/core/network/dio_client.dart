@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'api_constants.dart';
 import 'interceptors/auth_interceptor.dart';
 import 'interceptors/logging_interceptor.dart';
+import 'interceptors/response_interceptor.dart';
 
 part 'dio_client.g.dart';
 
@@ -12,17 +13,38 @@ part 'dio_client.g.dart';
 DioClient dioClient(final Ref ref) {
   final loggingInterceptor = ref.watch(loggingInterceptorProvider);
   final authInterceptor = ref.watch(authInterceptorProvider);
-  final dio =
-      Dio()
-        ..options = BaseOptions(
-          baseUrl: ApiConstants.baseUrl,
-          connectTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 30),
-          sendTimeout: const Duration(seconds: 30),
-          contentType: Headers.jsonContentType,
-        );
-  dio.interceptors.addAll([authInterceptor, loggingInterceptor]);
+  final responseInterceptor = ref.watch(responseInterceptorProvider);
+  final dio = Dio();
+  dio.interceptors.addAll([
+    authInterceptor,
+    responseInterceptor,
+    loggingInterceptor,
+  ]);
+  dio.options = BaseOptions(
+    baseUrl: ApiConstants.baseUrl,
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
+    sendTimeout: const Duration(seconds: 30),
+    contentType: Headers.jsonContentType,
+  );
   return DioClient(dio);
+}
+
+@Riverpod(keepAlive: true)
+Dio dioToken(final Ref ref) {
+  final loggingInterceptor = ref.watch(loggingInterceptorProvider);
+  final dio = Dio();
+  dio.interceptors.add(
+    loggingInterceptor,
+  );
+  dio.options = BaseOptions(
+    baseUrl: ApiConstants.baseUrl,
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
+    sendTimeout: const Duration(seconds: 30),
+    contentType: Headers.jsonContentType,
+  );
+  return dio;
 }
 
 class DioClient {

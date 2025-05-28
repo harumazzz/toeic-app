@@ -2,34 +2,79 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../injection_container.dart';
+import '../../storage/secure_storage_service.dart';
+import '../datasources/token_remote_data_source.dart';
+import '../dio_client.dart';
+import '../models/token_response.dart';
+
 part 'auth_interceptor.g.dart';
 
 @Riverpod(keepAlive: true)
-AuthInterceptor authInterceptor(final Ref ref) => AuthInterceptor();
+AuthInterceptor authInterceptor(final Ref ref) {
+  final secureStorageService = InjectionContainer.get<SecureStorageService>();
+  final tokenRemoteDataSource = ref.watch(tokenRemoteDataSourceProvider);
+  final dio = ref.watch(dioTokenProvider);
+  return AuthInterceptor(
+    secureStorageService,
+    tokenRemoteDataSource,
+    dio,
+  );
+}
 
 final class AuthInterceptor extends Interceptor {
-  AuthInterceptor();
+  const AuthInterceptor(
+    this.secureStorageService,
+    this.tokenRemoteDataSource,
+    this.dio,
+  );
+
+  final SecureStorageService secureStorageService;
+
+  final TokenRemoteDataSource tokenRemoteDataSource;
+
+  final Dio dio;
 
   @override
-  void onRequest(
+  Future<void> onRequest(
     final RequestOptions options,
     final RequestInterceptorHandler handler,
-  ) {
-    // if (_accessToken != null) {
-    //   options.headers['Authorization'] = 'Bearer $_accessToken';
-    // }
+  ) async {
+    final accessToken = await secureStorageService.getAccessToken();
+    if (accessToken != null) {
+      options.headers['Authorization'] = 'Bearer $accessToken';
+    }
     return super.onRequest(options, handler);
   }
 
   @override
-  void onError(
+  Future<void> onError(
     final DioException err,
     final ErrorInterceptorHandler handler,
-  ) {
-    // Handle 401 Unauthorized errors
+  ) async {
     if (err.response?.statusCode == 401) {
-      // Implement token refresh logic here
-      // For now, we'll just let the error propagate
+      final accessToken = await secureStorageService.getAccessToken();
+      if (accessToken == null || accessToken.isEmpty) {
+        return handler.next(err);
+      }
+      final refreshToken = await secureStorageService.getRefreshToken();
+      if (refreshToken != null) {
+        try {
+          final response = await tokenRemoteDataSource.refreshToken(
+            RefreshTokenRequest(refreshToken: refreshToken),
+          );
+          await Future.wait([
+            secureStorageService.saveAccessToken(response.accessToken),
+            secureStorageService.saveRefreshToken(response.refreshToken),
+          ]);
+          final options = err.requestOptions;
+          options.headers['Authorization'] = 'Bearer ${response.accessToken}';
+          final result = await dio.fetch(options);
+          return handler.resolve(result);
+        } catch (e) {
+          return handler.reject(err);
+        }
+      }
     }
     return super.onError(err, handler);
   }

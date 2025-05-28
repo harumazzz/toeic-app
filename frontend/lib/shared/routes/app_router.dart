@@ -1,60 +1,90 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/register_page.dart';
+
 part 'app_router.g.dart';
 
-@TypedGoRoute<AppRoute>(
-  path: '/',
-  routes: <TypedGoRoute<GoRouteData>>[
-    TypedGoRoute<LoginRouteData>(path: 'login'),
-    TypedGoRoute<RegisterRouteData>(path: 'register'),
-    TypedGoRoute<ForgotPasswordRouteData>(path: 'forgot-password'),
-    TypedGoRoute<HomeRouteData>(path: 'home'),
-  ],
+class AppRouter {
+  const AppRouter._();
+
+  static const String loginRoute = 'login';
+
+  static const String registerRoute = 'register';
+
+  static const String forgotPasswordRoute = 'forgot-password';
+
+  static const String homeRoute = 'home';
+
+  static GoRouter get router => _router;
+}
+
+@TypedGoRoute<LoginRoute>(
+  path: '/${AppRouter.loginRoute}',
+  name: AppRouter.loginRoute,
 )
-class AppRoute extends GoRouteData {
-  const AppRoute();
+class LoginRoute extends GoRouteData {
+  const LoginRoute();
 
   @override
   Widget build(
     final BuildContext context,
     final GoRouterState state,
-  ) => const HomeRouteData().build(context, state);
+  ) => const LoginPage();
 }
 
-class LoginRouteData extends GoRouteData {
-  const LoginRouteData();
+@TypedGoRoute<RegisterRoute>(
+  path: '/${AppRouter.registerRoute}',
+  name: AppRouter.registerRoute,
+)
+class RegisterRoute extends GoRouteData {
+  const RegisterRoute();
 
   @override
-  Widget build(final BuildContext context, final GoRouterState state) =>
-      const Scaffold(body: Center(child: Text('Login Screen')));
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const RegisterPage();
 }
 
-class RegisterRouteData extends GoRouteData {
-  const RegisterRouteData();
+@TypedGoRoute<ForgotPasswordRoute>(
+  path: '/${AppRouter.forgotPasswordRoute}',
+  name: AppRouter.forgotPasswordRoute,
+)
+class ForgotPasswordRoute extends GoRouteData {
+  const ForgotPasswordRoute();
 
   @override
-  Widget build(final BuildContext context, final GoRouterState state) =>
-      const Scaffold(body: Center(child: Text('Register Screen')));
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const Scaffold(body: Center(child: Text('Forgot Password Screen')));
 }
 
-class ForgotPasswordRouteData extends GoRouteData {
-  const ForgotPasswordRouteData();
+@TypedGoRoute<HomeRoute>(
+  path: '/${AppRouter.homeRoute}',
+  name: AppRouter.homeRoute,
+)
+class HomeRoute extends GoRouteData {
+  const HomeRoute();
 
   @override
-  Widget build(final BuildContext context, final GoRouterState state) =>
-      const Scaffold(body: Center(child: Text('Forgot Password Screen')));
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => Scaffold(
+    appBar: AppBar(title: const Text('Home')),
+    body: const Center(child: Text('Home Screen')),
+  );
 }
 
-class HomeRouteData extends GoRouteData {
-  const HomeRouteData();
-
-  @override
-  Widget build(final BuildContext context, final GoRouterState state) =>
-      Scaffold(
-        appBar: AppBar(title: const Text('Home')),
-        body: const Center(child: Text('Home Screen')),
-      );
-}
-
-final GoRouter router = GoRouter(initialLocation: '/home', routes: $appRoutes);
+final GoRouter _router = GoRouter(
+  routes: $appRoutes,
+  initialLocation: '/${AppRouter.loginRoute}',
+  debugLogDiagnostics: kDebugMode,
+  redirect: (context, state) {
+    return state.uri.toString();
+  },
+);

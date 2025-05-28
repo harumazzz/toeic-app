@@ -16,22 +16,18 @@ AuthRemoteDataSource authRemoteDataSource(final Ref ref) {
 
 @RestApi()
 abstract class AuthRemoteDataSource {
-  factory AuthRemoteDataSource(final Dio dio) = _AuthRemoteDataSource;
+  factory AuthRemoteDataSource(
+    final Dio dio,
+  ) = _AuthRemoteDataSource;
 
   @POST('/auth/login')
   Future<LoginResponse> login(@Body() final LoginRequest body);
 
   @POST('/auth/register')
-  Future<RegisterResponse> register(@Body() final RegisterRequest body);
-
-  @POST('/auth/forgot-password')
-  Future<ForgotPasswordResponse> forgotPassword(
-    @Body() final ForgotPasswordRequest body,
+  Future<RegisterResponse> register(
+    @Body() final RegisterRequest body,
   );
 
   @POST('/auth/logout')
-  Future<void> logout();
-
-  @GET('/auth/me')
-  Future<UserModel?> getCurrentUser();
+  Future<String> logout();
 }

@@ -1,0 +1,74 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../domain/entities/user.dart';
+import '../../domain/usecases/login_user.dart';
+import '../../domain/usecases/register_user.dart';
+
+part 'auth_provider.freezed.dart';
+part 'auth_provider.g.dart';
+
+@freezed
+sealed class AuthState with _$AuthState {
+  const factory AuthState.initial() = AuthInitial;
+
+  const factory AuthState.loading() = AuthLoading;
+
+  const factory AuthState.authenticated({
+    required final User user,
+  }) = AuthAuthenticated;
+
+  const factory AuthState.unauthenticated() = AuthUnauthenticated;
+  const factory AuthState.error({
+    required final String message,
+  }) = AuthError;
+}
+
+@Riverpod(keepAlive: true)
+class AuthController extends _$AuthController {
+  @override
+  AuthState build() => const AuthState.initial();
+
+  Future<void> setLoading() async {
+    state = const AuthState.loading();
+  }
+
+  Future<void> login({
+    required final String email,
+    required final String password,
+  }) async {
+    state = const AuthState.loading();
+
+    final loginUser = ref.read(loginUserProvider);
+    final result = await loginUser(
+      LoginParams(email: email, password: password),
+    );
+
+    state = result.fold(
+      ifLeft: (final failure) => AuthState.error(message: failure.message),
+      ifRight: (final user) => AuthState.authenticated(user: user),
+    );
+  }
+
+  Future<void> register({
+    required final String email,
+    required final String password,
+    required final String username,
+  }) async {
+    state = const AuthState.loading();
+
+    final regisetrUser = ref.read(registerUserProvider);
+    final result = await regisetrUser(
+      RegisterParams(
+        email: email,
+        password: password,
+        username: username,
+      ),
+    );
+
+    state = result.fold(
+      ifLeft: (final failure) => AuthState.error(message: failure.message),
+      ifRight: (final user) => AuthState.authenticated(user: user),
+    );
+  }
+}

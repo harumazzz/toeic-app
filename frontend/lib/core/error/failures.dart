@@ -20,3 +20,12 @@ abstract class Failure with _$Failure {
     required final String message,
   }) = AuthenticationFailure;
 }
+
+@freezed
+abstract class Success with _$Success {
+  const factory Success() = _Success;
+
+  const factory Success.withMessage({
+    required final String message,
+  }) = _SuccessWithMessage;
+}
