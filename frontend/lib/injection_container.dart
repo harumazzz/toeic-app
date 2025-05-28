@@ -6,7 +6,11 @@ import 'injection_container.config.dart';
 
 final GetIt _getIt = GetIt.instance;
 
-@InjectableInit(initializerName: 'init', preferRelativeImports: true, asExtension: false)
+@InjectableInit(
+  initializerName: 'init',
+  preferRelativeImports: true,
+  asExtension: false,
+)
 FutureOr<GetIt> configureDependencies() => init(_getIt);
 
 class InjectionContainer extends Equatable {

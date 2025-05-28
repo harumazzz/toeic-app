@@ -9,7 +9,7 @@ import '../datasources/auth_remote_data_source.dart';
 part 'auth_repository_impl.g.dart';
 
 @riverpod
-AuthRepository authRepository(Ref ref) {
+AuthRepository authRepository(final Ref ref) {
   final remoteDataSource = ref.watch(authRemoteDataSourceProvider);
   return AuthRepositoryImpl(remoteDataSource: remoteDataSource);
 }
@@ -19,22 +19,34 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
 
   @override
-  Future<Either<Failure, User>> login(String email, String password) async {
+  Future<Either<Failure, User>> login(
+    final String email,
+    final String password,
+  ) async {
     throw Exception('Not implemented');
   }
 
   @override
-  Future<Either<Failure, User>> register(String email, String password, String name) async {
+  Future<Either<Failure, User>> register(
+    final String email,
+    final String password,
+    final String name,
+  ) async {
     throw Exception('Not implemented');
   }
 
   @override
-  Future<Either<Failure, bool>> forgotPassword(String email) async {
+  Future<Either<Failure, bool>> forgotPassword(
+    final String email,
+  ) async {
     throw Exception('Not implemented');
   }
 
   @override
-  Future<Either<Failure, bool>> verifyOtp(String email, String otp) async {
+  Future<Either<Failure, bool>> verifyOtp(
+    final String email,
+    final String otp,
+  ) async {
     throw Exception('Not implemented');
   }
 

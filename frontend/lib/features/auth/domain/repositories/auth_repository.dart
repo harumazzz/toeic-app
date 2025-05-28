@@ -3,10 +3,27 @@ import '../../../../core/error/failures.dart';
 import '../entities/user.dart';
 
 abstract class AuthRepository {
-  Future<Either<Failure, User>> login(String email, String password);
-  Future<Either<Failure, User>> register(String email, String password, String name);
-  Future<Either<Failure, bool>> forgotPassword(String email);
-  Future<Either<Failure, bool>> verifyOtp(String email, String otp);
+  Future<Either<Failure, User>> login(
+    final String email,
+    final String password,
+  );
+
+  Future<Either<Failure, User>> register(
+    final String email,
+    final String password,
+    final String name,
+  );
+
+  Future<Either<Failure, bool>> forgotPassword(
+    final String email,
+  );
+
+  Future<Either<Failure, bool>> verifyOtp(
+    final String email,
+    final String otp,
+  );
+
   Future<void> logout();
+
   Future<Either<Failure, User?>> getCurrentUser();
 }

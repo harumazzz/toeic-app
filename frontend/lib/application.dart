@@ -7,7 +7,9 @@ class Application extends StatelessWidget {
   const Application({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp.router(theme: AppTheme.lightTheme, darkTheme: AppTheme.darkTheme, routerConfig: router);
-  }
+  Widget build(final BuildContext context) => MaterialApp.router(
+    theme: AppTheme.lightTheme,
+    darkTheme: AppTheme.darkTheme,
+    routerConfig: router,
+  );
 }

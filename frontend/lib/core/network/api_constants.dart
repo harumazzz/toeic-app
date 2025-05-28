@@ -1,9 +1,8 @@
-// API Constants for the application
 class ApiConstants {
-  // Base URL for the API
-  static const String baseUrl = 'https://api.example.com/v1';
+  const ApiConstants._();
 
-  // Endpoints
+  static const String baseUrl = 'http://192.168.31.37:8000/v1';
+
   static const String login = '/auth/login';
   static const String register = '/auth/register';
   static const String forgotPassword = '/auth/forgot-password';

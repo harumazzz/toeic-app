@@ -13,7 +13,7 @@ part 'login_user.freezed.dart';
 part 'login_user.g.dart';
 
 @riverpod
-LoginUser loginUser(Ref ref) {
+LoginUser loginUser(final Ref ref) {
   final repository = ref.watch(authRepositoryProvider);
   return LoginUser(repository);
 }
@@ -23,12 +23,18 @@ class LoginUser implements UseCase<User, LoginParams> {
   final AuthRepository repository;
 
   @override
-  Future<Either<Failure, User>> call(LoginParams params) async {
-    return await repository.login(params.email, params.password);
-  }
+  Future<Either<Failure, User>> call(
+    final LoginParams params,
+  ) async => repository.login(
+    params.email,
+    params.password,
+  );
 }
 
 @freezed
 sealed class LoginParams with _$LoginParams {
-  const factory LoginParams({required String email, required String password}) = _LoginParams;
+  const factory LoginParams({
+    required final String email,
+    required final String password,
+  }) = _LoginParams;
 }

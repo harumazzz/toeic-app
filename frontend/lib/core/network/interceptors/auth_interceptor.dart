@@ -5,15 +5,16 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'auth_interceptor.g.dart';
 
 @Riverpod(keepAlive: true)
-AuthInterceptor authInterceptor(Ref ref) {
-  return AuthInterceptor();
-}
+AuthInterceptor authInterceptor(final Ref ref) => AuthInterceptor();
 
 final class AuthInterceptor extends Interceptor {
   AuthInterceptor();
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+  void onRequest(
+    final RequestOptions options,
+    final RequestInterceptorHandler handler,
+  ) {
     // if (_accessToken != null) {
     //   options.headers['Authorization'] = 'Bearer $_accessToken';
     // }
@@ -21,7 +22,10 @@ final class AuthInterceptor extends Interceptor {
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
+  void onError(
+    final DioException err,
+    final ErrorInterceptorHandler handler,
+  ) {
     // Handle 401 Unauthorized errors
     if (err.response?.statusCode == 401) {
       // Implement token refresh logic here

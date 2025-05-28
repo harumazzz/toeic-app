@@ -12,7 +12,7 @@ part 'register_user.freezed.dart';
 part 'register_user.g.dart';
 
 @riverpod
-RegisterUser registerUser(Ref ref) {
+RegisterUser registerUser(final Ref ref) {
   final repository = ref.watch(authRepositoryProvider);
   return RegisterUser(repository);
 }
@@ -22,13 +22,20 @@ final class RegisterUser implements UseCase<User, RegisterParams> {
   final AuthRepository repository;
 
   @override
-  Future<Either<Failure, User>> call(RegisterParams params) async {
-    return await repository.register(params.email, params.password, params.name);
-  }
+  Future<Either<Failure, User>> call(
+    final RegisterParams params,
+  ) async => repository.register(
+    params.email,
+    params.password,
+    params.name,
+  );
 }
 
 @freezed
 sealed class RegisterParams with _$RegisterParams {
-  const factory RegisterParams({required String email, required String password, required String name}) =
-      _RegisterParams;
+  const factory RegisterParams({
+    required final String email,
+    required final String password,
+    required final String name,
+  }) = _RegisterParams;
 }

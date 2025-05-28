@@ -1,30 +1,33 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:retrofit/retrofit.dart';
-import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../../../../core/network/dio_client.dart';
 import '../models/user_model.dart';
 
 part 'auth_remote_data_source.g.dart';
 
 @riverpod
-AuthRemoteDataSource authRemoteDataSource(Ref ref) {
+AuthRemoteDataSource authRemoteDataSource(final Ref ref) {
   final dio = ref.watch(dioClientProvider).dio;
   return AuthRemoteDataSource(dio);
 }
 
 @RestApi()
 abstract class AuthRemoteDataSource {
-  factory AuthRemoteDataSource(Dio dio) = _AuthRemoteDataSource;
+  factory AuthRemoteDataSource(final Dio dio) = _AuthRemoteDataSource;
 
   @POST('/auth/login')
-  Future<LoginResponse> login(@Body() LoginRequest body);
+  Future<LoginResponse> login(@Body() final LoginRequest body);
 
   @POST('/auth/register')
-  Future<RegisterResponse> register(@Body() RegisterRequest body);
+  Future<RegisterResponse> register(@Body() final RegisterRequest body);
 
   @POST('/auth/forgot-password')
-  Future<ForgotPasswordResponse> forgotPassword(@Body() ForgotPasswordRequest body);
+  Future<ForgotPasswordResponse> forgotPassword(
+    @Body() final ForgotPasswordRequest body,
+  );
 
   @POST('/auth/logout')
   Future<void> logout();

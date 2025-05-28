@@ -1,98 +1,98 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'api_constants.dart';
 import 'interceptors/auth_interceptor.dart';
 import 'interceptors/logging_interceptor.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'dio_client.g.dart';
 
 @Riverpod(keepAlive: true)
-DioClient dioClient(Ref ref) {
+DioClient dioClient(final Ref ref) {
   final loggingInterceptor = ref.watch(loggingInterceptorProvider);
   final authInterceptor = ref.watch(authInterceptorProvider);
-  return DioClient(loggingInterceptor, authInterceptor);
+  final dio =
+      Dio()
+        ..options = BaseOptions(
+          baseUrl: ApiConstants.baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+          sendTimeout: const Duration(seconds: 30),
+          contentType: Headers.jsonContentType,
+        );
+  dio.interceptors.addAll([authInterceptor, loggingInterceptor]);
+  return DioClient(dio);
 }
 
 class DioClient {
-  DioClient(LoggingInterceptor loggingInterceptor, AuthInterceptor authInterceptor) : _dio = Dio() {
-    _dio.options = BaseOptions(
-      baseUrl: ApiConstants.baseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-      sendTimeout: const Duration(seconds: 30),
-      contentType: Headers.jsonContentType,
-    );
+  const DioClient(final Dio dio) : _dio = dio;
 
-    _dio.interceptors.addAll([authInterceptor, loggingInterceptor]);
-  }
   final Dio _dio;
 
   Dio get dio => _dio;
 
   Future<Response> get(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-    ProgressCallback? onReceiveProgress,
-  }) {
-    return _dio.get(
-      path,
-      queryParameters: queryParameters,
-      options: options,
-      cancelToken: cancelToken,
-      onReceiveProgress: onReceiveProgress,
-    );
-  }
+    final String path, {
+    final Map<String, dynamic>? queryParameters,
+    final Options? options,
+    final CancelToken? cancelToken,
+    final ProgressCallback? onReceiveProgress,
+  }) => _dio.get(
+    path,
+    queryParameters: queryParameters,
+    options: options,
+    cancelToken: cancelToken,
+    onReceiveProgress: onReceiveProgress,
+  );
 
   Future<Response> post(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-    ProgressCallback? onSendProgress,
-    ProgressCallback? onReceiveProgress,
-  }) {
-    return _dio.post(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-      cancelToken: cancelToken,
-      onSendProgress: onSendProgress,
-      onReceiveProgress: onReceiveProgress,
-    );
-  }
+    final String path, {
+    final dynamic data,
+    final Map<String, dynamic>? queryParameters,
+    final Options? options,
+    final CancelToken? cancelToken,
+    final ProgressCallback? onSendProgress,
+    final ProgressCallback? onReceiveProgress,
+  }) => _dio.post(
+    path,
+    data: data,
+    queryParameters: queryParameters,
+    options: options,
+    cancelToken: cancelToken,
+    onSendProgress: onSendProgress,
+    onReceiveProgress: onReceiveProgress,
+  );
 
   Future<Response> put(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-    ProgressCallback? onSendProgress,
-    ProgressCallback? onReceiveProgress,
-  }) {
-    return _dio.put(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-      cancelToken: cancelToken,
-      onSendProgress: onSendProgress,
-      onReceiveProgress: onReceiveProgress,
-    );
-  }
+    final String path, {
+    final dynamic data,
+    final Map<String, dynamic>? queryParameters,
+    final Options? options,
+    final CancelToken? cancelToken,
+    final ProgressCallback? onSendProgress,
+    final ProgressCallback? onReceiveProgress,
+  }) => _dio.put(
+    path,
+    data: data,
+    queryParameters: queryParameters,
+    options: options,
+    cancelToken: cancelToken,
+    onSendProgress: onSendProgress,
+    onReceiveProgress: onReceiveProgress,
+  );
 
   Future<Response> delete(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-  }) {
-    return _dio.delete(path, data: data, queryParameters: queryParameters, options: options, cancelToken: cancelToken);
-  }
+    final String path, {
+    final dynamic data,
+    final Map<String, dynamic>? queryParameters,
+    final Options? options,
+    final CancelToken? cancelToken,
+  }) => _dio.delete(
+    path,
+    data: data,
+    queryParameters: queryParameters,
+    options: options,
+    cancelToken: cancelToken,
+  );
 }

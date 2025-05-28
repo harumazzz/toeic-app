@@ -6,9 +6,16 @@ part 'user_model.g.dart';
 
 @freezed
 sealed class UserModel with _$UserModel {
-  const factory UserModel({required String id, required String email, String? name, String? photoUrl}) = _UserModel;
+  const factory UserModel({
+    required final String id,
+    required final String email,
+    final String? name,
+    final String? photoUrl,
+  }) = _UserModel;
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
+  factory UserModel.fromJson(
+    final Map<String, dynamic> json,
+  ) => _$UserModelFromJson(json);
 }
 
 extension UserModelExtension on UserModel {
@@ -17,9 +24,14 @@ extension UserModelExtension on UserModel {
 
 @freezed
 sealed class LoginRequest with _$LoginRequest {
-  const factory LoginRequest({required String email, required String password}) = _LoginRequest;
+  const factory LoginRequest({
+    required final String email,
+    required final String password,
+  }) = _LoginRequest;
 
-  factory LoginRequest.fromJson(Map<String, dynamic> json) => _$LoginRequestFromJson(json);
+  factory LoginRequest.fromJson(
+    final Map<String, dynamic> json,
+  ) => _$LoginRequestFromJson(json);
 
   @override
   Map<String, dynamic> toJson();
@@ -27,17 +39,27 @@ sealed class LoginRequest with _$LoginRequest {
 
 @freezed
 sealed class LoginResponse with _$LoginResponse {
-  const factory LoginResponse({required String email, required String password}) = _LoginResponse;
+  const factory LoginResponse({
+    required final String email,
+    required final String password,
+  }) = _LoginResponse;
 
-  factory LoginResponse.fromJson(Map<String, dynamic> json) => _$LoginResponseFromJson(json);
+  factory LoginResponse.fromJson(
+    final Map<String, dynamic> json,
+  ) => _$LoginResponseFromJson(json);
 }
 
 @freezed
 sealed class RegisterRequest with _$RegisterRequest {
-  const factory RegisterRequest({required String email, required String password, required String name}) =
-      _RegisterRequest;
+  const factory RegisterRequest({
+    required final String email,
+    required final String password,
+    required final String name,
+  }) = _RegisterRequest;
 
-  factory RegisterRequest.fromJson(Map<String, dynamic> json) => _$RegisterRequestFromJson(json);
+  factory RegisterRequest.fromJson(
+    final Map<String, dynamic> json,
+  ) => _$RegisterRequestFromJson(json);
 
   @override
   Map<String, dynamic> toJson();
@@ -45,17 +67,26 @@ sealed class RegisterRequest with _$RegisterRequest {
 
 @freezed
 sealed class RegisterResponse with _$RegisterResponse {
-  const factory RegisterResponse({required String email, required String password, required String name}) =
-      _RegisterResponse;
+  const factory RegisterResponse({
+    required final String email,
+    required final String password,
+    required final String name,
+  }) = _RegisterResponse;
 
-  factory RegisterResponse.fromJson(Map<String, dynamic> json) => _$RegisterResponseFromJson(json);
+  factory RegisterResponse.fromJson(
+    final Map<String, dynamic> json,
+  ) => _$RegisterResponseFromJson(json);
 }
 
 @freezed
 sealed class ForgotPasswordRequest with _$ForgotPasswordRequest {
-  const factory ForgotPasswordRequest({required String email}) = _ForgotPasswordRequest;
+  const factory ForgotPasswordRequest({
+    required final String email,
+  }) = _ForgotPasswordRequest;
 
-  factory ForgotPasswordRequest.fromJson(Map<String, dynamic> json) => _$ForgotPasswordRequestFromJson(json);
+  factory ForgotPasswordRequest.fromJson(
+    final Map<String, dynamic> json,
+  ) => _$ForgotPasswordRequestFromJson(json);
 
   @override
   Map<String, dynamic> toJson();
@@ -63,7 +94,11 @@ sealed class ForgotPasswordRequest with _$ForgotPasswordRequest {
 
 @freezed
 sealed class ForgotPasswordResponse with _$ForgotPasswordResponse {
-  const factory ForgotPasswordResponse({required String email}) = _ForgotPasswordResponse;
+  const factory ForgotPasswordResponse({
+    required final String email,
+  }) = _ForgotPasswordResponse;
 
-  factory ForgotPasswordResponse.fromJson(Map<String, dynamic> json) => _$ForgotPasswordResponseFromJson(json);
+  factory ForgotPasswordResponse.fromJson(
+    final Map<String, dynamic> json,
+  ) => _$ForgotPasswordResponseFromJson(json);
 }

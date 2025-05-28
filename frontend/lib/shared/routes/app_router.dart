@@ -16,45 +16,45 @@ class AppRoute extends GoRouteData {
   const AppRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const HomeRouteData().build(context, state);
-  }
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const HomeRouteData().build(context, state);
 }
 
 class LoginRouteData extends GoRouteData {
   const LoginRouteData();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const Scaffold(body: Center(child: Text('Login Screen')));
-  }
+  Widget build(final BuildContext context, final GoRouterState state) =>
+      const Scaffold(body: Center(child: Text('Login Screen')));
 }
 
 class RegisterRouteData extends GoRouteData {
   const RegisterRouteData();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const Scaffold(body: Center(child: Text('Register Screen')));
-  }
+  Widget build(final BuildContext context, final GoRouterState state) =>
+      const Scaffold(body: Center(child: Text('Register Screen')));
 }
 
 class ForgotPasswordRouteData extends GoRouteData {
   const ForgotPasswordRouteData();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const Scaffold(body: Center(child: Text('Forgot Password Screen')));
-  }
+  Widget build(final BuildContext context, final GoRouterState state) =>
+      const Scaffold(body: Center(child: Text('Forgot Password Screen')));
 }
 
 class HomeRouteData extends GoRouteData {
   const HomeRouteData();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return Scaffold(appBar: AppBar(title: const Text('Home')), body: const Center(child: Text('Home Screen')));
-  }
+  Widget build(final BuildContext context, final GoRouterState state) =>
+      Scaffold(
+        appBar: AppBar(title: const Text('Home')),
+        body: const Center(child: Text('Home Screen')),
+      );
 }
 
 final GoRouter router = GoRouter(initialLocation: '/home', routes: $appRoutes);
