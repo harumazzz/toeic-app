@@ -1,12 +1,14 @@
-{
-  "common": {
+{  "common": {
     "email": "Email",
     "password": "Mật khẩu",
     "login": "Đăng nhập",
     "logout": "Đăng xuất",
     "register": "Đăng ký",
     "cancel": "Hủy",
-    "username": "Tên người dùng"
+    "username": "Tên người dùng",
+    "retry": "Thử lại",
+    "level": "Cấp độ",
+    "learn": "Học"
   },
   "hint": {
     "email": "Nhập email của bạn",
@@ -17,7 +19,14 @@
     "login": "Đăng nhập",
     "register": "Đăng ký",
     "home": "Trang chủ",
-    "modules": "Các mô-đun"
+    "modules": "Modules",
+    "vocabulary": "Từ vựng",
+    "practice": "Luyện tập",
+    "speaking": "Nói",
+    "writing": "Viết",
+    "progress": "Tiến độ",
+    "settings": "Cài đặt",
+    "help": "Trợ giúp"
   },
   "subtitle": {
     "login": "Đăng nhập để tiếp tục học TOEIC",

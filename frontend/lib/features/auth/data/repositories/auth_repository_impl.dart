@@ -7,7 +7,7 @@ import '../../../../core/storage/secure_storage_service.dart';
 import '../../../../injection_container.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_remote_data_source.dart';
+import '../data_sources/auth_remote_data_source.dart';
 import '../models/user_model.dart';
 
 part 'auth_repository_impl.g.dart';

@@ -1,4 +1,4 @@
-{
+{  
   "common": {
     "email": "Email",
     "password": "Password",
@@ -6,7 +6,10 @@
     "logout": "Logout",
     "register": "Register",
     "cancel": "Cancel",
-    "username": "Username"
+    "username": "Username",
+    "retry": "Retry",
+    "level": "Level",
+    "learn": "Learn"
   },
   "hint": {
     "email": "Enter your email",
@@ -17,7 +20,14 @@
     "login": "Login",
     "register": "Register",
     "home": "Home",
-    "modules": "Modules"
+    "modules": "Modules",
+    "vocabulary": "Vocabulary",
+    "practice": "Practice",
+    "speaking": "Speaking",
+    "writing": "Writing",
+    "progress": "Progress",
+    "settings": "Settings",
+    "help": "Help"
   },
   "subtitle": {
     "login": "Login to continue learn TOEIC",

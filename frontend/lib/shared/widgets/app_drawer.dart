@@ -69,6 +69,7 @@ class AppDrawer extends StatelessWidget {
                 title: context.t.drawer.vocabulary,
                 onTap: () async {
                   Navigator.pop(context);
+                  await const VocabularyRoute().push(context);
                 },
               ),
               _DrawerItem(
