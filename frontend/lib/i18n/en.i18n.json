@@ -15,10 +15,40 @@
   },
   "page": {
     "login": "Login",
-    "register": "Register"
+    "register": "Register",
+    "home": "Home",
+    "modules": "Modules"
   },
   "subtitle": {
     "login": "Login to continue learn TOEIC",
     "register": "Register to start learning TOEIC"
+  },
+  "app": {
+    "name": "TOEIC Learning",
+    "description": "Master TOEIC with confidence"
+  },
+  "drawer": {
+    "modules": "Modules",
+    "practice": "Practice",
+    "vocabulary": "Vocabulary",
+    "speaking": "Speaking",
+    "writing": "Writing",
+    "progress": "Progress",
+    "settings": "Settings",
+    "help": "Help"
+  },
+  "modules": {
+    "listening": "Listening",
+    "listeningDescription": "Improve your listening skills",
+    "reading": "Reading",
+    "readingDescription": "Enhance reading comprehension",
+    "speaking": "Speaking",
+    "speakingDescription": "Practice speaking fluently",
+    "writing": "Writing",
+    "writingDescription": "Develop writing abilities",
+    "vocabulary": "Vocabulary",
+    "vocabularyDescription": "Expand your word knowledge",
+    "grammar": "Grammar",
+    "grammarDescription": "Master grammar rules"
   }
 }

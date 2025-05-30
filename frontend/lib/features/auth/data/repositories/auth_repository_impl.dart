@@ -39,25 +39,22 @@ class AuthRepositoryImpl implements AuthRepository {
   ) async {
     try {
       final result = await remoteDataSource.login(
-        LoginRequest(
-          email: email,
-          password: password,
-        ),
+        LoginRequest(email: email, password: password),
       );
-      await Future.wait([
-        secureStorageService.saveAccessToken(result.accessToken),
-        secureStorageService.saveRefreshToken(result.refreshToken),
-      ]);
+      await secureStorageService.saveAccessToken(result.accessToken);
+      await secureStorageService.saveRefreshToken(result.refreshToken);
       return Right(result.user.toEntity());
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        return const Left(
-          Failure.authenticationFailure(message: 'Invalid credentials'),
+        return Left(
+          Failure.authenticationFailure(
+            message: e.message ?? 'Invalid credentials',
+          ),
         );
       } else if (e.response?.statusCode == 500) {
-        return const Left(
+        return Left(
           Failure.serverFailure(
-            message: 'Server error, please try again later',
+            message: e.message ?? 'Server error, please try again later',
           ),
         );
       } else {
@@ -87,13 +84,15 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(user.user.toEntity());
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
-        return const Left(
-          Failure.authenticationFailure(message: 'Invalid registration data'),
+        return Left(
+          Failure.authenticationFailure(
+            message: e.message ?? 'Invalid registration data',
+          ),
         );
       } else if (e.response?.statusCode == 500) {
-        return const Left(
+        return Left(
           Failure.serverFailure(
-            message: 'Server error, please try again later',
+            message: e.message ?? 'Server error, please try again later',
           ),
         );
       } else {
@@ -110,16 +109,48 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, Success>> logout() async {
     try {
       await remoteDataSource.logout();
+      await secureStorageService.deleteAccessToken();
+      await secureStorageService.deleteRefreshToken();
       return const Right(Success());
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        return const Left(
-          Failure.authenticationFailure(message: 'Not authenticated'),
+        return Left(
+          Failure.authenticationFailure(
+            message: e.message ?? 'Not authenticated',
+          ),
         );
       } else if (e.response?.statusCode == 500) {
-        return const Left(
+        return Left(
           Failure.serverFailure(
-            message: 'Server error, please try again later',
+            message: e.message ?? 'Server error, please try again later',
+          ),
+        );
+      } else {
+        return Left(
+          Failure.networkFailure(message: e.message ?? 'Network error'),
+        );
+      }
+    } on Exception catch (e) {
+      return Left(Failure.authenticationFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> getUser() async {
+    try {
+      final user = await remoteDataSource.getCurrentUser();
+      return Right(user.toEntity());
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        return Left(
+          Failure.authenticationFailure(
+            message: e.message ?? 'Not authenticated',
+          ),
+        );
+      } else if (e.response?.statusCode == 500) {
+        return Left(
+          Failure.serverFailure(
+            message: e.message ?? 'Server error, please try again later',
           ),
         );
       } else {

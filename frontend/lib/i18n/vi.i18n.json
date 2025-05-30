@@ -15,10 +15,40 @@
   },
   "page": {
     "login": "Đăng nhập",
-    "register": "Đăng ký"
+    "register": "Đăng ký",
+    "home": "Trang chủ",
+    "modules": "Các mô-đun"
   },
   "subtitle": {
     "login": "Đăng nhập để tiếp tục học TOEIC",
     "register": "Đăng ký để bắt đầu học TOEIC"
+  },
+  "app": {
+    "name": "Học TOEIC",
+    "description": "Chinh phục TOEIC với sự tự tin"
+  },
+  "drawer": {
+    "modules": "Các mô-đun",
+    "practice": "Luyện tập",
+    "vocabulary": "Từ vựng",
+    "speaking": "Nói",
+    "writing": "Viết",
+    "progress": "Tiến độ",
+    "settings": "Cài đặt",
+    "help": "Trợ giúp"
+  },
+  "modules": {
+    "listening": "Nghe",
+    "listeningDescription": "Cải thiện kỹ năng nghe",
+    "reading": "Đọc",
+    "readingDescription": "Nâng cao khả năng đọc hiểu",
+    "speaking": "Nói",
+    "speakingDescription": "Luyện tập nói trôi chảy",
+    "writing": "Viết",
+    "writingDescription": "Phát triển khả năng viết",
+    "vocabulary": "Từ vựng",
+    "vocabularyDescription": "Mở rộng vốn từ vựng",
+    "grammar": "Ngữ pháp",
+    "grammarDescription": "Thành thạo các quy tắc ngữ pháp"
   }
 }

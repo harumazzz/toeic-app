@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
@@ -11,10 +11,25 @@ import '../widgets/auth_card.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_text_field.dart';
 
-class LoginPage extends HookWidget {
+class LoginPage extends HookConsumerWidget {
   const LoginPage({super.key});
   @override
-  Widget build(final BuildContext context) {
+  Widget build(
+    final BuildContext context,
+    final WidgetRef ref,
+  ) {
+    ref.listen(
+      authControllerProvider,
+      (final previous, final next) {
+        if (next is AuthAuthenticated) {
+          const HomeRoute().go(context);
+        } else if (next is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(next.message)),
+          );
+        }
+      },
+    );
     final formKey = useMemoized(GlobalKey<FormBuilderState>.new);
     final emailController = useTextEditingController();
     final passwordController = useTextEditingController();
@@ -55,28 +70,21 @@ class LoginPage extends HookWidget {
               },
             ),
             const SizedBox(height: 16),
-            Consumer(
-              builder:
-                  (
-                    final context,
-                    final ref,
-                    final child,
-                  ) => AuthActionButtons(
-                    primaryButtonText: context.t.common.login,
-                    secondaryButtonText: context.t.common.register,
-                    onPrimaryPressed: () async {
-                      if (formKey.currentState?.saveAndValidate() ?? false) {
-                        final email = emailController.text;
-                        final password = passwordController.text;
-                        await ref
-                            .read(authControllerProvider.notifier)
-                            .login(email: email, password: password);
-                      }
-                    },
-                    onSecondaryPressed: () async {
-                      const RegisterRoute().go(context);
-                    },
-                  ),
+            AuthActionButton(
+              primaryButtonText: context.t.common.login,
+              secondaryButtonText: context.t.common.register,
+              onPrimaryPressed: () async {
+                if (formKey.currentState?.saveAndValidate() ?? false) {
+                  final email = emailController.text;
+                  final password = passwordController.text;
+                  await ref
+                      .read(authControllerProvider.notifier)
+                      .login(email: email, password: password);
+                }
+              },
+              onSecondaryPressed: () async {
+                const RegisterRoute().go(context);
+              },
             ),
           ],
         ),

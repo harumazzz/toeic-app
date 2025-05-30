@@ -2,8 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/storage/secure_storage_service.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/home/presentation/pages/home_page.dart';
+import '../../injection_container.dart';
 
 part 'app_router.g.dart';
 
@@ -74,17 +77,26 @@ class HomeRoute extends GoRouteData {
   Widget build(
     final BuildContext context,
     final GoRouterState state,
-  ) => Scaffold(
-    appBar: AppBar(title: const Text('Home')),
-    body: const Center(child: Text('Home Screen')),
-  );
+  ) => const HomePage();
 }
 
 final GoRouter _router = GoRouter(
   routes: $appRoutes,
   initialLocation: '/${AppRouter.loginRoute}',
   debugLogDiagnostics: kDebugMode,
-  redirect: (context, state) {
-    return state.uri.toString();
+  redirect: (final context, final state) async {
+    final token =
+        await InjectionContainer.get<SecureStorageService>().getAccessToken();
+    if (token == null || token.isEmpty) {
+      return '/${AppRouter.loginRoute}';
+    }
+    final path = state.uri.toString();
+    switch (path) {
+      case '/${AppRouter.loginRoute}':
+      case '/${AppRouter.registerRoute}':
+      case '/${AppRouter.forgotPasswordRoute}':
+        return '/${AppRouter.homeRoute}';
+    }
+    return path;
   },
 );

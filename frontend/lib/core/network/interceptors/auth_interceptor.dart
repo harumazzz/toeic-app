@@ -63,10 +63,8 @@ final class AuthInterceptor extends Interceptor {
           final response = await tokenRemoteDataSource.refreshToken(
             RefreshTokenRequest(refreshToken: refreshToken),
           );
-          await Future.wait([
-            secureStorageService.saveAccessToken(response.accessToken),
-            secureStorageService.saveRefreshToken(response.refreshToken),
-          ]);
+          await secureStorageService.saveAccessToken(response.accessToken);
+          await secureStorageService.saveRefreshToken(response.refreshToken);
           final options = err.requestOptions;
           options.headers['Authorization'] = 'Bearer ${response.accessToken}';
           final result = await dio.fetch(options);

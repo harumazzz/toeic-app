@@ -28,7 +28,9 @@ final class ResponseInterceptor extends Interceptor {
             responseData,
             (final json) => json,
           );
-          response.data = apiResponse;
+          if (apiResponse.data != null) {
+            response.data = apiResponse.data;
+          }
           if (apiResponse.status == 'error') {
             final error = DioException(
               requestOptions: response.requestOptions,
@@ -38,6 +40,7 @@ final class ResponseInterceptor extends Interceptor {
             );
             return handler.reject(error);
           }
+          return super.onResponse(response, handler);
         }
       }
     } catch (e) {

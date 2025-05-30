@@ -21,7 +21,7 @@ void main() {
     const tEmail = 'test@example.com';
     const tPassword = 'password123';
     const tUser = User(
-      id: '1',
+      id: 1,
       email: tEmail,
       username: 'testuser',
     );

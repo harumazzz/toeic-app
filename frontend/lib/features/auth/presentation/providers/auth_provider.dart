@@ -1,8 +1,11 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/user.dart';
+import '../../domain/usecases/get_user.dart';
 import '../../domain/usecases/login_user.dart';
+import '../../domain/usecases/logout.dart';
 import '../../domain/usecases/register_user.dart';
 
 part 'auth_provider.freezed.dart';
@@ -29,14 +32,13 @@ class AuthController extends _$AuthController {
   @override
   AuthState build() => const AuthState.initial();
 
-  Future<void> setLoading() async {
-    state = const AuthState.loading();
-  }
-
   Future<void> login({
     required final String email,
     required final String password,
   }) async {
+    if (state is AuthLoading) {
+      return;
+    }
     state = const AuthState.loading();
 
     final loginUser = ref.read(loginUserProvider);
@@ -50,11 +52,24 @@ class AuthController extends _$AuthController {
     );
   }
 
+  Future<void> logout() async {
+    if (state is AuthLoading) {
+      return;
+    }
+    state = const AuthState.loading();
+    final logOut = ref.read(logoutUseCaseProvider);
+    await logOut(const NoParams());
+    state = const AuthState.unauthenticated();
+  }
+
   Future<void> register({
     required final String email,
     required final String password,
     required final String username,
   }) async {
+    if (state is AuthLoading) {
+      return;
+    }
     state = const AuthState.loading();
 
     final regisetrUser = ref.read(registerUserProvider);
@@ -66,6 +81,24 @@ class AuthController extends _$AuthController {
       ),
     );
 
+    state = result.fold(
+      ifLeft: (final failure) => AuthState.error(message: failure.message),
+      ifRight: (final user) => AuthState.authenticated(user: user),
+    );
+  }
+
+  Future<void> getCurrentUser() async {
+    if (state is AuthLoading) {
+      return;
+    }
+    if (state is AuthAuthenticated) {
+      return;
+    }
+
+    state = const AuthState.loading();
+
+    final getUser = ref.read(getUserProvider);
+    final result = await getUser(const NoParams());
     state = result.fold(
       ifLeft: (final failure) => AuthState.error(message: failure.message),
       ifRight: (final user) => AuthState.authenticated(user: user),

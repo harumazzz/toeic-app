@@ -76,7 +76,7 @@ class RegisterPage extends HookWidget {
                     final context,
                     final ref,
                     final child,
-                  ) => AuthActionButtons(
+                  ) => AuthActionButton(
                     primaryButtonText: context.t.common.register,
                     secondaryButtonText: context.t.common.login,
                     onPrimaryPressed: () async {

@@ -19,7 +19,7 @@ void main() {
     const tPassword = 'password123';
     const tUsername = 'testuser';
     const tUser = User(
-      id: '1',
+      id: 1,
       email: tEmail,
       username: tUsername,
     );

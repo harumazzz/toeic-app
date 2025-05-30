@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/auth_provider.dart';
 
-class AuthActionButtons extends ConsumerWidget {
-  const AuthActionButtons({
+class AuthActionButton extends ConsumerWidget {
+  const AuthActionButton({
     required this.primaryButtonText,
     required this.secondaryButtonText,
     required this.onPrimaryPressed,
