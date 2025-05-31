@@ -15,6 +15,8 @@ class SecureStorageService {
 
   static const String userIdKey = 'user_id';
 
+  static const String refreshTokenExpiryKey = 'refresh_token_expiry';
+
   Future<void> saveAccessToken(
     final String token,
   ) async => _secureStorage.write(
@@ -24,10 +26,17 @@ class SecureStorageService {
 
   Future<void> saveRefreshToken(
     final String token,
-  ) async => _secureStorage.write(
-    key: refreshTokenKey,
-    value: token,
-  );
+  ) async {
+    await _secureStorage.write(
+      key: refreshTokenKey,
+      value: token,
+    );
+    final expired = DateTime.now().add(const Duration(days: 7));
+    await _secureStorage.write(
+      key: refreshTokenExpiryKey,
+      value: expired.toIso8601String(),
+    );
+  }
 
   Future<void> saveUserId(final String userId) async => _secureStorage.write(
     key: userIdKey,
@@ -42,15 +51,38 @@ class SecureStorageService {
     key: refreshTokenKey,
   );
 
+  Future<DateTime?> getRefreshTokenExpiry() async {
+    final expiryString = await _secureStorage.read(
+      key: refreshTokenExpiryKey,
+    );
+    if (expiryString == null) {
+      return null;
+    }
+    try {
+      return DateTime.parse(expiryString);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<bool> isExpired() async {
+    final expiry = await getRefreshTokenExpiry();
+    if (expiry == null) {
+      return true;
+    }
+    return DateTime.now().isAfter(expiry);
+  }
+
   Future<String?> getUserId() async => _secureStorage.read(key: userIdKey);
 
   Future<void> deleteAccessToken() async => _secureStorage.delete(
     key: accessTokenKey,
   );
 
-  Future<void> deleteRefreshToken() async => _secureStorage.delete(
-    key: refreshTokenKey,
-  );
+  Future<void> deleteRefreshToken() async {
+    await _secureStorage.delete(key: refreshTokenKey);
+    await _secureStorage.delete(key: refreshTokenExpiryKey);
+  }
 
   Future<void> deleteUserId() async => _secureStorage.delete(
     key: userIdKey,

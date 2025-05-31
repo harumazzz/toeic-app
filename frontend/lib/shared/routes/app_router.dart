@@ -122,9 +122,13 @@ final GoRouter _router = GoRouter(
   initialLocation: '/${AppRouter.loginRoute}',
   debugLogDiagnostics: kDebugMode,
   redirect: (final context, final state) async {
-    final token =
-        await InjectionContainer.get<SecureStorageService>().getAccessToken();
-    if (token == null || token.isEmpty) {
+    final secureStorage = InjectionContainer.get<SecureStorageService>();
+    final token = await secureStorage.getAccessToken();
+    final isExpired = await secureStorage.isExpired();
+    if (token == null || token.isEmpty || isExpired) {
+      if (isExpired) {
+        await secureStorage.clearAllTokens();
+      }
       return '/${AppRouter.loginRoute}';
     }
     final path = state.uri.toString();

@@ -20,15 +20,15 @@ abstract class AuthRemoteDataSource {
     final Dio dio,
   ) = _AuthRemoteDataSource;
 
-  @POST('/api/login')
+  @POST('/api/auth/login')
   Future<LoginResponse> login(@Body() final LoginRequest body);
 
-  @POST('/api/register')
+  @POST('/api/auth/register')
   Future<RegisterResponse> register(
     @Body() final RegisterRequest body,
   );
 
-  @POST('/api/logout')
+  @POST('/api/auth/logout')
   Future<String> logout();
 
   @GET('/api/v1/users/me')

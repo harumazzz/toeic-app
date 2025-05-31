@@ -58,7 +58,8 @@ final class AuthInterceptor extends Interceptor {
         return handler.next(err);
       }
       final refreshToken = await secureStorageService.getRefreshToken();
-      if (refreshToken != null) {
+      final isRefreshTokenExpired = await secureStorageService.isExpired();
+      if (refreshToken != null && !isRefreshTokenExpired) {
         try {
           final response = await tokenRemoteDataSource.refreshToken(
             RefreshTokenRequest(refreshToken: refreshToken),
@@ -70,8 +71,12 @@ final class AuthInterceptor extends Interceptor {
           final result = await dio.fetch(options);
           return handler.resolve(result);
         } catch (e) {
+          await secureStorageService.clearAllTokens();
           return handler.reject(err);
         }
+      } else {
+        await secureStorageService.clearAllTokens();
+        return handler.reject(err);
       }
     }
     return super.onError(err, handler);

@@ -74,14 +74,18 @@ class AuthRepositoryImpl implements AuthRepository {
     final String username,
   ) async {
     try {
-      final user = await remoteDataSource.register(
+      final response = await remoteDataSource.register(
         RegisterRequest(
           email: email,
           password: password,
           username: username,
         ),
       );
-      return Right(user.user.toEntity());
+
+      await secureStorageService.saveAccessToken(response.accessToken);
+      await secureStorageService.saveRefreshToken(response.refreshToken);
+
+      return Right(response.user.toEntity());
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
         return Left(

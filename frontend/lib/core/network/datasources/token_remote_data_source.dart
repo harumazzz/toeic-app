@@ -21,7 +21,7 @@ abstract class TokenRemoteDataSource {
     final Dio dio,
   ) = _TokenRemoteDataSource;
 
-  @POST('/auth/refresh-token')
+  @POST('/api/auth/refresh-token')
   Future<RefreshTokenResponse> refreshToken(
     final RefreshTokenRequest body,
   );

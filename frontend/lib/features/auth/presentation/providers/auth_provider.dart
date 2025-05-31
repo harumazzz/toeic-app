@@ -1,7 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/storage/secure_storage_service.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../../../injection_container.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/get_user.dart';
 import '../../domain/usecases/login_user.dart';
@@ -92,6 +94,13 @@ class AuthController extends _$AuthController {
       return;
     }
     if (state is AuthAuthenticated) {
+      return;
+    }
+    final secureStorage = InjectionContainer.get<SecureStorageService>();
+    final isRefreshTokenExpired = await secureStorage.isExpired();
+    if (isRefreshTokenExpired) {
+      await secureStorage.clearAllTokens();
+      state = const AuthState.unauthenticated();
       return;
     }
 
