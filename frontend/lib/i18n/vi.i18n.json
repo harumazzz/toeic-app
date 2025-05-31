@@ -1,5 +1,4 @@
-{  
-  "common": {
+{    "common": {
     "email": "Email",
     "password": "Mật khẩu",
     "login": "Đăng nhập",
@@ -20,6 +19,7 @@
     "edit": "Chỉnh sửa",
     "update": "Cập nhật",
     "search": "Tìm kiếm",
+    "noDataFound": "Không tìm thấy dữ liệu",
     "confirm": "Xác nhận",
     "back": "Quay lại",
     "yes": "Có",
@@ -60,7 +60,8 @@
     "presentParticiple": "Phân từ hiện tại",
     "playPronunciation": "Phát âm",
     "bookmark": "Đánh dấu",
-    "practiceWord": "Luyện tập từ"
+    "practiceWord": "Luyện tập từ",
+    "noSynonyms": "Không có từ đồng nghĩa"
   },
   "page": {
     "login": "Đăng nhập",
@@ -75,7 +76,8 @@
     "settings": "Cài đặt",
     "help": "Trợ giúp",
     "grammar": "Ngữ pháp",
-    "wordDetails": "Từ vựng"
+    "wordDetails": "Từ vựng",
+    "learn": "Học"
   },
   "subtitle": {
     "login": "Đăng nhập để tiếp tục học TOEIC",

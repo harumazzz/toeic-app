@@ -10,10 +10,10 @@ sealed class Word with _$Word {
     required final int freq,
     required final int id,
     required final int level,
-    required final List<Meaning> means,
+    final List<Meaning>? means,
     required final String pronounce,
     required final String shortMean,
-    required final List<Synonym> snym,
+    final List<Synonym>? snym,
     required final String word,
   }) = _Word;
 }

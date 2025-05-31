@@ -27,12 +27,17 @@ class SynonymsSection extends StatelessWidget {
         children: [
           const SynonymHeader(),
           const SizedBox(height: 16),
-          for (int index = 0; index < word.snym.length; index++) ...[
-            SynonymGroupItem(
-              synonym: word.snym[index],
+          if (word.snym != null && word.snym!.isNotEmpty) ...[
+            for (final synonymGroup in word.snym!)
+              SynonymGroupItem(synonym: synonymGroup),
+            const SizedBox(height: 16),
+          ] else
+            Text(
+              context.t.wordDetail.noSynonyms,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
-            if (index < word.snym.length - 1) const SynonymDivider(),
-          ],
         ],
       ),
     ),

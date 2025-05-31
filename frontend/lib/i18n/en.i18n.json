@@ -1,5 +1,4 @@
-{  
-  "common": {
+{    "common": {
     "email": "Email",
     "password": "Password",
     "login": "Login",
@@ -20,6 +19,7 @@
     "edit": "Edit",
     "update": "Update",
     "search": "Search",
+    "noDataFound": "No data found",
     "confirm": "Confirm",
     "back": "Back",
     "yes": "Yes",
@@ -60,7 +60,8 @@
     "presentParticiple": "Present Participle",
     "playPronunciation": "Play pronunciation",
     "bookmark": "Bookmark",
-    "practiceWord": "Practice word"
+    "practiceWord": "Practice word",
+    "noSynonyms": "No synonyms available"
   },
   "page": {
     "login": "Login",
@@ -75,7 +76,8 @@
     "settings": "Settings",
     "help": "Help",
     "grammar": "Grammar",
-    "wordDetails": "Word Details"
+    "wordDetails": "Word Details",
+    "learn": "Learn"
   },
   "subtitle": {
     "login": "Login to continue learn TOEIC",

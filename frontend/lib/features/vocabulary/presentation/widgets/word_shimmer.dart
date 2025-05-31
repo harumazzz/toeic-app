@@ -18,7 +18,8 @@ class WordShimmer extends StatelessWidget {
               children: [
                 Expanded(
                   child: Shimmer(
-                    duration: const Duration(seconds: 2),
+                    interval: const Duration(milliseconds: 800),
+                    color: Theme.of(context).colorScheme.surface,
                     child: Container(
                       height: 28,
                       decoration: BoxDecoration(
@@ -30,7 +31,8 @@ class WordShimmer extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Shimmer(
-                  duration: const Duration(seconds: 2),
+                  interval: const Duration(milliseconds: 800),
+                  color: Theme.of(context).colorScheme.surface,
                   child: Container(
                     width: 70,
                     height: 28,
@@ -50,7 +52,8 @@ class WordShimmer extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Shimmer(
-                      duration: const Duration(seconds: 2),
+                      interval: const Duration(milliseconds: 800),
+                      color: Theme.of(context).colorScheme.surface,
                       child: Container(
                         width: 20,
                         height: 20,
@@ -62,7 +65,8 @@ class WordShimmer extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Shimmer(
-                      duration: const Duration(seconds: 2),
+                      interval: const Duration(milliseconds: 800),
+                      color: Theme.of(context).colorScheme.surface,
                       child: Container(
                         width: 80,
                         height: 16,
@@ -75,7 +79,8 @@ class WordShimmer extends StatelessWidget {
                   ],
                 ),
                 Shimmer(
-                  duration: const Duration(seconds: 2),
+                  interval: const Duration(milliseconds: 800),
+                  color: Theme.of(context).colorScheme.surface,
                   child: Container(
                     width: 40,
                     height: 40,
@@ -89,7 +94,8 @@ class WordShimmer extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Shimmer(
-              duration: const Duration(seconds: 2),
+              interval: const Duration(milliseconds: 800),
+              color: Theme.of(context).colorScheme.surface,
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.8,
                 height: 20,
@@ -101,7 +107,8 @@ class WordShimmer extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Shimmer(
-              duration: const Duration(seconds: 2),
+              interval: const Duration(milliseconds: 800),
+              color: Theme.of(context).colorScheme.surface,
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.6,
                 height: 14,

@@ -137,11 +137,11 @@ void main() {
 
       // assert
       expect(entity.conjugation, isNotNull);
-      expect(entity.means.length, 1);
-      expect(entity.snym.length, 1);
+      expect(entity.means!.length, 1);
+      expect(entity.snym!.length, 1);
       expect(entity.conjugation?.simplePresent?.p, 'go');
-      expect(entity.means.first.kind, 'noun');
-      expect(entity.snym.first.kind, 'synonym');
+      expect(entity.means!.first.kind, 'noun');
+      expect(entity.snym!.first.kind, 'synonym');
     });
   });
 

@@ -83,4 +83,38 @@ class WordRepositoryImpl implements WordRepository {
       }
     }
   }
+
+  @override
+  Future<Either<Failure, List<Word>>> searchWords({
+    required final String query,
+    required final int offset,
+    required final int limit,
+  }) async {
+    try {
+      final words = await _remoteDataSource.searchWords(
+        query: query,
+        offset: offset,
+        limit: limit,
+      );
+      return Right([...words.map((final e) => e.toEntity())]);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return Left(
+          Failure.serverFailure(message: e.message ?? 'Words not found'),
+        );
+      } else if (e.response?.statusCode == 500) {
+        return Left(
+          Failure.serverFailure(
+            message: e.message ?? 'Server error, please try again later',
+          ),
+        );
+      } else {
+        return Left(
+          Failure.networkFailure(
+            message: e.message ?? 'An unexpected error occurred',
+          ),
+        );
+      }
+    }
+  }
 }

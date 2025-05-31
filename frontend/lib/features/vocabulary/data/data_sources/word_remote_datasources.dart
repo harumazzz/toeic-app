@@ -20,12 +20,19 @@ sealed class WordRemoteDataSource {
 
   @GET('/api/v1/words')
   Future<List<WordModel>> getWords({
-    @Query('offset') final int? offset,
-    @Query('limit') final int? limit,
+    @Query('offset') required final int offset,
+    @Query('limit') required final int limit,
   });
 
   @GET('/api/v1/words/{id}')
   Future<WordModel> getWord(
     @Path('id') final int id,
   );
+
+  @GET('/api/v1/words/search')
+  Future<List<WordModel>> searchWords({
+    @Query('query') required final String query,
+    @Query('offset') required final int offset,
+    @Query('limit') required final int limit,
+  });
 }

@@ -91,11 +91,11 @@ class WordDetailContent extends StatelessWidget {
               const SizedBox(height: 8),
               QuickStatsRow(word: word),
               const SizedBox(height: 8),
-              if (word.means.isNotEmpty) ...[
+              if (word.means != null && word.means!.isNotEmpty) ...[
                 DetailedMeanings(word: word),
                 const SizedBox(height: 8),
               ],
-              if (word.snym.isNotEmpty) ...[
+              if (word.snym != null && word.snym!.isNotEmpty) ...[
                 SynonymsSection(word: word),
                 const SizedBox(height: 8),
               ],

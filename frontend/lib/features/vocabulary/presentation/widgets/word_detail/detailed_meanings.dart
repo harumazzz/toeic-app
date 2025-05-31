@@ -52,7 +52,7 @@ class DetailedMeanings extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          ...word.means.asMap().entries.map((final entry) {
+          ...?word.means?.asMap().entries.map((final entry) {
             final index = entry.key;
             final meaning = entry.value;
             return Column(
@@ -137,7 +137,7 @@ class DetailedMeanings extends StatelessWidget {
                     );
                   }),
                 ],
-                if (index < word.means.length - 1) ...[
+                if (word.means != null && index < word.means!.length - 1) ...[
                   const SizedBox(height: 20),
                   Divider(
                     color: Theme.of(

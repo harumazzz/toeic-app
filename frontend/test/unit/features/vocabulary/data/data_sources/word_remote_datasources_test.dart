@@ -15,13 +15,13 @@ void main() {
   setUpAll(() {
     registerFallbackValue(FakeRequestOptions());
   });
-  
+
   setUp(() {
     mockDio = MockDio();
-    
+
     // Mock the options property required by Retrofit
     when(() => mockDio.options).thenReturn(BaseOptions());
-    
+
     dataSource = WordRemoteDataSource(mockDio);
   });
 
@@ -41,7 +41,8 @@ void main() {
     const tLimit = 10;
     const tWordId = 1;
 
-    group('getWords', () {      test('should perform GET request to correct endpoint', () async {
+    group('getWords', () {
+      test('should perform GET request to correct endpoint', () async {
         // arrange
         when(
           () => mockDio.fetch<List<dynamic>>(any()),
@@ -60,7 +61,8 @@ void main() {
         verify(
           () => mockDio.fetch<List<dynamic>>(any()),
         ).called(1);
-      });      test('should return List<WordModel> when call is successful', () async {
+      });
+      test('should return List<WordModel> when call is successful', () async {
         // arrange
         when(
           () => mockDio.fetch<List<dynamic>>(any()),
@@ -80,7 +82,8 @@ void main() {
 
         // assert
         expect(result, tWordsList);
-      });      test('should handle empty response correctly', () async {
+      });
+      test('should handle empty response correctly', () async {
         // arrange
         when(
           () => mockDio.fetch<List<dynamic>>(any()),
@@ -100,7 +103,8 @@ void main() {
 
         // assert
         expect(result, isEmpty);
-      });      test('should handle default parameters', () async {
+      });
+      test('should handle default parameters', () async {
         // arrange
         when(
           () => mockDio.fetch<List<dynamic>>(any()),
@@ -113,13 +117,14 @@ void main() {
         );
 
         // act
-        await dataSource.getWords();
+        await dataSource.getWords(offset: 10, limit: 20);
 
         // assert
         verify(
           () => mockDio.fetch<List<dynamic>>(any()),
         ).called(1);
-      });      test('should throw DioException when request fails', () async {
+      });
+      test('should throw DioException when request fails', () async {
         // arrange
         when(
           () => mockDio.fetch<List<dynamic>>(any()),
@@ -141,7 +146,8 @@ void main() {
       });
     });
 
-    group('getWord', () {      test('should perform GET request to correct endpoint with id', () async {
+    group('getWord', () {
+      test('should perform GET request to correct endpoint with id', () async {
         // arrange
         when(
           () => mockDio.fetch<Map<String, dynamic>>(any()),
@@ -160,7 +166,8 @@ void main() {
         verify(
           () => mockDio.fetch<Map<String, dynamic>>(any()),
         ).called(1);
-      });      test('should return WordModel when call is successful', () async {
+      });
+      test('should return WordModel when call is successful', () async {
         // arrange
         when(
           () => mockDio.fetch<Map<String, dynamic>>(any()),
@@ -177,7 +184,8 @@ void main() {
 
         // assert
         expect(result, tWordModel);
-      });      test('should throw DioException when word not found', () async {
+      });
+      test('should throw DioException when word not found', () async {
         // arrange
         when(
           () => mockDio.fetch<Map<String, dynamic>>(any()),
@@ -196,7 +204,8 @@ void main() {
           () => dataSource.getWord(tWordId),
           throwsA(isA<DioException>()),
         );
-      });      test('should throw DioException when server error occurs', () async {
+      });
+      test('should throw DioException when server error occurs', () async {
         // arrange
         when(
           () => mockDio.fetch<Map<String, dynamic>>(any()),
@@ -215,7 +224,8 @@ void main() {
           () => dataSource.getWord(tWordId),
           throwsA(isA<DioException>()),
         );
-      });      test('should handle network error', () async {
+      });
+      test('should handle network error', () async {
         // arrange
         when(
           () => mockDio.fetch<Map<String, dynamic>>(any()),

@@ -129,10 +129,10 @@ extension WordModelExtension on WordModel {
     freq: freq,
     id: id,
     level: level,
-    means: means?.toEntity() ?? [],
+    means: means?.toEntity(),
     pronounce: pronounce,
     shortMean: shortMean,
-    snym: snym?.toEntity() ?? [],
+    snym: snym?.toEntity(),
     word: word,
   );
 }

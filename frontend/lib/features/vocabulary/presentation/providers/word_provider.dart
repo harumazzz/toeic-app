@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/word.dart';
 import '../../domain/usecases/get_all_word.dart';
+import '../../domain/usecases/search_word.dart';
 
 part 'word_provider.freezed.dart';
 part 'word_provider.g.dart';
@@ -67,6 +68,47 @@ class WordController extends _$WordController {
   Future<void> refreshWords() async {
     state = const WordState.initial(words: []);
     await loadWords();
+  }
+
+  Future<void> searchWords({
+    required final String query,
+    final int offset = 0,
+    final int limit = 20,
+  }) async {
+    if (state is WordLoading) {
+      return;
+    }
+    state = WordState.loading(words: state.words);
+    final List<Word> currentWords = query.isEmpty ? [] : state.words;
+
+    if (query.isEmpty) {
+      await loadWords();
+      return;
+    }
+
+    final searchWord = ref.read(searchWordProvider);
+    final result = await searchWord(
+      SearchWordParams(
+        query: query,
+        offset: offset,
+        limit: limit,
+      ),
+    );
+
+    state = result.fold(
+      ifLeft:
+          (final e) => WordState.error(
+            words: currentWords,
+            message: e.message,
+          ),
+      ifRight: (final List<Word> words) {
+        final isFinished = words.isEmpty;
+        return WordState.loaded(
+          words: offset > 0 ? [...currentWords, ...words] : words,
+          isFinished: isFinished,
+        );
+      },
+    );
   }
 
   void reset() {

@@ -12,4 +12,10 @@ abstract class WordRepository {
   Future<Either<Failure, Word>> getWordById({
     required final int id,
   });
+
+  Future<Either<Failure, List<Word>>> searchWords({
+    required final String query,
+    required final int offset,
+    required final int limit,
+  });
 }

@@ -101,10 +101,10 @@ void main() {
 
       // assert
       expect(word.conjugation, conjugation);
-      expect(word.means.length, 1);
-      expect(word.snym.length, 1);
-      expect(word.means.first.kind, 'noun');
-      expect(word.snym.first.kind, 'synonym');
+      expect(word.means!.length, 1);
+      expect(word.snym!.length, 1);
+      expect(word.means!.first.kind, 'noun');
+      expect(word.snym!.first.kind, 'synonym');
     });
   });
 

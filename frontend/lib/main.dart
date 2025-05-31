@@ -1,5 +1,7 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'i18n/strings.g.dart';
 import 'injection_container.dart';
 import 'shared/routes/app_router.dart';
@@ -23,10 +25,20 @@ class Main extends StatelessWidget {
   const Main({super.key});
 
   @override
-  Widget build(final BuildContext context) => MaterialApp.router(
-    debugShowCheckedModeBanner: false,
-    theme: AppTheme.lightTheme,
-    darkTheme: AppTheme.darkTheme,
-    routerConfig: AppRouter.router,
+  Widget build(final BuildContext context) => DynamicColorBuilder(
+    builder:
+        (
+          final ColorScheme? lightDynamic,
+          final ColorScheme? darkDynamic,
+        ) => MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme.copyWith(
+            colorScheme: lightDynamic,
+          ),
+          darkTheme: AppTheme.darkTheme.copyWith(
+            colorScheme: darkDynamic,
+          ),
+          routerConfig: AppRouter.router,
+        ),
   );
 }

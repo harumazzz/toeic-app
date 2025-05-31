@@ -33,7 +33,7 @@ class QuickStatsRow extends StatelessWidget {
             child: StatCard(
               icon: Symbols.list_alt,
               label: 'Meanings',
-              value: word.means.length.toString(),
+              value: word.means?.length.toString() ?? '0',
               color: Colors.green,
             ),
           ),
@@ -42,7 +42,7 @@ class QuickStatsRow extends StatelessWidget {
             child: StatCard(
               icon: Symbols.swap_horiz,
               label: context.t.tooltip.synonyms,
-              value: word.snym.length.toString(),
+              value: word.snym?.length.toString() ?? '0',
               color: Colors.orange,
             ),
           ),
