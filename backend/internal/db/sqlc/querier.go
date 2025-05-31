@@ -10,6 +10,7 @@ import (
 )
 
 type Querier interface {
+	BatchGetExamples(ctx context.Context, dollar_1 []int32) ([]Example, error)
 	CreateContent(ctx context.Context, arg CreateContentParams) (Content, error)
 	CreateExam(ctx context.Context, arg CreateExamParams) (Exam, error)
 	CreateExample(ctx context.Context, arg CreateExampleParams) (Example, error)
@@ -70,6 +71,7 @@ type Querier interface {
 	ListWords(ctx context.Context, arg ListWordsParams) ([]Word, error)
 	ListWritingPrompts(ctx context.Context) ([]WritingPrompt, error)
 	SearchGrammars(ctx context.Context, arg SearchGrammarsParams) ([]Grammar, error)
+	SearchWords(ctx context.Context, arg SearchWordsParams) ([]Word, error)
 	UpdateContent(ctx context.Context, arg UpdateContentParams) (Content, error)
 	UpdateExam(ctx context.Context, arg UpdateExamParams) (Exam, error)
 	UpdateExample(ctx context.Context, arg UpdateExampleParams) (Example, error)

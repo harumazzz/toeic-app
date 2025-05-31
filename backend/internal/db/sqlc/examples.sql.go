@@ -7,7 +7,38 @@ package db
 
 import (
 	"context"
+
+	"github.com/lib/pq"
 )
+
+const batchGetExamples = `-- name: BatchGetExamples :many
+SELECT id, title, meaning FROM examples
+WHERE id = ANY($1::int[])
+ORDER BY id
+`
+
+func (q *Queries) BatchGetExamples(ctx context.Context, dollar_1 []int32) ([]Example, error) {
+	rows, err := q.db.QueryContext(ctx, batchGetExamples, pq.Array(dollar_1))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Example
+	for rows.Next() {
+		var i Example
+		if err := rows.Scan(&i.ID, &i.Title, &i.Meaning); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const createExample = `-- name: CreateExample :one
 INSERT INTO examples (

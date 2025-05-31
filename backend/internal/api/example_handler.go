@@ -101,16 +101,22 @@ func (server *Server) getExample(ctx *gin.Context) {
 // @Success 200 {object} Response{data=[]ExampleResponse} "Examples retrieved successfully"
 // @Failure 500 {object} Response "Failed to retrieve examples"
 // @Router /api/v1/examples [get]
-func (server *Server) listExamples(ctx *gin.Context) {
-	examples, err := server.store.ListExamples(ctx)
+func (server *Server) listExamples(ctx *gin.Context) {	examples, err := server.store.ListExamples(ctx)
 	if err != nil {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve examples", err)
 		return
 	}
 
 	var exampleResponses []ExampleResponse
-	for _, example := range examples {
-		exampleResponses = append(exampleResponses, NewExampleResponse(example))
+	if examples != nil {
+		for _, example := range examples {
+			exampleResponses = append(exampleResponses, NewExampleResponse(example))
+		}
+	}
+	
+	// Ensure we return an empty array instead of null if no results
+	if exampleResponses == nil {
+		exampleResponses = []ExampleResponse{}
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "Examples retrieved successfully", exampleResponses)
@@ -192,4 +198,51 @@ func (server *Server) deleteExample(ctx *gin.Context) {
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "Example deleted successfully", nil)
+}
+
+// batchGetExamplesRequest defines the structure for batch getting examples by IDs.
+type batchGetExamplesRequest struct {
+	IDs []int32 `json:"ids" binding:"required"`
+}
+
+// @Summary Batch get examples by IDs
+// @Description Get multiple examples by their IDs in a single request
+// @Tags examples
+// @Accept json
+// @Produce json
+// @Param request body batchGetExamplesRequest true "List of example IDs"
+// @Success 200 {object} Response{data=[]ExampleResponse} "Examples retrieved successfully"
+// @Failure 400 {object} Response "Invalid request body"
+// @Failure 500 {object} Response "Failed to retrieve examples"
+// @Router /api/v1/examples/batch [post]
+func (server *Server) batchGetExamples(ctx *gin.Context) {
+	var req batchGetExamplesRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request body", err)
+		return
+	}
+
+	if len(req.IDs) == 0 {
+		ErrorResponse(ctx, http.StatusBadRequest, "IDs list cannot be empty", nil)
+		return
+	}
+	examples, err := server.store.BatchGetExamples(ctx, req.IDs)
+	if err != nil {
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve examples", err)
+		return
+	}
+
+	var exampleResponses []ExampleResponse
+	if examples != nil {
+		for _, example := range examples {
+			exampleResponses = append(exampleResponses, NewExampleResponse(example))
+		}
+	}
+	
+	// Ensure we return an empty array instead of null if no results
+	if exampleResponses == nil {
+		exampleResponses = []ExampleResponse{}
+	}
+
+	SuccessResponse(ctx, http.StatusOK, "Examples retrieved successfully", exampleResponses)
 }

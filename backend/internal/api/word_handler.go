@@ -33,6 +33,22 @@ type WordResponse struct {
 	Conjugation   WordJSONField `json:"conjugation"`
 }
 
+// NewWordResponse creates a WordResponse from db.Word model
+func NewWordResponse(word db.Word) WordResponse {
+	return WordResponse{
+		ID:            word.ID,
+		Word:          word.Word,
+		Pronounce:     word.Pronounce,
+		Level:         word.Level,
+		DescriptLevel: word.DescriptLevel,
+		ShortMean:     word.ShortMean,
+		Means:         WordJSONField{Raw: word.Means.RawMessage},
+		Snym:          WordJSONField{Raw: word.Snym.RawMessage},
+		Freq:          word.Freq,
+		Conjugation:   WordJSONField{Raw: word.Conjugation.RawMessage},
+	}
+}
+
 type createWordRequest struct {
 	Word          string        `json:"word" binding:"required"`
 	Pronounce     string        `json:"pronounce" binding:"required"`
@@ -143,7 +159,6 @@ func (server *Server) listWords(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusBadRequest, "Invalid query parameters", err)
 		return
 	}
-
 	words, err := server.store.ListWords(ctx, db.ListWordsParams{
 		Limit:  req.Limit,
 		Offset: req.Offset,
@@ -153,7 +168,19 @@ func (server *Server) listWords(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, words)
+	var wordResponses []WordResponse
+	if words != nil {
+		for _, word := range words {
+			wordResponses = append(wordResponses, NewWordResponse(word))
+		}
+	}
+	
+	// Ensure we return an empty array instead of null if no results
+	if wordResponses == nil {
+		wordResponses = []WordResponse{}
+	}
+
+	SuccessResponse(ctx, http.StatusOK, "Words retrieved successfully", wordResponses)
 }
 
 type updateWordRequest struct {
@@ -259,4 +286,56 @@ func (server *Server) deleteWord(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Word deleted successfully"})
+}
+
+// searchWordsRequest defines the structure for searching words with pagination.
+type searchWordsRequest struct {
+	Query  string `form:"query" binding:"required"`
+	Limit  int32  `form:"limit" binding:"required,min=1,max=100"`
+	Offset int32  `form:"offset" binding:"min=0"`
+}
+
+// @Summary Search words
+// @Description Search words by word, short meaning, or meanings with pagination
+// @Tags words
+// @Accept json
+// @Produce json
+// @Param query query string true "Search query"
+// @Param limit query int true "Limit" default(10)
+// @Param offset query int false "Offset" default(0)
+// @Success 200 {object} Response{data=[]WordResponse} "Words search completed successfully"
+// @Failure 400 {object} Response "Invalid query parameters"
+// @Failure 500 {object} Response "Failed to search words"
+// @Router /api/v1/words/search [get]
+// @Security ApiKeyAuth
+func (server *Server) searchWords(ctx *gin.Context) {
+	var req searchWordsRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ErrorResponse(ctx, http.StatusBadRequest, "Invalid query parameters", err)
+		return
+	}
+	arg := db.SearchWordsParams{
+		Column1: sql.NullString{String: req.Query, Valid: true},
+		Limit:   req.Limit,
+		Offset:  req.Offset,
+	}
+	words, err := server.store.SearchWords(ctx, arg)
+	if err != nil {
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to search words", err)
+		return
+	}
+
+	var wordResponses []WordResponse
+	if words != nil {
+		for _, word := range words {
+			wordResponses = append(wordResponses, NewWordResponse(word))
+		}
+	}
+	
+	// Ensure we return an empty array instead of null if no results
+	if wordResponses == nil {
+		wordResponses = []WordResponse{}
+	}
+
+	SuccessResponse(ctx, http.StatusOK, "Word search completed successfully", wordResponses)
 }

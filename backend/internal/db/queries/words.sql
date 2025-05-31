@@ -23,6 +23,14 @@ ORDER BY id
 LIMIT $1
 OFFSET $2;
 
+-- name: SearchWords :many
+SELECT * FROM words
+WHERE
+    word ILIKE '%' || $1 || '%'
+ORDER BY level, freq DESC, id
+LIMIT $2
+OFFSET $3;
+
 -- name: UpdateWord :one
 UPDATE words
 SET

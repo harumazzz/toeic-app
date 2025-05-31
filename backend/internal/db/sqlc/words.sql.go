@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/sqlc-dev/pqtype"
 )
@@ -114,6 +115,55 @@ type ListWordsParams struct {
 
 func (q *Queries) ListWords(ctx context.Context, arg ListWordsParams) ([]Word, error) {
 	rows, err := q.db.QueryContext(ctx, listWords, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Word
+	for rows.Next() {
+		var i Word
+		if err := rows.Scan(
+			&i.ID,
+			&i.Word,
+			&i.Pronounce,
+			&i.Level,
+			&i.DescriptLevel,
+			&i.ShortMean,
+			&i.Means,
+			&i.Snym,
+			&i.Freq,
+			&i.Conjugation,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchWords = `-- name: SearchWords :many
+SELECT id, word, pronounce, level, descript_level, short_mean, means, snym, freq, conjugation FROM words
+WHERE
+    word ILIKE '%' || $1 || '%'
+ORDER BY level, freq DESC, id
+LIMIT $2
+OFFSET $3
+`
+
+type SearchWordsParams struct {
+	Column1 sql.NullString `json:"column_1"`
+	Limit   int32          `json:"limit"`
+	Offset  int32          `json:"offset"`
+}
+
+func (q *Queries) SearchWords(ctx context.Context, arg SearchWordsParams) ([]Word, error) {
+	rows, err := q.db.QueryContext(ctx, searchWords, arg.Column1, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

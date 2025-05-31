@@ -224,6 +224,7 @@ func (server *Server) setupRouter() {
 			{
 				words.GET("/:id", server.getWord)
 				words.GET("", server.listWords)
+				words.GET("/search", server.searchWords)
 				words.POST("", server.createWord)
 				words.PUT("/:id", server.updateWord)
 				words.DELETE("/:id", server.deleteWord)
@@ -240,6 +241,7 @@ func (server *Server) setupRouter() {
 			{
 				examples.GET("/:id", server.getExample)
 				examples.GET("", server.listExamples)
+				examples.POST("/batch", server.batchGetExamples)
 				examples.POST("", server.createExample)
 				examples.PUT("/:id", server.updateExample)
 				examples.DELETE("/:id", server.deleteExample)

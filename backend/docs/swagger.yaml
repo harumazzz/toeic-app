@@ -303,6 +303,48 @@ definitions:
       user_id:
         type: integer
     type: object
+  api.backupListItem:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      download_url:
+        type: string
+      filename:
+        type: string
+      size:
+        type: integer
+    type: object
+  api.backupRequest:
+    properties:
+      description:
+        type: string
+      filename:
+        type: string
+    type: object
+  api.backupResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      download_url:
+        type: string
+      filename:
+        type: string
+      size:
+        type: integer
+    type: object
+  api.batchGetExamplesRequest:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    required:
+    - ids
+    type: object
   api.createContentRequest:
     properties:
       description:
@@ -601,6 +643,13 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/api.UserResponse'
+    type: object
+  api.restoreRequest:
+    properties:
+      filename:
+        type: string
+    required:
+    - filename
     type: object
   api.updateContentRequest:
     properties:
@@ -934,6 +983,214 @@ paths:
       summary: Register a new user
       tags:
       - auth
+  /api/v1/admin/backups:
+    get:
+      consumes:
+      - application/json
+      description: Lists all available database backups
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backups retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.backupListItem'
+                  type: array
+              type: object
+        "500":
+          description: Failed to retrieve backups
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List database backups
+      tags:
+      - admin
+    post:
+      consumes:
+      - application/json
+      description: Creates a backup of the PostgreSQL database
+      parameters:
+      - description: Backup details
+        in: body
+        name: backup
+        required: true
+        schema:
+          $ref: '#/definitions/api.backupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backup created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.backupResponse'
+              type: object
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create backup
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create database backup
+      tags:
+      - admin
+  /api/v1/admin/backups/{filename}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a specific database backup file
+      parameters:
+      - description: Backup filename
+        in: path
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backup deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid filename
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Backup file not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete backup file
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete database backup
+      tags:
+      - admin
+  /api/v1/admin/backups/download/{filename}:
+    get:
+      description: Downloads a specific database backup file
+      parameters:
+      - description: Backup filename
+        in: path
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: Backup file content
+          schema:
+            type: file
+        "400":
+          description: Invalid filename
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Backup file not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to serve backup file
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Download database backup
+      tags:
+      - admin
+  /api/v1/admin/backups/restore:
+    post:
+      consumes:
+      - application/json
+      description: Restores the database from a specified backup file
+      parameters:
+      - description: Restore details
+        in: body
+        name: restore
+        required: true
+        schema:
+          $ref: '#/definitions/api.restoreRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Database restored successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Backup file not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to restore database
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Restore database from backup
+      tags:
+      - admin
+  /api/v1/admin/backups/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a backup file to the server
+      parameters:
+      - description: Backup SQL file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Backup description
+        in: formData
+        name: description
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backup uploaded successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.backupResponse'
+              type: object
+        "400":
+          description: Invalid file or description
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to save backup file
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Upload database backup
+      tags:
+      - admin
   /api/v1/content-questions/{content_id}:
     get:
       consumes:
@@ -1333,6 +1590,43 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update example
+      tags:
+      - examples
+  /api/v1/examples/batch:
+    post:
+      consumes:
+      - application/json
+      description: Get multiple examples by their IDs in a single request
+      parameters:
+      - description: List of example IDs
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.batchGetExamplesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Examples retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.ExampleResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve examples
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Batch get examples by IDs
       tags:
       - examples
   /api/v1/exams:
@@ -3279,6 +3573,55 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update a word
+      tags:
+      - words
+  /api/v1/words/search:
+    get:
+      consumes:
+      - application/json
+      description: Search words by word, short meaning, or meanings with pagination
+      parameters:
+      - description: Search query
+        in: query
+        name: query
+        required: true
+        type: string
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Words search completed successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.WordResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to search words
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Search words
       tags:
       - words
   /api/v1/writing/prompt-submissions/{prompt_id}:

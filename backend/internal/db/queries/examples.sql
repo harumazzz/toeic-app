@@ -10,6 +10,11 @@ INSERT INTO examples (
 SELECT * FROM examples
 WHERE id = $1 LIMIT 1;
 
+-- name: BatchGetExamples :many
+SELECT * FROM examples
+WHERE id = ANY($1::int[])
+ORDER BY id;
+
 -- name: ListExamples :many
 SELECT * FROM examples
 ORDER BY id;
