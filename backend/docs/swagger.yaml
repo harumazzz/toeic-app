@@ -839,7 +839,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /api/login:
+  /api/auth/login:
     post:
       consumes:
       - application/json
@@ -878,7 +878,7 @@ paths:
       summary: Login user
       tags:
       - auth
-  /api/logout:
+  /api/auth/logout:
     post:
       consumes:
       - application/json
@@ -909,7 +909,7 @@ paths:
       summary: Logout user
       tags:
       - auth
-  /api/refresh-token:
+  /api/auth/refresh-token:
     post:
       consumes:
       - application/json
@@ -948,7 +948,7 @@ paths:
       summary: Refresh access token
       tags:
       - auth
-  /api/register:
+  /api/auth/register:
     post:
       consumes:
       - application/json

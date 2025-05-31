@@ -92,8 +92,10 @@ go run main.go
 ## API Endpoints
 
 ### Authentication
-- `POST /api/login` - Login with email and password
-- `POST /api/refresh-token` - Refresh access token using refresh token
+- `POST /api/auth/login` - Login with email and password
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/logout` - Logout and invalidate tokens
+- `POST /api/auth/refresh-token` - Refresh access token using refresh token
 
 ### Users
 - `POST /api/v1/users` - Create a new user

@@ -39,7 +39,7 @@ type loginUserResponse struct {
 // @Failure     400 {object} Response "Invalid request"
 // @Failure     401 {object} Response "Authentication failed"
 // @Failure     500 {object} Response "Server error"
-// @Router      /api/login [post]
+// @Router      /api/auth/login [post]
 func (server *Server) loginUser(ctx *gin.Context) {
 	var req loginUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -119,7 +119,7 @@ type registerUserResponse struct {
 // @Success     201 {object} Response{data=registerUserResponse} "User registered successfully"
 // @Failure     400 {object} Response "Invalid request"
 // @Failure     500 {object} Response "Server error"
-// @Router      /api/register [post]
+// @Router      /api/auth/register [post]
 func (server *Server) registerUser(ctx *gin.Context) {
 	var req registerUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -221,7 +221,7 @@ type logoutRequest struct {
 // @Failure     401 {object} Response "Unauthorized if the user is not authenticated"
 // @Failure     500 {object} Response "Server error"
 // @Security    ApiKeyAuth
-// @Router      /api/logout [post]
+// @Router      /api/auth/logout [post]
 func (server *Server) logoutUser(ctx *gin.Context) {
 	// Extract auth header
 	authorizationHeader := ctx.GetHeader(AuthorizationHeaderKey)
@@ -282,7 +282,7 @@ func (server *Server) logoutUser(ctx *gin.Context) {
 // @Failure     400 {object} Response "Invalid request"
 // @Failure     401 {object} Response "Invalid refresh token"
 // @Failure     500 {object} Response "Server error"
-// @Router      /api/refresh-token [post]
+// @Router      /api/auth/refresh-token [post]
 func (server *Server) refreshToken(ctx *gin.Context) {
 	var req refreshTokenRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {

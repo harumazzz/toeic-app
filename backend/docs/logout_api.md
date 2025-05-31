@@ -7,7 +7,7 @@ The logout endpoint invalidates both the JWT access token and refresh token by a
 ## Endpoint
 
 ```
-POST /api/logout
+POST /api/auth/logout
 ```
 
 ## Request Format

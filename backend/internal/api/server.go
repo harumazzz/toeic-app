@@ -166,14 +166,18 @@ func (server *Server) setupRouter() {
 		advancedLimiter := middleware.NewAdvancedRateLimit(server.config, server.tokenMaker)
 		router.Use(advancedLimiter.Middleware())
 	}
-
 	// Health check and metrics routes
 	router.GET("/health", server.healthCheck)
-	router.GET("/metrics", server.getMetrics) // Authentication routes
-	router.POST("/api/login", server.loginUser)
-	router.POST("/api/register", server.registerUser)
-	router.POST("/api/refresh-token", server.refreshToken)
-	router.POST("/api/logout", server.logoutUser)
+	router.GET("/metrics", server.getMetrics)
+
+	// Authentication routes
+	authGroup := router.Group("/api/auth")
+	{
+		authGroup.POST("/login", server.loginUser)
+		authGroup.POST("/register", server.registerUser)
+		authGroup.POST("/refresh-token", server.refreshToken)
+		authGroup.POST("/logout", server.logoutUser)
+	}
 
 	// API v1 group
 	v1 := router.Group("/api/v1")

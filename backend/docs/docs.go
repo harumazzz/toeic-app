@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/login": {
+        "/api/auth/login": {
             "post": {
                 "description": "Authenticate a user and return a JWT token",
                 "consumes": [
@@ -79,7 +79,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/logout": {
+        "/api/auth/logout": {
             "post": {
                 "security": [
                     {
@@ -129,7 +129,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/refresh-token": {
+        "/api/auth/refresh-token": {
             "post": {
                 "description": "Get a new access token using a refresh token",
                 "consumes": [
@@ -193,7 +193,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/register": {
+        "/api/auth/register": {
             "post": {
                 "description": "Register a new user and return authentication tokens",
                 "consumes": [

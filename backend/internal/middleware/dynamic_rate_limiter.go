@@ -48,9 +48,9 @@ func DynamicRateLimiter(cfg config.Config) gin.HandlerFunc {
 // isAuthEndpoint checks if a path is an authentication-related endpoint
 func isAuthEndpoint(path string) bool {
 	authPaths := []string{
-		"/api/login",
-		"/api/register",
-		"/api/refresh-token",
+		"/api/auth/login",
+		"/api/auth/register",
+		"/api/auth/refresh-token",
 	}
 
 	for _, authPath := range authPaths {
