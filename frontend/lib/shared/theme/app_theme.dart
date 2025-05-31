@@ -16,13 +16,12 @@ class AppTheme {
     swapLegacyOnMaterial3: true,
     fontFamily: GoogleFonts.notoSans().fontFamily,
   );
-
   static ThemeData get darkTheme => FlexThemeData.dark(
-    scheme: FlexScheme.material,
+    scheme: FlexScheme.materialHc,
     surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-    blendLevel: 13,
+    blendLevel: 8,
     subThemesData: const FlexSubThemesData(
-      blendOnLevel: 20,
+      blendOnLevel: 12,
       useMaterial3Typography: true,
       useM2StyleDividerInM3: true,
     ),

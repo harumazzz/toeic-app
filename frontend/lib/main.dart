@@ -10,7 +10,13 @@ Future<void> main(
 ) async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
-  runApp(ProviderScope(child: TranslationProvider(child: const Main())));
+  runApp(
+    ProviderScope(
+      child: TranslationProvider(
+        child: const Main(),
+      ),
+    ),
+  );
 }
 
 class Main extends StatelessWidget {

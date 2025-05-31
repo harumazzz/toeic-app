@@ -7,6 +7,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/vocabulary/presentation/pages/vocabulary_page.dart';
+import '../../features/vocabulary/presentation/pages/word_detail_page.dart';
 import '../../injection_container.dart';
 
 part 'app_router.g.dart';
@@ -21,8 +22,9 @@ class AppRouter {
   static const String forgotPasswordRoute = 'forgot-password';
 
   static const String homeRoute = 'home';
-
   static const String vocabularyRoute = 'vocabulary';
+
+  static const String wordDetailRoute = 'word-detail';
 
   static GoRouter get router => _router;
 }
@@ -95,6 +97,24 @@ class VocabularyRoute extends GoRouteData {
     final BuildContext context,
     final GoRouterState state,
   ) => const VocabularyPage();
+}
+
+@TypedGoRoute<WordDetailRoute>(
+  path: '/${AppRouter.wordDetailRoute}/:wordId',
+  name: AppRouter.wordDetailRoute,
+)
+class WordDetailRoute extends GoRouteData {
+  const WordDetailRoute({
+    required this.wordId,
+  });
+
+  final int wordId;
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => WordDetailPage(wordId: wordId);
 }
 
 final GoRouter _router = GoRouter(

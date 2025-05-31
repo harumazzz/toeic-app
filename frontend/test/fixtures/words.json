@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "word": "example",
+    "pronounce": "ɪɡˈzæmpəl",
+    "level": 1,
+    "descript_level": "A1",
+    "short_mean": "short meaning",
+    "freq": 100,
+    "means": null,
+    "snym": null,
+    "conjugation": null
+  },
+  {
+    "id": 2,
+    "word": "test",
+    "pronounce": "test",
+    "level": 2,
+    "descript_level": "A2",
+    "short_mean": "test meaning",
+    "freq": 80,
+    "means": null,
+    "snym": null,
+    "conjugation": null
+  }
+]

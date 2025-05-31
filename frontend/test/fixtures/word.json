@@ -1,0 +1,43 @@
+{
+  "id": 1,
+  "word": "example",
+  "pronounce": "ɪɡˈzæmpəl",
+  "level": 1,
+  "descript_level": "A1",
+  "short_mean": "short meaning",
+  "freq": 100,
+  "means": {
+    "RawMessage": [
+      {
+        "kind": "noun",
+        "means": [
+          {
+            "mean": "a thing characteristic of its kind or illustrating a general rule",
+            "examples": [1, 2, 3]
+          }
+        ]
+      }
+    ]
+  },
+  "snym": {
+    "RawMessage": [
+      {
+        "kind": "synonym",
+        "content": [
+          {
+            "syno": ["sample", "instance", "illustration"],
+            "anto": ["original"]
+          }
+        ]
+      }
+    ]
+  },
+  "conjugation": {
+    "RawMessage": {
+      "htd": {"p": "go", "w": "goes"},
+      "qkd": {"p": "went", "w": "went"},
+      "httd": {"p": "going", "w": "going"},
+      "htht": {"p": "gone", "w": "gone"}
+    }
+  }
+}

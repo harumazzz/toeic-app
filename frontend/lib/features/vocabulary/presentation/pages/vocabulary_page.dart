@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../../i18n/strings.g.dart';
 import '../providers/word_provider.dart';
 import '../widgets/word_card.dart';
+import '../widgets/word_shimmer.dart';
 import '../widgets/words_loading.dart' as widgets;
 
 class VocabularyPage extends HookConsumerWidget {
@@ -17,9 +18,9 @@ class VocabularyPage extends HookConsumerWidget {
     final offset = useState(0);
 
     useEffect(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (wordState.words.isEmpty) {
-          ref.read(wordControllerProvider.notifier).loadWords();
+          await ref.read(wordControllerProvider.notifier).loadWords();
         }
       });
       return null;
@@ -43,7 +44,8 @@ class VocabularyPage extends HookConsumerWidget {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh:
-            () => ref.read(wordControllerProvider.notifier).refreshWords(),
+            () async =>
+                ref.read(wordControllerProvider.notifier).refreshWords(),
         child: CustomScrollView(
           controller: scrollController,
           slivers: [
@@ -68,10 +70,7 @@ class VocabularyPage extends HookConsumerWidget {
                           child: WordCard(word: wordState.words[index]),
                         );
                       } else if (wordState is WordLoading) {
-                        return const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
+                        return const WordShimmer();
                       } else if (wordState is WordError) {
                         return Padding(
                           padding: const EdgeInsets.all(16),

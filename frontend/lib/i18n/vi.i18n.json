@@ -1,4 +1,5 @@
-{  "common": {
+{  
+  "common": {
     "email": "Email",
     "password": "Mật khẩu",
     "login": "Đăng nhập",
@@ -8,12 +9,58 @@
     "username": "Tên người dùng",
     "retry": "Thử lại",
     "level": "Cấp độ",
-    "learn": "Học"
+    "learn": "Học",
+    "play": "Chơi",
+    "next": "Tiếp theo",
+    "previous": "Trước đó",
+    "start": "Bắt đầu",
+    "finish": "Kết thúc",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "update": "Cập nhật",
+    "search": "Tìm kiếm",
+    "confirm": "Xác nhận",
+    "back": "Quay lại",
+    "yes": "Có",
+    "no": "Không",
+    "close": "Đóng",
+    "continue": "Tiếp tục",
+    "select": "Chọn",
+    "submit": "Gửi",
+    "reset": "Đặt lại",
+    "loading": "Đang tải",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "warning": "Cảnh báo",
+    "info": "Thông tin"
   },
   "hint": {
     "email": "Nhập email của bạn",
     "password": "Nhập mật khẩu của bạn",
     "username": "Nhập tên người dùng của bạn"
+  },  "tooltip": {
+    "shortMeaning": "Ý nghĩa ngắn gọn",
+    "detailMeaning": "Ý nghĩa chi tiết",
+    "synonyms": "Từ đồng nghĩa",
+    "conjugation": "Biến thể động từ",
+    "description": "Mô tả",
+    "frequency": "Tần suất"
+  },
+  "wordDetail": {
+    "failedToLoad": "Không thể tải từ vựng",
+    "pronunciationTitle": "Cách phát âm",
+    "synonymsAndAntonyms": "Từ đồng nghĩa & trái nghĩa",
+    "synonyms": "Từ đồng nghĩa",
+    "antonyms": "Từ trái nghĩa",
+    "noConjugationInfo": "Không có thông tin biến thể động từ",
+    "simplePresent": "Hiện tại đơn",
+    "simplePast": "Quá khứ đơn",
+    "presentContinuous": "Hiện tại tiếp diễn",
+    "presentParticiple": "Phân từ hiện tại",
+    "playPronunciation": "Phát âm",
+    "bookmark": "Đánh dấu",
+    "practiceWord": "Luyện tập từ"
   },
   "page": {
     "login": "Đăng nhập",
@@ -26,7 +73,9 @@
     "writing": "Viết",
     "progress": "Tiến độ",
     "settings": "Cài đặt",
-    "help": "Trợ giúp"
+    "help": "Trợ giúp",
+    "grammar": "Ngữ pháp",
+    "wordDetails": "Từ vựng"
   },
   "subtitle": {
     "login": "Đăng nhập để tiếp tục học TOEIC",
@@ -44,7 +93,8 @@
     "writing": "Viết",
     "progress": "Tiến độ",
     "settings": "Cài đặt",
-    "help": "Trợ giúp"
+    "help": "Trợ giúp",
+    "grammar": "Ngữ pháp"
   },
   "modules": {
     "listening": "Nghe",
@@ -59,5 +109,9 @@
     "vocabularyDescription": "Mở rộng vốn từ vựng",
     "grammar": "Ngữ pháp",
     "grammarDescription": "Thành thạo các quy tắc ngữ pháp"
+  },
+  "errors": {
+    "failedToLoad": "Không thể tải dữ liệu",
+    "networkError": "Lỗi mạng, vui lòng kiểm tra kết nối của bạn"
   }
 }

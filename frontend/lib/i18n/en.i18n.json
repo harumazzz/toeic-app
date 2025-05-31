@@ -9,12 +9,58 @@
     "username": "Username",
     "retry": "Retry",
     "level": "Level",
-    "learn": "Learn"
+    "learn": "Learn",
+    "play": "Play",
+    "next": "Next",
+    "previous": "Previous",
+    "start": "Start",
+    "finish": "Finish",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "update": "Update",
+    "search": "Search",
+    "confirm": "Confirm",
+    "back": "Back",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "continue": "Continue",
+    "select": "Select",
+    "submit": "Submit",
+    "reset": "Reset",
+    "loading": "Loading",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Info"
   },
   "hint": {
     "email": "Enter your email",
     "password": "Enter your password",
     "username": "Enter your username"
+  },  "tooltip": {
+    "shortMeaning": "Short Meaning",
+    "detailMeaning": "Detailed Meaning",
+    "synonyms": "Synonyms",
+    "conjugation": "Conjugation",
+    "description": "Description",
+    "frequency": "Frequency"
+  },
+  "wordDetail": {
+    "failedToLoad": "Failed to load word",
+    "pronunciationTitle": "Pronunciation",
+    "synonymsAndAntonyms": "Synonyms & Antonyms",
+    "synonyms": "Synonyms",
+    "antonyms": "Antonyms",
+    "noConjugationInfo": "No conjugation information available",
+    "simplePresent": "Simple Present",
+    "simplePast": "Simple Past",
+    "presentContinuous": "Present Continuous",
+    "presentParticiple": "Present Participle",
+    "playPronunciation": "Play pronunciation",
+    "bookmark": "Bookmark",
+    "practiceWord": "Practice word"
   },
   "page": {
     "login": "Login",
@@ -27,7 +73,9 @@
     "writing": "Writing",
     "progress": "Progress",
     "settings": "Settings",
-    "help": "Help"
+    "help": "Help",
+    "grammar": "Grammar",
+    "wordDetails": "Word Details"
   },
   "subtitle": {
     "login": "Login to continue learn TOEIC",
@@ -45,7 +93,8 @@
     "writing": "Writing",
     "progress": "Progress",
     "settings": "Settings",
-    "help": "Help"
+    "help": "Help",
+    "grammar": "Grammar"
   },
   "modules": {
     "listening": "Listening",
@@ -60,5 +109,9 @@
     "vocabularyDescription": "Expand your word knowledge",
     "grammar": "Grammar",
     "grammarDescription": "Master grammar rules"
+  },
+  "errors": {
+    "failedToLoad": "Failed to load the data",
+    "networkError": "Network error, please check your connection"
   }
 }
