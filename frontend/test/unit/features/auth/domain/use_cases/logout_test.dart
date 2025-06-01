@@ -1,9 +1,9 @@
 import 'package:dart_either/dart_either.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learn/core/error/failures.dart';
-import 'package:learn/core/usecases/usecase.dart';
+import 'package:learn/core/use_cases/use_case.dart';
 import 'package:learn/features/auth/domain/repositories/auth_repository.dart';
-import 'package:learn/features/auth/domain/usecases/logout.dart';
+import 'package:learn/features/auth/domain/use_cases/logout.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}

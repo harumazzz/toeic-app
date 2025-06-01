@@ -16,8 +16,8 @@ import '../widgets/word_detail/synonyms_section.dart';
 import '../widgets/word_detail/word_detail_error.dart' as word_detail_error;
 import '../widgets/word_detail/word_detail_shimmer.dart';
 
-class WordDetailPage extends HookConsumerWidget {
-  const WordDetailPage({
+class WordDetailScreen extends HookConsumerWidget {
+  const WordDetailScreen({
     required this.wordId,
     super.key,
   });

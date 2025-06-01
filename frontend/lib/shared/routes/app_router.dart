@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/storage/secure_storage_service.dart';
-import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/pages/register_page.dart';
-import '../../features/home/presentation/pages/home_page.dart';
-import '../../features/vocabulary/presentation/pages/vocabulary_page.dart';
-import '../../features/vocabulary/presentation/pages/word_detail_page.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/help/presentation/screens/help_screen.dart';
+import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/vocabulary/presentation/screens/vocabulary_screen.dart';
+import '../../features/vocabulary/presentation/screens/word_detail_screen.dart';
 import '../../injection_container.dart';
 
 part 'app_router.g.dart';
@@ -22,6 +23,9 @@ class AppRouter {
   static const String forgotPasswordRoute = 'forgot-password';
 
   static const String homeRoute = 'home';
+
+  static const String helpRoute = 'help';
+
   static const String vocabularyRoute = 'vocabulary';
 
   static const String wordDetailRoute = 'word-detail';
@@ -40,7 +44,7 @@ class LoginRoute extends GoRouteData {
   Widget build(
     final BuildContext context,
     final GoRouterState state,
-  ) => const LoginPage();
+  ) => const LoginScreen();
 }
 
 @TypedGoRoute<RegisterRoute>(
@@ -54,7 +58,7 @@ class RegisterRoute extends GoRouteData {
   Widget build(
     final BuildContext context,
     final GoRouterState state,
-  ) => const RegisterPage();
+  ) => const RegisterScreen();
 }
 
 @TypedGoRoute<ForgotPasswordRoute>(
@@ -82,7 +86,21 @@ class HomeRoute extends GoRouteData {
   Widget build(
     final BuildContext context,
     final GoRouterState state,
-  ) => const HomePage();
+  ) => const HomeScreen();
+}
+
+@TypedGoRoute<HelpRoute>(
+  path: '/${AppRouter.helpRoute}',
+  name: AppRouter.helpRoute,
+)
+class HelpRoute extends GoRouteData {
+  const HelpRoute();
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const HelpScreen();
 }
 
 @TypedGoRoute<VocabularyRoute>(
@@ -96,7 +114,7 @@ class VocabularyRoute extends GoRouteData {
   Widget build(
     final BuildContext context,
     final GoRouterState state,
-  ) => const VocabularyPage();
+  ) => const VocabularyScreen();
 }
 
 @TypedGoRoute<WordDetailRoute>(
@@ -114,7 +132,7 @@ class WordDetailRoute extends GoRouteData {
   Widget build(
     final BuildContext context,
     final GoRouterState state,
-  ) => WordDetailPage(wordId: wordId);
+  ) => WordDetailScreen(wordId: wordId);
 }
 
 final GoRouter _router = GoRouter(

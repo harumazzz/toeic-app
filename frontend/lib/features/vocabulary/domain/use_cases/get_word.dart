@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import '../../../../core/use_cases/use_case.dart';
 import '../../data/repositories/word_repository_impl.dart';
 import '../entities/word.dart';
 import '../repositories/word_repository.dart';

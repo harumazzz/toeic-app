@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learn/core/error/failures.dart';
 import 'package:learn/features/vocabulary/domain/entities/word.dart';
 import 'package:learn/features/vocabulary/domain/repositories/word_repository.dart';
-import 'package:learn/features/vocabulary/domain/usecases/get_all_word.dart';
+import 'package:learn/features/vocabulary/domain/use_cases/get_all_word.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockWordRepository extends Mock implements WordRepository {}

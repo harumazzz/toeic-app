@@ -13,8 +13,8 @@ import '../widgets/word_card.dart';
 import '../widgets/word_shimmer.dart';
 import '../widgets/words_loading.dart' as widgets;
 
-class WordPage extends HookConsumerWidget {
-  const WordPage({super.key});
+class WordScreen extends HookConsumerWidget {
+  const WordScreen({super.key});
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {

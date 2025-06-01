@@ -93,6 +93,13 @@ class AppDrawer extends StatelessWidget {
                   Navigator.pop(context);
                 },
               ),
+              _DrawerItem(
+                icon: Symbols.book,
+                title: context.t.drawer.grammar,
+                onTap: () async {
+                  Navigator.pop(context);
+                },
+              ),
               const Divider(),
               _DrawerItem(
                 icon: Symbols.settings,
@@ -106,6 +113,7 @@ class AppDrawer extends StatelessWidget {
                 title: context.t.drawer.help,
                 onTap: () async {
                   Navigator.pop(context);
+                  await const HelpRoute().push(context);
                 },
               ),
             ],

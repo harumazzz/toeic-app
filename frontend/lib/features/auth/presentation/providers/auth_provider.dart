@@ -2,13 +2,13 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/storage/secure_storage_service.dart';
-import '../../../../core/usecases/usecase.dart';
+import '../../../../core/use_cases/use_case.dart';
 import '../../../../injection_container.dart';
 import '../../domain/entities/user.dart';
-import '../../domain/usecases/get_user.dart';
-import '../../domain/usecases/login_user.dart';
-import '../../domain/usecases/logout.dart';
-import '../../domain/usecases/register_user.dart';
+import '../../domain/use_cases/get_user.dart';
+import '../../domain/use_cases/login_user.dart';
+import '../../domain/use_cases/logout.dart';
+import '../../domain/use_cases/register_user.dart';
 
 part 'auth_provider.freezed.dart';
 part 'auth_provider.g.dart';

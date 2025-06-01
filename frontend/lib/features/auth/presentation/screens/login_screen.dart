@@ -11,8 +11,8 @@ import '../widgets/auth_card.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_text_field.dart';
 
-class LoginPage extends HookConsumerWidget {
-  const LoginPage({super.key});
+class LoginScreen extends HookConsumerWidget {
+  const LoginScreen({super.key});
   @override
   Widget build(
     final BuildContext context,

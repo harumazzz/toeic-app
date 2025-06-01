@@ -7,8 +7,8 @@ import '../../../../shared/widgets/app_drawer.dart' hide DrawerButton;
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/home_loading.dart';
 
-class HomePage extends ConsumerWidget {
-  const HomePage({super.key});
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final authState = ref.watch(authControllerProvider);

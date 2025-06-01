@@ -3,11 +3,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../i18n/strings.g.dart';
-import 'learn_page.dart';
-import 'word_page.dart';
+import 'learn_screen.dart';
+import 'word_screen.dart';
 
-class VocabularyPage extends HookWidget {
-  const VocabularyPage({super.key});
+class VocabularyScreen extends HookWidget {
+  const VocabularyScreen({super.key});
 
   @override
   Widget build(final BuildContext context) {
@@ -20,8 +20,8 @@ class VocabularyPage extends HookWidget {
           currentIndex.value = index;
         },
         children: const [
-          WordPage(),
-          LearnPage(),
+          WordScreen(),
+          LearnScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(

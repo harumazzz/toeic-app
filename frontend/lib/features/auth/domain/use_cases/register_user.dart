@@ -2,39 +2,40 @@ import 'package:dart_either/dart_either.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import '../../../../core/use_cases/use_case.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../entities/user.dart';
 import '../repositories/auth_repository.dart';
 
-part 'login_user.freezed.dart';
-part 'login_user.g.dart';
+part 'register_user.freezed.dart';
+part 'register_user.g.dart';
 
 @riverpod
-LoginUser loginUser(final Ref ref) {
+RegisterUser registerUser(final Ref ref) {
   final repository = ref.watch(authRepositoryProvider);
-  return LoginUser(repository);
+  return RegisterUser(repository);
 }
 
-class LoginUser implements UseCase<User, LoginParams> {
-  const LoginUser(this.repository);
+class RegisterUser implements UseCase<User, RegisterParams> {
+  const RegisterUser(this.repository);
   final AuthRepository repository;
 
   @override
   Future<Either<Failure, User>> call(
-    final LoginParams params,
-  ) async => repository.login(
+    final RegisterParams params,
+  ) async => repository.register(
     params.email,
     params.password,
+    params.username,
   );
 }
 
 @freezed
-sealed class LoginParams with _$LoginParams {
-  const factory LoginParams({
+sealed class RegisterParams with _$RegisterParams {
+  const factory RegisterParams({
     required final String email,
     required final String password,
-  }) = _LoginParams;
+    required final String username,
+  }) = _RegisterParams;
 }

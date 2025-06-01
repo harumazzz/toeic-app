@@ -4,8 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../providers/word_provider.dart';
 
-class LearnPage extends HookConsumerWidget {
-  const LearnPage({super.key});
+class LearnScreen extends HookConsumerWidget {
+  const LearnScreen({super.key});
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {

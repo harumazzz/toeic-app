@@ -2,8 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/word.dart';
-import '../../domain/usecases/get_all_word.dart';
-import '../../domain/usecases/search_word.dart';
+import '../../domain/use_cases/get_all_word.dart';
+import '../../domain/use_cases/search_word.dart';
 
 part 'word_provider.freezed.dart';
 part 'word_provider.g.dart';

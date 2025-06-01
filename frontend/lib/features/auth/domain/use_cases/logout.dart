@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import '../../../../core/use_cases/use_case.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../repositories/auth_repository.dart';
 

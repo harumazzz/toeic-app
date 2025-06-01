@@ -1,4 +1,5 @@
-{    "common": {
+{
+  "common": {
     "email": "Email",
     "password": "Password",
     "login": "Login",
@@ -39,7 +40,8 @@
     "email": "Enter your email",
     "password": "Enter your password",
     "username": "Enter your username"
-  },  "tooltip": {
+  },
+  "tooltip": {
     "shortMeaning": "Short Meaning",
     "detailMeaning": "Detailed Meaning",
     "synonyms": "Synonyms",
@@ -115,5 +117,65 @@
   "errors": {
     "failedToLoad": "Failed to load the data",
     "networkError": "Network error, please check your connection"
+  },
+  "help": {
+    "title": "Help Center",
+    "description": "Find answers to common questions about using the TOEIC Learning app",
+    "categories": {
+      "gettingStarted": "Getting Started",
+      "studyFeatures": "Study Features",
+      "testPreparation": "Test Preparation",
+      "accountSettings": "Account Settings",
+      "troubleshooting": "Troubleshooting"
+    },
+    "emailCopied": "Email copied to clipboard",
+    "gettingStarted": {
+      "title": "Getting Started",
+      "createAccount": "How to create an account",
+      "createAccountContent": "Tap the Register button on the login screen and fill in your details to create a new account.",
+      "navigation": "How to navigate the app",
+      "navigationContent": "Use the drawer menu by tapping the menu icon in the top-left corner to access different sections of the app.",
+      "trackProgress": "How to track your progress",
+      "trackProgressContent": "Go to the Progress section in the drawer menu to view your learning statistics and achievements."
+    },
+    "studyFeatures": {
+      "title": "Study Features",
+      "vocabulary": "Vocabulary Practice",
+      "vocabularyContent": "Browse through word lists, learn definitions, and practice with interactive exercises in the Vocabulary section.",
+      "listening": "Listening Practice",
+      "listeningContent": "Access audio recordings and listening exercises designed to improve your comprehension skills.",
+      "grammar": "Grammar Lessons",
+      "grammarContent": "Learn and practice TOEIC grammar rules with examples and exercises in the Grammar section."
+    },
+    "testPreparation": {
+      "title": "Test Preparation",
+      "practice": "Practice Tests",
+      "practiceContent": "Take timed practice tests that simulate the real TOEIC exam experience.",
+      "strategies": "Test Strategies",
+      "strategiesContent": "Learn effective strategies for each section of the TOEIC test.",
+      "scoring": "Scoring System",
+      "scoringContent": "Understand how your practice test scores correlate with actual TOEIC test scores."
+    },
+    "accountSettings": {
+      "title": "Account Settings",
+      "changePassword": "How to change your password",
+      "changePasswordContent": "Go to Settings in the drawer menu and select the option to update your password.",
+      "updateProfile": "How to update your profile",
+      "updateProfileContent": "Access your profile settings to update personal information and preferences.",
+      "notifications": "Managing notifications",
+      "notificationsContent": "Customize your notification preferences in the Settings section."
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting",
+      "loginIssues": "Login Problems",
+      "loginIssuesContent": "If you can't login, try resetting your password or contacting support at support@toeiclearning.com",
+      "contentLoading": "Content Not Loading",
+      "contentLoadingContent": "Check your internet connection and try restarting the app if content isn't loading properly.",
+      "appPerformance": "App Performance",
+      "appPerformanceContent": "If the app is running slowly, try clearing the cache in your device's application settings."
+    },
+    "contactSupport": "Contact Support",
+    "contactSupportContent": "Need more help? Contact our support team at support@toeiclearning.com",
+    "version": "App Version"
   }
 }

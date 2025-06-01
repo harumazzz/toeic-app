@@ -11,8 +11,8 @@ import '../widgets/auth_card.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_text_field.dart';
 
-class RegisterPage extends HookWidget {
-  const RegisterPage({super.key});
+class RegisterScreen extends HookWidget {
+  const RegisterScreen({super.key});
   @override
   Widget build(final BuildContext context) {
     final formKey = useMemoized(GlobalKey<FormBuilderState>.new);

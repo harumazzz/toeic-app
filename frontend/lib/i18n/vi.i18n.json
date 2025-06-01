@@ -1,4 +1,5 @@
-{    "common": {
+{
+  "common": {
     "email": "Email",
     "password": "Mật khẩu",
     "login": "Đăng nhập",
@@ -39,7 +40,8 @@
     "email": "Nhập email của bạn",
     "password": "Nhập mật khẩu của bạn",
     "username": "Nhập tên người dùng của bạn"
-  },  "tooltip": {
+  },
+  "tooltip": {
     "shortMeaning": "Ý nghĩa ngắn gọn",
     "detailMeaning": "Ý nghĩa chi tiết",
     "synonyms": "Từ đồng nghĩa",
@@ -115,5 +117,65 @@
   "errors": {
     "failedToLoad": "Không thể tải dữ liệu",
     "networkError": "Lỗi mạng, vui lòng kiểm tra kết nối của bạn"
+  },
+  "help": {
+    "title": "Trung tâm trợ giúp",
+    "description": "Tìm câu trả lời cho các câu hỏi thường gặp về việc sử dụng ứng dụng TOEIC Learning",
+    "categories": {
+      "gettingStarted": "Bắt đầu",
+      "studyFeatures": "Tính năng học tập",
+      "testPreparation": "Chuẩn bị thi",
+      "accountSettings": "Cài đặt tài khoản",
+      "troubleshooting": "Xử lý sự cố"
+    },
+    "emailCopied": "Đã sao chép email vào bộ nhớ tạm",
+    "gettingStarted": {
+      "title": "Bắt đầu",
+      "createAccount": "Cách tạo tài khoản",
+      "createAccountContent": "Nhấn nút Đăng ký trên màn hình đăng nhập và điền thông tin của bạn để tạo tài khoản mới.",
+      "navigation": "Cách điều hướng ứng dụng",
+      "navigationContent": "Sử dụng menu ngăn kéo bằng cách nhấn biểu tượng menu ở góc trên bên trái để truy cập các phần khác nhau của ứng dụng.",
+      "trackProgress": "Cách theo dõi tiến độ",
+      "trackProgressContent": "Đi đến phần Tiến độ trong menu ngăn kéo để xem thống kê học tập và thành tích của bạn."
+    },
+    "studyFeatures": {
+      "title": "Tính năng học tập",
+      "vocabulary": "Luyện tập từ vựng",
+      "vocabularyContent": "Duyệt qua danh sách từ, học định nghĩa và luyện tập với các bài tập tương tác trong phần Từ vựng.",
+      "listening": "Luyện tập nghe",
+      "listeningContent": "Truy cập các bản ghi âm và bài tập nghe được thiết kế để cải thiện kỹ năng hiểu của bạn.",
+      "grammar": "Bài học ngữ pháp",
+      "grammarContent": "Học và luyện tập các quy tắc ngữ pháp TOEIC với các ví dụ và bài tập trong phần Ngữ pháp."
+    },
+    "testPreparation": {
+      "title": "Chuẩn bị thi",
+      "practice": "Bài thi thử",
+      "practiceContent": "Làm các bài thi thử có giới hạn thời gian mô phỏng trải nghiệm thi TOEIC thực tế.",
+      "strategies": "Chiến lược làm bài",
+      "strategiesContent": "Học các chiến lược hiệu quả cho từng phần của bài thi TOEIC.",
+      "scoring": "Hệ thống tính điểm",
+      "scoringContent": "Hiểu cách điểm bài thi thử của bạn tương quan với điểm thi TOEIC thực tế."
+    },
+    "accountSettings": {
+      "title": "Cài đặt tài khoản",
+      "changePassword": "Cách thay đổi mật khẩu",
+      "changePasswordContent": "Vào phần Cài đặt trong menu ngăn kéo và chọn tùy chọn cập nhật mật khẩu của bạn.",
+      "updateProfile": "Cách cập nhật hồ sơ",
+      "updateProfileContent": "Truy cập cài đặt hồ sơ để cập nhật thông tin cá nhân và tùy chọn.",
+      "notifications": "Quản lý thông báo",
+      "notificationsContent": "Tùy chỉnh tùy chọn thông báo của bạn trong phần Cài đặt."
+    },
+    "troubleshooting": {
+      "title": "Xử lý sự cố",
+      "loginIssues": "Vấn đề đăng nhập",
+      "loginIssuesContent": "Nếu bạn không thể đăng nhập, hãy thử đặt lại mật khẩu hoặc liên hệ hỗ trợ tại support@toeiclearning.com",
+      "contentLoading": "Nội dung không tải được",
+      "contentLoadingContent": "Kiểm tra kết nối internet và thử khởi động lại ứng dụng nếu nội dung không tải đúng cách.",
+      "appPerformance": "Hiệu suất ứng dụng",
+      "appPerformanceContent": "Nếu ứng dụng chạy chậm, hãy thử xóa bộ nhớ đệm trong cài đặt ứng dụng trên thiết bị của bạn."
+    },
+    "contactSupport": "Liên hệ hỗ trợ",
+    "contactSupportContent": "Cần thêm trợ giúp? Liên hệ đội ngũ hỗ trợ của chúng tôi tại support@toeiclearning.com",
+    "version": "Phiên bản ứng dụng"
   }
 }
