@@ -1,3 +1,4 @@
+basePath: /
 definitions:
   api.ContentResponse:
     properties:
@@ -337,6 +338,15 @@ definitions:
         type: integer
     type: object
   api.batchGetExamplesRequest:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    required:
+    - ids
+    type: object
+  api.batchGetGrammarsRequest:
     properties:
       ids:
         items:
@@ -836,8 +846,19 @@ definitions:
       topic:
         type: string
     type: object
+host: 192.168.31.37:8000
 info:
-  contact: {}
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: A RESTful API for the Toeic application
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Toeic App API
+  version: "1.0"
 paths:
   /api/auth/login:
     post:
@@ -1224,6 +1245,8 @@ paths:
           description: Failed to retrieve questions
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: List questions by content
       tags:
       - questions
@@ -1329,6 +1352,8 @@ paths:
           description: Failed to retrieve content
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get content by ID
       tags:
       - contents
@@ -1410,6 +1435,8 @@ paths:
           description: Failed to retrieve parts
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: List parts by exam
       tags:
       - parts
@@ -1434,6 +1461,8 @@ paths:
           description: Failed to retrieve examples
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: List examples
       tags:
       - examples
@@ -1540,6 +1569,8 @@ paths:
           description: Failed to retrieve example
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get example by ID
       tags:
       - examples
@@ -1626,6 +1657,8 @@ paths:
           description: Failed to retrieve examples
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Batch get examples by IDs
       tags:
       - examples
@@ -1667,6 +1700,8 @@ paths:
           description: Failed to retrieve exams
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: List exams
       tags:
       - exams
@@ -1771,6 +1806,8 @@ paths:
           description: Failed to retrieve exam
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get an exam by ID
       tags:
       - exams
@@ -1858,6 +1895,8 @@ paths:
           description: Failed to retrieve grammars
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: List grammars
       tags:
       - grammars
@@ -1966,6 +2005,8 @@ paths:
           description: Failed to retrieve grammar
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get a grammar by ID
       tags:
       - grammars
@@ -2014,6 +2055,45 @@ paths:
       summary: Update a grammar
       tags:
       - grammars
+  /api/v1/grammars/batch:
+    post:
+      consumes:
+      - application/json
+      description: Get multiple grammars by their IDs in a single request
+      parameters:
+      - description: List of grammar IDs
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.batchGetGrammarsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Grammars retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.GrammarResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve grammars
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Batch get grammars by IDs
+      tags:
+      - grammars
   /api/v1/grammars/level:
     get:
       consumes:
@@ -2058,6 +2138,8 @@ paths:
           description: Failed to retrieve grammars by level
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: List grammars by level
       tags:
       - grammars
@@ -2082,6 +2164,8 @@ paths:
           description: Failed to retrieve random grammar
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get a random grammar
       tags:
       - grammars
@@ -2129,6 +2213,8 @@ paths:
           description: Failed to search grammars
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Search grammars
       tags:
       - grammars
@@ -2176,6 +2262,8 @@ paths:
           description: Failed to retrieve grammars by tag
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: List grammars by tag
       tags:
       - grammars
@@ -2212,6 +2300,8 @@ paths:
           description: Failed to retrieve contents
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: List contents by part
       tags:
       - contents
@@ -2317,6 +2407,8 @@ paths:
           description: Failed to retrieve part
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get a part by ID
       tags:
       - parts
@@ -2467,6 +2559,8 @@ paths:
           description: Failed to retrieve question
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get a question by ID
       tags:
       - questions
@@ -3225,6 +3319,8 @@ paths:
           description: Server error during user creation
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Create a new user
       tags:
       - users
@@ -3657,6 +3753,8 @@ paths:
           description: Failed to retrieve user writing submissions
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: List user writing submissions by prompt ID
       tags:
       - writing
@@ -3683,6 +3781,8 @@ paths:
           description: Failed to retrieve writing prompts
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: List all writing prompts
       tags:
       - writing
@@ -3787,6 +3887,8 @@ paths:
           description: Failed to retrieve writing prompt
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get a writing prompt by ID
       tags:
       - writing
@@ -3937,6 +4039,8 @@ paths:
           description: Failed to retrieve user writing submission
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get a user writing submission by ID
       tags:
       - writing
@@ -4018,6 +4122,8 @@ paths:
           description: Failed to retrieve user writing submissions
           schema:
             $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
       summary: List user writing submissions by user ID
       tags:
       - writing
@@ -4125,4 +4231,10 @@ paths:
       summary: Upload an audio file
       tags:
       - Uploads
+securityDefinitions:
+  ApiKeyAuth:
+    description: 'Bearer JWT token authorization. Format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

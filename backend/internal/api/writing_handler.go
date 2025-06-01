@@ -187,6 +187,7 @@ type getWritingPromptRequest struct {
 // @Failure     400 {object} Response "Invalid prompt ID"
 // @Failure     404 {object} Response "Writing prompt not found"
 // @Failure     500 {object} Response "Failed to retrieve writing prompt"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/writing/prompts/{id} [get]
 func (server *Server) getWritingPrompt(ctx *gin.Context) {
 	var req getWritingPromptRequest
@@ -215,6 +216,7 @@ func (server *Server) getWritingPrompt(ctx *gin.Context) {
 // @Produce     json
 // @Success     200 {object} Response{data=[]WritingPromptResponse} "Writing prompts retrieved successfully"
 // @Failure     500 {object} Response "Failed to retrieve writing prompts"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/writing/prompts [get]
 func (server *Server) listWritingPrompts(ctx *gin.Context) {
 	prompts, err := server.store.ListWritingPrompts(ctx)
@@ -422,6 +424,7 @@ type getUserWritingRequest struct {
 // @Failure     400 {object} Response "Invalid submission ID"
 // @Failure     404 {object} Response "User writing submission not found"
 // @Failure     500 {object} Response "Failed to retrieve user writing submission"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/writing/submissions/{id} [get]
 func (server *Server) getUserWriting(ctx *gin.Context) {
 	var req getUserWritingRequest
@@ -457,6 +460,7 @@ type listUserWritingsByUserIDRequest struct {
 // @Success     200 {object} Response{data=[]UserWritingResponse} "User writing submissions retrieved successfully"
 // @Failure     400 {object} Response "Invalid user ID"
 // @Failure     500 {object} Response "Failed to retrieve user writing submissions"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/writing/users/{user_id}/submissions [get]
 func (server *Server) listUserWritingsByUserID(ctx *gin.Context) {
 	var req listUserWritingsByUserIDRequest
@@ -494,6 +498,7 @@ type listUserWritingsByPromptIDRequest struct {
 // @Success     200 {object} Response{data=[]UserWritingResponse} "User writing submissions retrieved successfully"
 // @Failure     400 {object} Response "Invalid prompt ID"
 // @Failure     500 {object} Response "Failed to retrieve user writing submissions"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/writing/prompt-submissions/{prompt_id} [get]
 func (server *Server) listUserWritingsByPromptID(ctx *gin.Context) {
 	var req listUserWritingsByPromptIDRequest

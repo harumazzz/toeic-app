@@ -125,6 +125,7 @@ type getQuestionRequest struct {
 // @Failure     400 {object} Response "Invalid question ID"
 // @Failure     404 {object} Response "Question not found"
 // @Failure     500 {object} Response "Failed to retrieve question"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/questions/{id} [get]
 func (server *Server) getQuestion(ctx *gin.Context) {
 	var req getQuestionRequest
@@ -160,6 +161,7 @@ type listQuestionsByContentRequest struct {
 // @Success     200 {object} Response{data=[]QuestionResponse} "Questions retrieved successfully"
 // @Failure     400 {object} Response "Invalid content ID"
 // @Failure     500 {object} Response "Failed to retrieve questions"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/content-questions/{content_id} [get]
 func (server *Server) listQuestionsByContent(ctx *gin.Context) {
 	var req listQuestionsByContentRequest

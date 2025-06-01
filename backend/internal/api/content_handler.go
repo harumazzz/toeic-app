@@ -82,6 +82,7 @@ type getContentRequest struct {
 // @Failure     400 {object} Response "Invalid content ID"
 // @Failure     404 {object} Response "Content not found"
 // @Failure     500 {object} Response "Failed to retrieve content"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/contents/{id} [get]
 func (server *Server) getContent(ctx *gin.Context) {
 	var req getContentRequest
@@ -117,6 +118,7 @@ type listContentsByPartRequest struct {
 // @Success     200 {object} Response{data=[]ContentResponse} "Contents retrieved successfully"
 // @Failure     400 {object} Response "Invalid part ID"
 // @Failure     500 {object} Response "Failed to retrieve contents"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/part-contents/{part_id} [get]
 func (server *Server) listContentsByPart(ctx *gin.Context) {
 	var req listContentsByPartRequest

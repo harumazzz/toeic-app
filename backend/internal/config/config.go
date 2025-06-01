@@ -33,11 +33,13 @@ type Config struct {
 	RateLimitRequests  int           `mapstructure:"RATE_LIMIT_REQUESTS"`   // Requests per second
 	RateLimitBurst     int           `mapstructure:"RATE_LIMIT_BURST"`      // Maximum burst size
 	RateLimitExpiresIn time.Duration `mapstructure:"RATE_LIMIT_EXPIRES_IN"` // Expiration time for visitor entries
-
 	// Auth rate limiting configuration (for login/register endpoints)
 	AuthRateLimitEnabled  bool `mapstructure:"AUTH_RATE_LIMIT_ENABLED"`
 	AuthRateLimitRequests int  `mapstructure:"AUTH_RATE_LIMIT_REQUESTS"` // Requests per second
 	AuthRateLimitBurst    int  `mapstructure:"AUTH_RATE_LIMIT_BURST"`    // Maximum burst size
+
+	// CORS configuration
+	CORSAllowedOrigins string `mapstructure:"CORS_ALLOWED_ORIGINS"` // Comma-separated list of allowed origins
 }
 
 // LoadEnv loads environment variables from .env file
@@ -110,11 +112,14 @@ func DefaultConfig() Config {
 	rateLimitRequests := int(GetEnvAsInt("RATE_LIMIT_REQUESTS", 10))                              // 10 reqs/sec by default
 	rateLimitBurst := int(GetEnvAsInt("RATE_LIMIT_BURST", 20))                                    // 20 burst by default
 	rateLimitExpiresIn := time.Duration(GetEnvAsInt("RATE_LIMIT_EXPIRES_IN", 3600)) * time.Second // 1 hour by default
-
 	// Get auth rate limiting configuration
 	authRateLimitEnabled := GetEnv("AUTH_RATE_LIMIT_ENABLED", "true") == "true"
 	authRateLimitRequests := int(GetEnvAsInt("AUTH_RATE_LIMIT_REQUESTS", 3)) // 3 reqs/sec by default (more restricted)
 	authRateLimitBurst := int(GetEnvAsInt("AUTH_RATE_LIMIT_BURST", 5))       // 5 burst by default
+
+	// Get CORS configuration
+	corsAllowedOrigins := GetEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8080,http://192.168.31.37:8000")
+
 	return Config{
 		// Database configuration
 		DBDriver:   dbDriver,
@@ -136,10 +141,12 @@ func DefaultConfig() Config {
 		RateLimitRequests:  rateLimitRequests,
 		RateLimitBurst:     rateLimitBurst,
 		RateLimitExpiresIn: rateLimitExpiresIn,
-
 		// Auth rate limiting configuration
 		AuthRateLimitEnabled:  authRateLimitEnabled,
 		AuthRateLimitRequests: authRateLimitRequests,
 		AuthRateLimitBurst:    authRateLimitBurst,
+
+		// CORS configuration
+		CORSAllowedOrigins: corsAllowedOrigins,
 	}
 }

@@ -102,6 +102,7 @@ type getGrammarRequest struct {
 // @Failure     400 {object} Response "Invalid grammar ID"
 // @Failure     404 {object} Response "Grammar not found"
 // @Failure     500 {object} Response "Failed to retrieve grammar"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/grammars/{id} [get]
 func (server *Server) getGrammar(ctx *gin.Context) {
 	var req getGrammarRequest
@@ -139,6 +140,7 @@ type listGrammarsRequest struct {
 // @Success     200 {object} Response{data=[]GrammarResponse} "Grammars retrieved successfully"
 // @Failure     400 {object} Response "Invalid query parameters"
 // @Failure     500 {object} Response "Failed to retrieve grammars"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/grammars [get]
 func (server *Server) listGrammars(ctx *gin.Context) {
 	var req listGrammarsRequest
@@ -317,6 +319,7 @@ func (server *Server) deleteGrammar(ctx *gin.Context) {
 // @Produce     json
 // @Success     200 {object} Response{data=GrammarResponse} "Random grammar retrieved successfully"
 // @Failure     500 {object} Response "Failed to retrieve random grammar"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/grammars/random [get]
 func (server *Server) getRandomGrammar(ctx *gin.Context) {
 	grammar, err := server.store.GetRandomGrammar(ctx)
@@ -346,6 +349,7 @@ type listGrammarsByLevelRequest struct {
 // @Success     200 {object} Response{data=[]GrammarResponse} "Grammars retrieved successfully"
 // @Failure     400 {object} Response "Invalid query parameters"
 // @Failure     500 {object} Response "Failed to retrieve grammars by level"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/grammars/level [get]
 func (server *Server) listGrammarsByLevel(ctx *gin.Context) {
 	var req listGrammarsByLevelRequest
@@ -392,6 +396,7 @@ type listGrammarsByTagRequest struct {
 // @Success     200 {object} Response{data=[]GrammarResponse} "Grammars retrieved successfully"
 // @Failure     400 {object} Response "Invalid query parameters"
 // @Failure     500 {object} Response "Failed to retrieve grammars by tag"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/grammars/tag [get]
 func (server *Server) listGrammarsByTag(ctx *gin.Context) {
 	var req listGrammarsByTagRequest
@@ -438,6 +443,7 @@ type searchGrammarsRequest struct {
 // @Success     200 {object} Response{data=[]GrammarResponse} "Grammars retrieved successfully"
 // @Failure     400 {object} Response "Invalid query parameters"
 // @Failure     500 {object} Response "Failed to search grammars"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/grammars/search [get]
 func (server *Server) searchGrammars(ctx *gin.Context) {
 	var req searchGrammarsRequest
@@ -464,4 +470,53 @@ func (server *Server) searchGrammars(ctx *gin.Context) {
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "Grammar search completed successfully", grammarResponses)
+}
+
+// batchGetGrammarsRequest defines the structure for batch getting grammars by IDs.
+type batchGetGrammarsRequest struct {
+	IDs []int32 `json:"ids" binding:"required"`
+}
+
+// @Summary Batch get grammars by IDs
+// @Description Get multiple grammars by their IDs in a single request
+// @Tags grammars
+// @Accept json
+// @Produce json
+// @Param request body batchGetGrammarsRequest true "List of grammar IDs"
+// @Success 200 {object} Response{data=[]GrammarResponse} "Grammars retrieved successfully"
+// @Failure 400 {object} Response "Invalid request body"
+// @Failure 500 {object} Response "Failed to retrieve grammars"
+// @Security    ApiKeyAuth
+// @Router /api/v1/grammars/batch [post]
+func (server *Server) batchGetGrammars(ctx *gin.Context) {
+	var req batchGetGrammarsRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request body", err)
+		return
+	}
+
+	if len(req.IDs) == 0 {
+		ErrorResponse(ctx, http.StatusBadRequest, "IDs list cannot be empty", nil)
+		return
+	}
+
+	grammars, err := server.store.BatchGetGrammars(ctx, req.IDs)
+	if err != nil {
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve grammars", err)
+		return
+	}
+
+	var grammarResponses []GrammarResponse
+	if grammars != nil {
+		for _, grammar := range grammars {
+			grammarResponses = append(grammarResponses, NewGrammarResponse(grammar))
+		}
+	}
+
+	// Ensure we return an empty array instead of null if no results
+	if grammarResponses == nil {
+		grammarResponses = []GrammarResponse{}
+	}
+
+	SuccessResponse(ctx, http.StatusOK, "Grammars retrieved successfully", grammarResponses)
 }

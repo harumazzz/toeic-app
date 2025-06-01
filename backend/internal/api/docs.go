@@ -12,7 +12,7 @@ package api
 // @license.name  MIT
 // @license.url   https://opensource.org/licenses/MIT
 
-// @host      localhost:8000
+// @host      192.168.31.37:8000
 // @BasePath  /
 
 // @securityDefinitions.apikey ApiKeyAuth

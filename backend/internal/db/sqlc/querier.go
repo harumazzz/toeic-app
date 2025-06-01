@@ -11,6 +11,7 @@ import (
 
 type Querier interface {
 	BatchGetExamples(ctx context.Context, dollar_1 []int32) ([]Example, error)
+	BatchGetGrammars(ctx context.Context, dollar_1 []int32) ([]Grammar, error)
 	CreateContent(ctx context.Context, arg CreateContentParams) (Content, error)
 	CreateExam(ctx context.Context, arg CreateExamParams) (Exam, error)
 	CreateExample(ctx context.Context, arg CreateExampleParams) (Example, error)

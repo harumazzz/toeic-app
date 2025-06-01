@@ -78,6 +78,7 @@ type getPartRequest struct {
 // @Failure     400 {object} Response "Invalid part ID"
 // @Failure     404 {object} Response "Part not found"
 // @Failure     500 {object} Response "Failed to retrieve part"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/parts/{id} [get]
 func (server *Server) getPart(ctx *gin.Context) {
 	var req getPartRequest
@@ -113,6 +114,7 @@ type listPartsByExamRequest struct {
 // @Success     200 {object} Response{data=[]PartResponse} "Parts retrieved successfully"
 // @Failure     400 {object} Response "Invalid exam ID"
 // @Failure     500 {object} Response "Failed to retrieve parts"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/exam-parts/{exam_id} [get]
 func (server *Server) listPartsByExam(ctx *gin.Context) {
 	var req listPartsByExamRequest

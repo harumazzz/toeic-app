@@ -72,6 +72,7 @@ func (server *Server) createExample(ctx *gin.Context) {
 // @Failure 400 {object} Response "Invalid example ID"
 // @Failure 404 {object} Response "Example not found"
 // @Failure 500 {object} Response "Failed to retrieve example"
+// @Security    ApiKeyAuth
 // @Router /api/v1/examples/{id} [get]
 func (server *Server) getExample(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
@@ -100,8 +101,10 @@ func (server *Server) getExample(ctx *gin.Context) {
 // @Produce json
 // @Success 200 {object} Response{data=[]ExampleResponse} "Examples retrieved successfully"
 // @Failure 500 {object} Response "Failed to retrieve examples"
+// @Security    ApiKeyAuth
 // @Router /api/v1/examples [get]
-func (server *Server) listExamples(ctx *gin.Context) {	examples, err := server.store.ListExamples(ctx)
+func (server *Server) listExamples(ctx *gin.Context) {
+	examples, err := server.store.ListExamples(ctx)
 	if err != nil {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve examples", err)
 		return
@@ -113,7 +116,7 @@ func (server *Server) listExamples(ctx *gin.Context) {	examples, err := server.s
 			exampleResponses = append(exampleResponses, NewExampleResponse(example))
 		}
 	}
-	
+
 	// Ensure we return an empty array instead of null if no results
 	if exampleResponses == nil {
 		exampleResponses = []ExampleResponse{}
@@ -214,6 +217,7 @@ type batchGetExamplesRequest struct {
 // @Success 200 {object} Response{data=[]ExampleResponse} "Examples retrieved successfully"
 // @Failure 400 {object} Response "Invalid request body"
 // @Failure 500 {object} Response "Failed to retrieve examples"
+// @Security    ApiKeyAuth
 // @Router /api/v1/examples/batch [post]
 func (server *Server) batchGetExamples(ctx *gin.Context) {
 	var req batchGetExamplesRequest
@@ -238,7 +242,7 @@ func (server *Server) batchGetExamples(ctx *gin.Context) {
 			exampleResponses = append(exampleResponses, NewExampleResponse(example))
 		}
 	}
-	
+
 	// Ensure we return an empty array instead of null if no results
 	if exampleResponses == nil {
 		exampleResponses = []ExampleResponse{}

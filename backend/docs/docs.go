@@ -9,7 +9,16 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.example.com/support",
+            "email": "support@example.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -594,6 +603,11 @@ const docTemplate = `{
         },
         "/api/v1/content-questions/{content_id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all questions for a specific content",
                 "consumes": [
                     "application/json"
@@ -716,6 +730,11 @@ const docTemplate = `{
         },
         "/api/v1/contents/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieve specific content by its ID",
                 "consumes": [
                     "application/json"
@@ -899,6 +918,11 @@ const docTemplate = `{
         },
         "/api/v1/exam-parts/{exam_id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all parts for a specific exam",
                 "consumes": [
                     "application/json"
@@ -958,6 +982,11 @@ const docTemplate = `{
         },
         "/api/v1/examples": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all examples",
                 "produces": [
                     "application/json"
@@ -1066,6 +1095,11 @@ const docTemplate = `{
         },
         "/api/v1/examples/batch": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get multiple examples by their IDs in a single request",
                 "consumes": [
                     "application/json"
@@ -1127,6 +1161,11 @@ const docTemplate = `{
         },
         "/api/v1/examples/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get details of an example by its ID",
                 "produces": [
                     "application/json"
@@ -1313,6 +1352,11 @@ const docTemplate = `{
         },
         "/api/v1/exams": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all exams with pagination",
                 "consumes": [
                     "application/json"
@@ -1440,6 +1484,11 @@ const docTemplate = `{
         },
         "/api/v1/exams/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieve a specific exam entry by its ID",
                 "consumes": [
                     "application/json"
@@ -1623,6 +1672,11 @@ const docTemplate = `{
         },
         "/api/v1/grammars": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of grammars with pagination.",
                 "consumes": [
                     "application/json"
@@ -1749,8 +1803,79 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/grammars/batch": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get multiple grammars by their IDs in a single request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grammars"
+                ],
+                "summary": "Batch get grammars by IDs",
+                "parameters": [
+                    {
+                        "description": "List of grammar IDs",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.batchGetGrammarsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grammars retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.GrammarResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve grammars",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/grammars/level": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of grammars filtered by level, with pagination.",
                 "consumes": [
                     "application/json"
@@ -1825,6 +1950,11 @@ const docTemplate = `{
         },
         "/api/v1/grammars/random": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieve a single random grammar entry from the database.",
                 "consumes": [
                     "application/json"
@@ -1866,6 +1996,11 @@ const docTemplate = `{
         },
         "/api/v1/grammars/search": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Search grammars by title, key, or tag, with pagination.",
                 "consumes": [
                     "application/json"
@@ -1940,6 +2075,11 @@ const docTemplate = `{
         },
         "/api/v1/grammars/tag": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of grammars filtered by a specific tag, with pagination.",
                 "consumes": [
                     "application/json"
@@ -2014,6 +2154,11 @@ const docTemplate = `{
         },
         "/api/v1/grammars/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieve a specific grammar entry by its ID.",
                 "consumes": [
                     "application/json"
@@ -2203,6 +2348,11 @@ const docTemplate = `{
         },
         "/api/v1/part-contents/{part_id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all contents for a specific part",
                 "consumes": [
                     "application/json"
@@ -2325,6 +2475,11 @@ const docTemplate = `{
         },
         "/api/v1/parts/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieve a specific part by its ID",
                 "consumes": [
                     "application/json"
@@ -2571,6 +2726,11 @@ const docTemplate = `{
         },
         "/api/v1/questions/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieve a specific question by its ID",
                 "consumes": [
                     "application/json"
@@ -3868,6 +4028,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new user in the system. This endpoint is typically used for user registration.",
                 "consumes": [
                     "application/json"
@@ -4577,6 +4742,11 @@ const docTemplate = `{
         },
         "/api/v1/writing/prompt-submissions/{prompt_id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all writing submissions for a specific prompt",
                 "consumes": [
                     "application/json"
@@ -4636,6 +4806,11 @@ const docTemplate = `{
         },
         "/api/v1/writing/prompts": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all writing prompts",
                 "consumes": [
                     "application/json"
@@ -4741,6 +4916,11 @@ const docTemplate = `{
         },
         "/api/v1/writing/prompts/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieve a specific writing prompt by its ID",
                 "consumes": [
                     "application/json"
@@ -4987,6 +5167,11 @@ const docTemplate = `{
         },
         "/api/v1/writing/submissions/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieve a specific user writing submission by its ID",
                 "consumes": [
                     "application/json"
@@ -5170,6 +5355,11 @@ const docTemplate = `{
         },
         "/api/v1/writing/users/{user_id}/submissions": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all writing submissions for a specific user",
                 "consumes": [
                     "application/json"
@@ -5923,6 +6113,20 @@ const docTemplate = `{
                 }
             }
         },
+        "api.batchGetGrammarsRequest": {
+            "type": "object",
+            "required": [
+                "ids"
+            ],
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
         "api.createContentRequest": {
             "type": "object",
             "required": [
@@ -6645,17 +6849,25 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Bearer JWT token authorization. Format: Bearer {token}",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "1.0",
+	Host:             "192.168.31.37:8000",
+	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Toeic App API",
+	Description:      "A RESTful API for the Toeic application",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

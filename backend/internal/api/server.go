@@ -151,11 +151,10 @@ func (server *Server) uploadAudioFile(ctx *gin.Context) {
 
 func (server *Server) setupRouter() {
 	router := gin.New() // Create a new clean router without default middleware
-
 	// Apply middleware
-	router.Use(gin.Recovery())      // Recovery middleware recovers from panics
-	router.Use(middleware.Logger()) // Our custom logger
-	router.Use(middleware.CORS())   // Enable CORS
+	router.Use(gin.Recovery())                 // Recovery middleware recovers from panics
+	router.Use(middleware.Logger())            // Our custom logger
+	router.Use(middleware.CORS(server.config)) // Enable CORS with config
 
 	// Apply rate limiting middleware based on config
 	if server.config.RateLimitEnabled {
@@ -186,7 +185,6 @@ func (server *Server) setupRouter() {
 		v1.POST("/users", server.createUser)
 		v1.POST("/upload", server.uploadFile)
 		v1.POST("/upload-audio", server.uploadAudioFile)
-
 		// Grammar routes (publicly accessible for now, consider auth later if needed)
 		grammarsPublic := v1.Group("/grammars")
 		{
@@ -196,6 +194,7 @@ func (server *Server) setupRouter() {
 			grammarsPublic.GET("/level", server.listGrammarsByLevel)
 			grammarsPublic.GET("/tag", server.listGrammarsByTag)
 			grammarsPublic.GET("/search", server.searchGrammars)
+			grammarsPublic.POST("/batch", server.batchGetGrammars)
 		}
 
 		// Protected routes requiring authentication

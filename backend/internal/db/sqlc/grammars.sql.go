@@ -13,6 +13,43 @@ import (
 	"github.com/lib/pq"
 )
 
+const batchGetGrammars = `-- name: BatchGetGrammars :many
+SELECT id, level, title, tag, grammar_key, related, contents FROM grammars
+WHERE id = ANY($1::int[])
+ORDER BY id
+`
+
+func (q *Queries) BatchGetGrammars(ctx context.Context, dollar_1 []int32) ([]Grammar, error) {
+	rows, err := q.db.QueryContext(ctx, batchGetGrammars, pq.Array(dollar_1))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Grammar
+	for rows.Next() {
+		var i Grammar
+		if err := rows.Scan(
+			&i.ID,
+			&i.Level,
+			&i.Title,
+			pq.Array(&i.Tag),
+			&i.GrammarKey,
+			pq.Array(&i.Related),
+			&i.Contents,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const createGrammar = `-- name: CreateGrammar :one
 INSERT INTO grammars (
     level,

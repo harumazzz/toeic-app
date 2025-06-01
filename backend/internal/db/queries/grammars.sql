@@ -14,6 +14,11 @@ INSERT INTO grammars (
 SELECT * FROM grammars
 WHERE id = $1 LIMIT 1;
 
+-- name: BatchGetGrammars :many
+SELECT * FROM grammars
+WHERE id = ANY($1::int[])
+ORDER BY id;
+
 -- name: ListGrammars :many
 SELECT * FROM grammars
 ORDER BY id

@@ -28,6 +28,7 @@ type createUserRequest struct {
 // @Success     201 {object} Response{data=UserResponse} "User created successfully"
 // @Failure     400 {object} Response "Invalid request parameters or validation failure"
 // @Failure     500 {object} Response "Server error during user creation"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/users [post]
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest

@@ -82,6 +82,7 @@ type getExamRequest struct {
 // @Failure     400 {object} Response "Invalid exam ID"
 // @Failure     404 {object} Response "Exam not found"
 // @Failure     500 {object} Response "Failed to retrieve exam"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/exams/{id} [get]
 func (server *Server) getExam(ctx *gin.Context) {
 	var req getExamRequest
@@ -119,6 +120,7 @@ type listExamsRequest struct {
 // @Success     200 {object} Response{data=[]ExamResponse} "Exams retrieved successfully"
 // @Failure     400 {object} Response "Invalid query parameters"
 // @Failure     500 {object} Response "Failed to retrieve exams"
+// @Security    ApiKeyAuth
 // @Router      /api/v1/exams [get]
 func (server *Server) listExams(ctx *gin.Context) {
 	var req listExamsRequest
