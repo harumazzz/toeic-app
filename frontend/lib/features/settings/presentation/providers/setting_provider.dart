@@ -5,7 +5,7 @@ import '../../domain/entities/setting.dart';
 
 part 'setting_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class SettingNotifier extends _$SettingNotifier {
   late final SettingLocalDataSource _localDataSource;
 

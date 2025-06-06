@@ -142,7 +142,8 @@
     "application": "Cài đặt ứng dụng",
     "notification": "Gửi thông báo",
     "notification_enabled": "Bật",
-    "notification_disabled": "Tắt"
+    "notification_disabled": "Tắt",
+    "loading": "Đang tải cài đặt..."
   },
   "help": {
     "title": "Trung tâm trợ giúp",

@@ -142,7 +142,8 @@
     "application": "Application Setting",
     "notification": "Send notification",
     "notification_enabled": "Enabled",
-    "notification_disabled": "Disabled"
+    "notification_disabled": "Disabled",
+    "loading": "Loading settings..."
   },
   "help": {
     "title": "Help Center",

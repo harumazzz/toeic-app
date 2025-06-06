@@ -7,7 +7,7 @@ import 'theme_provider.dart';
 
 part 'setting_init_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<void> settingInit(final Ref ref) async {
   final setting = await ref.read(settingNotifierProvider.future);
   ref.read(themeModeProvider.notifier).themeMode = setting.themeMode;
