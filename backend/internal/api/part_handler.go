@@ -133,7 +133,10 @@ func (server *Server) listPartsByExam(ctx *gin.Context) {
 	for _, part := range parts {
 		partResponses = append(partResponses, NewPartResponse(part))
 	}
-
+	// Ensure we return an empty array instead of null if no results
+	if partResponses == nil {
+		partResponses = []PartResponse{}
+	}
 	SuccessResponse(ctx, http.StatusOK, "Parts retrieved successfully", partResponses)
 }
 

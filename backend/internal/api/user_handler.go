@@ -141,7 +141,10 @@ func (server *Server) listUsers(ctx *gin.Context) {
 	for _, user := range users {
 		userResponses = append(userResponses, NewUserResponse(user))
 	}
-
+	// Ensure we return an empty array instead of null if no results
+	if userResponses == nil {
+		userResponses = []UserResponse{}
+	}
 	SuccessResponse(ctx, http.StatusOK, "Users retrieved successfully", userResponses)
 }
 

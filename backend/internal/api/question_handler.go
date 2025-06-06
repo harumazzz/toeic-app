@@ -180,7 +180,10 @@ func (server *Server) listQuestionsByContent(ctx *gin.Context) {
 	for _, question := range questions {
 		questionResponses = append(questionResponses, NewQuestionResponse(question))
 	}
-
+	// Ensure we return an empty array instead of null if no results
+	if questionResponses == nil {
+		questionResponses = []QuestionResponse{}
+	}
 	SuccessResponse(ctx, http.StatusOK, "Questions retrieved successfully", questionResponses)
 }
 

@@ -137,7 +137,10 @@ func (server *Server) listContentsByPart(ctx *gin.Context) {
 	for _, content := range contents {
 		contentResponses = append(contentResponses, NewContentResponse(content))
 	}
-
+	// Ensure we return an empty array instead of null if no results
+	if contentResponses == nil {
+		contentResponses = []ContentResponse{}
+	}
 	SuccessResponse(ctx, http.StatusOK, "Contents retrieved successfully", contentResponses)
 }
 

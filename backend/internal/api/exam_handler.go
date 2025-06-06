@@ -139,7 +139,10 @@ func (server *Server) listExams(ctx *gin.Context) {
 	for _, exam := range exams {
 		examResponses = append(examResponses, NewExamResponse(exam))
 	}
-
+	// Ensure we return an empty array instead of null if no results
+	if examResponses == nil {
+		examResponses = []ExamResponse{}
+	}
 	SuccessResponse(ctx, http.StatusOK, "Exams retrieved successfully", examResponses)
 }
 

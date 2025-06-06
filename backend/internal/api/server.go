@@ -337,9 +337,7 @@ func (server *Server) setupRouter() {
 					sessions.DELETE("/:id", server.deleteSpeakingSession)
 					// Session turns nested under the specific session
 					sessions.GET("/:id/turns", server.listSpeakingTurnsBySessionID)
-				}
-
-				// User-specific speaking sessions
+				} // User-specific speaking sessions
 				speaking.GET("/users/:user_id/sessions", server.listSpeakingSessionsByUserID)
 
 				// Speaking turn routes
@@ -404,7 +402,6 @@ func (server *Server) Shutdown(ctx context.Context) error {
 		server.rateLimiter.Stop()
 		logger.Info("Rate limiter shutdown complete")
 	}
-
 	// Stop the token maker to clean up blacklist resources
 	if server.tokenMaker != nil {
 		server.tokenMaker.Stop()

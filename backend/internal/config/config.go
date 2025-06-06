@@ -14,19 +14,21 @@ import (
 // The values are read from environment variables or .env file.
 type Config struct {
 	// Database configuration
-	DBDriver   string `mapstructure:"DB_DRIVER"`
-	DBSource   string `mapstructure:"DB_SOURCE"`
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBPort     string `mapstructure:"DB_PORT"`
-	DBUser     string `mapstructure:"DB_USER"`
-	DBPassword string `mapstructure:"DB_PASSWORD"`
-	DBName     string `mapstructure:"DB_NAME"`
-
+	DBDriver             string        `mapstructure:"DB_DRIVER"`
+	DBSource             string        `mapstructure:"DB_SOURCE"`
+	DBHost               string        `mapstructure:"DB_HOST"`
+	DBPort               string        `mapstructure:"DB_PORT"`
+	DBUser               string        `mapstructure:"DB_USER"`
+	DBPassword           string        `mapstructure:"DB_PASSWORD"`
+	DBName               string        `mapstructure:"DB_NAME"`
 	ServerAddress        string        `mapstructure:"SERVER_ADDRESS"`
 	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration int64         `mapstructure:"REFRESH_TOKEN_DURATION"`
 	CloudinaryURL        string        `mapstructure:"CLOUDINARY_URL"`
+
+	// Google AI configuration
+	GoogleAIAPIKey string `mapstructure:"GOOGLE_AI_API_KEY"`
 
 	// Rate limiting configuration
 	RateLimitEnabled   bool          `mapstructure:"RATE_LIMIT_ENABLED"`
@@ -100,12 +102,18 @@ func DefaultConfig() Config {
 	tokenKey := GetEnv("TOKEN_SYMMETRIC_KEY", "12345678901234567890123456789012")
 	accessTokenDuration := time.Duration(GetEnvAsInt("ACCESS_TOKEN_DURATION", 3600)) * time.Second
 	refreshTokenDuration := GetEnvAsInt("REFRESH_TOKEN_DURATION", 604800)
-
 	// Get Cloudinary configuration
 	cloudinaryURL := GetEnv("CLOUDINARY_URL", "")
 
 	if cloudinaryURL == "" {
 		log.Fatal("CLOUDINARY_URL environment variable is required")
+	}
+
+	// Get Google AI configuration
+	googleAIAPIKey := GetEnv("GOOGLE_AI_API_KEY", "")
+
+	if googleAIAPIKey == "" {
+		log.Println("Warning: GOOGLE_AI_API_KEY environment variable is not set. AI features will be disabled.")
 	}
 	// Get rate limiting configuration
 	rateLimitEnabled := GetEnv("RATE_LIMIT_ENABLED", "true") == "true"
@@ -119,7 +127,6 @@ func DefaultConfig() Config {
 
 	// Get CORS configuration
 	corsAllowedOrigins := GetEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8080,http://192.168.31.37:8000")
-
 	return Config{
 		// Database configuration
 		DBDriver:   dbDriver,
@@ -135,6 +142,9 @@ func DefaultConfig() Config {
 		AccessTokenDuration:  accessTokenDuration,
 		RefreshTokenDuration: refreshTokenDuration,
 		CloudinaryURL:        cloudinaryURL,
+
+		// Google AI configuration
+		GoogleAIAPIKey: googleAIAPIKey,
 
 		// Rate limiting configuration
 		RateLimitEnabled:   rateLimitEnabled,
