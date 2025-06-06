@@ -118,6 +118,15 @@
     "failedToLoad": "Failed to load the data",
     "networkError": "Network error, please check your connection"
   },
+  "grammar": {
+    "grammarList": "Grammar List",
+    "searchHint": "Search...",
+    "errorOccurred": "An error occurred",
+    "retry": "Retry",
+    "noGrammarsFound": "No grammars found",
+    "level": "Level",
+    "relatedGrammars": "Related Grammars"
+  },
   "help": {
     "title": "Help Center",
     "description": "Find answers to common questions about using the TOEIC Learning app",

@@ -118,6 +118,15 @@
     "failedToLoad": "Không thể tải dữ liệu",
     "networkError": "Lỗi mạng, vui lòng kiểm tra kết nối của bạn"
   },
+  "grammar": {
+    "grammarList": "Danh sách ngữ pháp",
+    "searchHint": "Tìm kiếm...",
+    "errorOccurred": "Đã xảy ra lỗi",
+    "retry": "Thử lại",
+    "noGrammarsFound": "Không tìm thấy ngữ pháp nào",
+    "level": "Cấp độ",
+    "relatedGrammars": "Ngữ pháp liên quan"
+  },
   "help": {
     "title": "Trung tâm trợ giúp",
     "description": "Tìm câu trả lời cho các câu hỏi thường gặp về việc sử dụng ứng dụng TOEIC Learning",

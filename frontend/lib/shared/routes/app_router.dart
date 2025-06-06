@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/storage/secure_storage_service.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/grammars/presentation/screens/grammar_detail_screen.dart';
+import '../../features/grammars/presentation/screens/grammar_list_screen.dart';
 import '../../features/help/presentation/screens/help_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/vocabulary/presentation/screens/vocabulary_screen.dart';
@@ -29,6 +31,10 @@ class AppRouter {
   static const String vocabularyRoute = 'vocabulary';
 
   static const String wordDetailRoute = 'word-detail';
+
+  static const String grammarRoute = 'grammar';
+
+  static const String grammarDetailRoute = 'grammar-detail';
 
   static GoRouter get router => _router;
 }
@@ -133,6 +139,36 @@ class WordDetailRoute extends GoRouteData {
     final BuildContext context,
     final GoRouterState state,
   ) => WordDetailScreen(wordId: wordId);
+}
+
+@TypedGoRoute<GrammarRoute>(
+  path: '/${AppRouter.grammarRoute}',
+  name: AppRouter.grammarRoute,
+)
+class GrammarRoute extends GoRouteData {
+  const GrammarRoute();
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const GrammarListScreen();
+}
+
+@TypedGoRoute<GrammarDetailRoute>(
+  path: '/${AppRouter.grammarDetailRoute}/:grammarId',
+  name: AppRouter.grammarDetailRoute,
+)
+class GrammarDetailRoute extends GoRouteData {
+  const GrammarDetailRoute({required this.grammarId});
+
+  final int grammarId;
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => GrammarDetailScreen(grammarId: grammarId);
 }
 
 final GoRouter _router = GoRouter(

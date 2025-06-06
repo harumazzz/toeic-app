@@ -98,6 +98,7 @@ class AppDrawer extends StatelessWidget {
                 title: context.t.drawer.grammar,
                 onTap: () async {
                   Navigator.pop(context);
+                  await const GrammarRoute().push(context);
                 },
               ),
               const Divider(),
