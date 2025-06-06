@@ -153,7 +153,6 @@ func (server *Server) listGrammars(ctx *gin.Context) {
 		Limit:  req.Limit,
 		Offset: req.Offset,
 	}
-
 	grammars, err := server.store.ListGrammars(ctx, arg)
 	if err != nil {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve grammars", err)
@@ -163,6 +162,11 @@ func (server *Server) listGrammars(ctx *gin.Context) {
 	var grammarResponses []GrammarResponse
 	for _, grammar := range grammars {
 		grammarResponses = append(grammarResponses, NewGrammarResponse(grammar))
+	}
+
+	// Ensure we return an empty array instead of null if no results
+	if grammarResponses == nil {
+		grammarResponses = []GrammarResponse{}
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "Grammars retrieved successfully", grammarResponses)
@@ -363,7 +367,6 @@ func (server *Server) listGrammarsByLevel(ctx *gin.Context) {
 		Limit:  req.Limit,
 		Offset: req.Offset,
 	}
-
 	grammars, err := server.store.ListGrammarsByLevel(ctx, arg)
 	if err != nil {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve grammars by level", err)
@@ -373,6 +376,11 @@ func (server *Server) listGrammarsByLevel(ctx *gin.Context) {
 	var grammarResponses []GrammarResponse
 	for _, grammar := range grammars {
 		grammarResponses = append(grammarResponses, NewGrammarResponse(grammar))
+	}
+
+	// Ensure we return an empty array instead of null if no results
+	if grammarResponses == nil {
+		grammarResponses = []GrammarResponse{}
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "Grammars retrieved successfully for the level", grammarResponses)
@@ -410,7 +418,6 @@ func (server *Server) listGrammarsByTag(ctx *gin.Context) {
 		Limit:  req.Limit,
 		Offset: req.Offset,
 	}
-
 	grammars, err := server.store.ListGrammarsByTag(ctx, arg)
 	if err != nil {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve grammars by tag", err)
@@ -420,6 +427,11 @@ func (server *Server) listGrammarsByTag(ctx *gin.Context) {
 	var grammarResponses []GrammarResponse
 	for _, grammar := range grammars {
 		grammarResponses = append(grammarResponses, NewGrammarResponse(grammar))
+	}
+
+	// Ensure we return an empty array instead of null if no results
+	if grammarResponses == nil {
+		grammarResponses = []GrammarResponse{}
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "Grammars retrieved successfully for the tag", grammarResponses)
@@ -457,7 +469,6 @@ func (server *Server) searchGrammars(ctx *gin.Context) {
 		Limit:   req.Limit,
 		Offset:  req.Offset,
 	}
-
 	grammars, err := server.store.SearchGrammars(ctx, arg)
 	if err != nil {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to search grammars", err)
@@ -467,6 +478,11 @@ func (server *Server) searchGrammars(ctx *gin.Context) {
 	var grammarResponses []GrammarResponse
 	for _, grammar := range grammars {
 		grammarResponses = append(grammarResponses, NewGrammarResponse(grammar))
+	}
+
+	// Ensure we return an empty array instead of null if no results
+	if grammarResponses == nil {
+		grammarResponses = []GrammarResponse{}
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "Grammar search completed successfully", grammarResponses)
@@ -499,7 +515,6 @@ func (server *Server) batchGetGrammars(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusBadRequest, "IDs list cannot be empty", nil)
 		return
 	}
-
 	grammars, err := server.store.BatchGetGrammars(ctx, req.IDs)
 	if err != nil {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve grammars", err)
@@ -507,10 +522,8 @@ func (server *Server) batchGetGrammars(ctx *gin.Context) {
 	}
 
 	var grammarResponses []GrammarResponse
-	if grammars != nil {
-		for _, grammar := range grammars {
-			grammarResponses = append(grammarResponses, NewGrammarResponse(grammar))
-		}
+	for _, grammar := range grammars {
+		grammarResponses = append(grammarResponses, NewGrammarResponse(grammar))
 	}
 
 	// Ensure we return an empty array instead of null if no results

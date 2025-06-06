@@ -224,9 +224,15 @@ func (server *Server) listWritingPrompts(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve writing prompts", err)
 		return
 	}
+
 	var promptResponses []WritingPromptResponse
 	for _, prompt := range prompts {
 		promptResponses = append(promptResponses, NewWritingPromptResponse(prompt))
+	}
+
+	// Ensure we return an empty array instead of null if no results
+	if promptResponses == nil {
+		promptResponses = []WritingPromptResponse{}
 	}
 
 	logger.Debug("Retrieved %d writing prompts", len(promptResponses))
@@ -474,10 +480,14 @@ func (server *Server) listUserWritingsByUserID(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve user writing submissions", err)
 		return
 	}
-
 	var writingResponses []UserWritingResponse
 	for _, writing := range writings {
 		writingResponses = append(writingResponses, NewUserWritingResponse(writing))
+	}
+
+	// Ensure we return an empty array instead of null if no results
+	if writingResponses == nil {
+		writingResponses = []UserWritingResponse{}
 	}
 
 	logger.Debug("Retrieved %d writing submissions for user ID: %d", len(writingResponses), req.UserID)
@@ -518,10 +528,14 @@ func (server *Server) listUserWritingsByPromptID(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve user writing submissions", err)
 		return
 	}
-
 	var writingResponses []UserWritingResponse
 	for _, writing := range writings {
 		writingResponses = append(writingResponses, NewUserWritingResponse(writing))
+	}
+
+	// Ensure we return an empty array instead of null if no results
+	if writingResponses == nil {
+		writingResponses = []UserWritingResponse{}
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "User writing submissions retrieved successfully", writingResponses)
