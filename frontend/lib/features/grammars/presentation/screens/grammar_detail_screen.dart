@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../../i18n/strings.g.dart';
+import '../../../../shared/routes/app_router.dart';
 import '../../domain/entities/grammar.dart';
 import '../providers/grammar_provider.dart';
 import '../widgets/grammar_content.dart';
@@ -126,12 +128,11 @@ class _RelatedGrammarsSection extends StatelessWidget {
   Widget build(final BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Padding(
-        padding: EdgeInsets.all(16),
+      Padding(
+        padding: const EdgeInsets.all(16),
         child: Text(
-          'Related Grammars',
-          style: TextStyle(
-            fontSize: 20,
+          context.t.grammar.relatedGrammars,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -144,8 +145,10 @@ class _RelatedGrammarsSection extends StatelessWidget {
           final grammar = grammars[index];
           return GrammarListItem(
             grammar: grammar,
-            onTap: () {
-              // TODO(dev): Navigate to grammar detail screen
+            onTap: () async {
+              await GrammarDetailRoute(
+                grammarId: grammar.id,
+              ).push(context);
             },
           );
         },

@@ -127,6 +127,23 @@
     "level": "Cấp độ",
     "relatedGrammars": "Ngữ pháp liên quan"
   },
+  "settings": {
+    "title": "Cài đặt",
+    "error_occurred": "Đã xảy ra lỗi",
+    "retry": "Thử lại",
+    "default": "Cài đặt mặc định",
+    "theme": "Chế độ",
+    "theme_system": "Hệ thống",
+    "theme_light": "Sáng",
+    "theme_dark": "Tối",
+    "language": "Ngôn ngữ",
+    "lang_en": "Tiếng Anh",
+    "lang_vi": "Tiếng Việt",
+    "application": "Cài đặt ứng dụng",
+    "notification": "Gửi thông báo",
+    "notification_enabled": "Bật",
+    "notification_disabled": "Tắt"
+  },
   "help": {
     "title": "Trung tâm trợ giúp",
     "description": "Tìm câu trả lời cho các câu hỏi thường gặp về việc sử dụng ứng dụng TOEIC Learning",

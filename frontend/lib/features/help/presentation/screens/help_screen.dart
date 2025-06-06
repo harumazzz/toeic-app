@@ -4,7 +4,6 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../i18n/strings.g.dart';
-import '../../../../shared/widgets/app_drawer.dart';
 import '../widgets/help_widgets.dart';
 
 class HelpScreen extends HookWidget {
@@ -26,7 +25,6 @@ class HelpScreen extends HookWidget {
       appBar: AppBar(
         title: Text(context.t.page.help),
       ),
-      drawer: const AppDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),

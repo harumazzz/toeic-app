@@ -36,6 +36,7 @@ dependencies:
   dynamic_color: ^1.7.0
   package_info_plus: ^8.3.0
   flutter_html: ^3.0.0
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:

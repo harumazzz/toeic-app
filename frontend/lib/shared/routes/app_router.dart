@@ -9,6 +9,7 @@ import '../../features/grammars/presentation/screens/grammar_detail_screen.dart'
 import '../../features/grammars/presentation/screens/grammar_list_screen.dart';
 import '../../features/help/presentation/screens/help_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/settings/presentation/screens/setting_screen.dart';
 import '../../features/vocabulary/presentation/screens/vocabulary_screen.dart';
 import '../../features/vocabulary/presentation/screens/word_detail_screen.dart';
 import '../../injection_container.dart';
@@ -35,6 +36,8 @@ class AppRouter {
   static const String grammarRoute = 'grammar';
 
   static const String grammarDetailRoute = 'grammar-detail';
+
+  static const String settingsRoute = 'settings';
 
   static GoRouter get router => _router;
 }
@@ -169,6 +172,20 @@ class GrammarDetailRoute extends GoRouteData {
     final BuildContext context,
     final GoRouterState state,
   ) => GrammarDetailScreen(grammarId: grammarId);
+}
+
+@TypedGoRoute<SettingsRoute>(
+  path: '/${AppRouter.settingsRoute}',
+  name: AppRouter.settingsRoute,
+)
+class SettingsRoute extends GoRouteData {
+  const SettingsRoute();
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const SettingScreen();
 }
 
 final GoRouter _router = GoRouter(

@@ -400,13 +400,13 @@ class FlashcardControls extends StatelessWidget {
     children: [
       IconButton(
         onPressed: onPrevious,
-        icon: const Icon(Icons.arrow_back_rounded),
+        icon: const Icon(Symbols.arrow_back_rounded),
         tooltip: 'Previous card',
       ),
       const SizedBox(width: 16),
       ElevatedButton.icon(
         onPressed: onFlip,
-        icon: const Icon(Icons.flip),
+        icon: const Icon(Symbols.flip),
         label: Text(showFrontSide ? 'Show Meaning' : 'Show Word'),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -415,7 +415,7 @@ class FlashcardControls extends StatelessWidget {
       const SizedBox(width: 16),
       IconButton(
         onPressed: onNext,
-        icon: const Icon(Icons.arrow_forward_rounded),
+        icon: const Icon(Symbols.arrow_forward_rounded),
         tooltip: 'Next card',
       ),
     ],

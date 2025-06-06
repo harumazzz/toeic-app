@@ -127,6 +127,23 @@
     "level": "Level",
     "relatedGrammars": "Related Grammars"
   },
+  "settings": {
+    "title": "Settings",
+    "error_occurred": "An error occurred",
+    "retry": "Retry",
+    "default": "Default setting",
+    "theme": "Theme",
+    "theme_system": "System",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "language": "Language",
+    "lang_en": "English",
+    "lang_vi": "Vietnamese",
+    "application": "Application Setting",
+    "notification": "Send notification",
+    "notification_enabled": "Enabled",
+    "notification_disabled": "Disabled"
+  },
   "help": {
     "title": "Help Center",
     "description": "Find answers to common questions about using the TOEIC Learning app",

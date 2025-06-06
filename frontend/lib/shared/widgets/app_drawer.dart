@@ -107,6 +107,7 @@ class AppDrawer extends StatelessWidget {
                 title: context.t.drawer.settings,
                 onTap: () async {
                   Navigator.pop(context);
+                  await const SettingsRoute().push(context);
                 },
               ),
               _DrawerItem(
