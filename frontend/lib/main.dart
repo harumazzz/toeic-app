@@ -226,7 +226,7 @@ class _ErrorSettings extends StatelessWidget {
             ElevatedButton.icon(
               icon: const Icon(Symbols.refresh),
               label: Text(context.t.settings.retry),
-              onPressed: () => ref.invalidate(settingInitProvider),
+              onPressed: () async => ref.invalidate(settingInitProvider),
             ),
           ],
         ),
