@@ -21,10 +21,25 @@ sealed class RefreshTokenRequest with _$RefreshTokenRequest {
 sealed class RefreshTokenResponse with _$RefreshTokenResponse {
   const factory RefreshTokenResponse({
     @JsonKey(name: 'access_token') required final String accessToken,
-    @JsonKey(name: 'refresh_token') required final String refreshToken,
+    @JsonKey(name: 'refresh_token') final String? refreshToken,
+    @JsonKey(name: 'expires_in') final int? expiresIn,
   }) = _RefreshTokenResponse;
 
   factory RefreshTokenResponse.fromJson(
     final Map<String, dynamic> json,
   ) => _$RefreshTokenResponseFromJson(json);
+}
+
+@freezed
+sealed class TokenError with _$TokenError {
+  const factory TokenError({
+    @JsonKey(name: 'error') required final String error,
+    @JsonKey(name: 'error_description') final String? errorDescription,
+    @JsonKey(name: 'status') final String? status,
+    @JsonKey(name: 'message') final String? message,
+  }) = _TokenError;
+
+  factory TokenError.fromJson(
+    final Map<String, dynamic> json,
+  ) => _$TokenErrorFromJson(json);
 }

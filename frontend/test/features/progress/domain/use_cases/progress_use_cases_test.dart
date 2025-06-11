@@ -34,11 +34,11 @@ void main() {
   });
 
   group('AddProgress Use Case', () {
-    const request = WordProgressRequest(
+    final request = WordProgressRequest(
       easeFactor: 2,
       intervalDays: 1,
-      lastReviewedAt: '2024-01-01T00:00:00Z',
-      nextReviewAt: '2024-01-02T00:00:00Z',
+      lastReviewedAt: DateTime(2024),
+      nextReviewAt: DateTime(2024, 1, 2),
       repetitions: 0,
       wordId: 1,
     );
@@ -57,8 +57,8 @@ void main() {
       createdAt: testDateTime,
       easeFactor: 2,
       intervalDays: 1,
-      lastReviewedAt: '2024-01-01T00:00:00Z',
-      nextReviewAt: '2024-01-02T00:00:00Z',
+      lastReviewedAt: DateTime(2024),
+      nextReviewAt: DateTime(2024, 1, 2),
       repetitions: 0,
       updatedAt: testDateTime,
       userId: 1,
@@ -76,7 +76,7 @@ void main() {
       ).thenAnswer((_) async => Right(wordProgress));
 
       final result = await addProgress(
-        const AddProgressParams(request: request),
+        AddProgressParams(request: request),
       );
 
       expect(result, Right(wordProgress));
@@ -89,7 +89,7 @@ void main() {
       ).thenAnswer((_) async => const Left(ServerFailure(message: 'Error')));
 
       final result = await addProgress(
-        const AddProgressParams(request: request),
+        AddProgressParams(request: request),
       );
 
       expect(result, const Left(ServerFailure(message: 'Error')));
@@ -98,11 +98,11 @@ void main() {
   });
 
   group('UpdateProgress Use Case', () {
-    const request = WordProgressRequest(
+    final request = WordProgressRequest(
       easeFactor: 2,
       intervalDays: 1,
-      lastReviewedAt: '2024-01-01T00:00:00Z',
-      nextReviewAt: '2024-01-02T00:00:00Z',
+      lastReviewedAt: DateTime(2024),
+      nextReviewAt: DateTime(2024, 1, 2),
       repetitions: 0,
       wordId: 1,
     );
@@ -121,8 +121,8 @@ void main() {
       createdAt: testDateTime,
       easeFactor: 2,
       intervalDays: 1,
-      lastReviewedAt: '2024-01-01T00:00:00Z',
-      nextReviewAt: '2024-01-02T00:00:00Z',
+      lastReviewedAt: DateTime(2024),
+      nextReviewAt: DateTime(2024, 1, 2),
       repetitions: 0,
       updatedAt: testDateTime,
       userId: 1,
@@ -143,7 +143,7 @@ void main() {
       ).thenAnswer((_) async => Right(wordProgress));
 
       final result = await updateProgress(
-        const UpdateProgressParams(
+        UpdateProgressParams(
           wordId: 1,
           request: request,
         ),
@@ -167,7 +167,7 @@ void main() {
       ).thenAnswer((_) async => const Left(ServerFailure(message: 'Error')));
 
       final result = await updateProgress(
-        const UpdateProgressParams(
+        UpdateProgressParams(
           wordId: 1,
           request: request,
         ),
@@ -198,8 +198,8 @@ void main() {
       createdAt: testDateTime,
       easeFactor: 2,
       intervalDays: 1,
-      lastReviewedAt: '2024-01-01T00:00:00Z',
-      nextReviewAt: '2024-01-02T00:00:00Z',
+      lastReviewedAt: DateTime(2024),
+      nextReviewAt: DateTime(2024, 1, 2),
       repetitions: 0,
       updatedAt: testDateTime,
       userId: 1,

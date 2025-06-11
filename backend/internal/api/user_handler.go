@@ -15,7 +15,7 @@ import (
 // It includes username, email, and password, all of which are required and validated.
 type createUserRequest struct {
 	Username string `json:"username" binding:"required,min=3,max=50"`
-	Email    string `json:"email" binding:"required,valid_email"`
+	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=8,strong_password"`
 }
 
@@ -152,7 +152,7 @@ func (server *Server) listUsers(ctx *gin.Context) {
 // All fields are optional; only provided fields will be updated.
 type updateUserRequest struct {
 	Username string `json:"username" binding:"omitempty,min=3,max=50"`
-	Email    string `json:"email" binding:"omitempty,valid_email"`
+	Email    string `json:"email" binding:"omitempty,email"`
 	Password string `json:"password" binding:"omitempty,min=8,strong_password"`
 }
 

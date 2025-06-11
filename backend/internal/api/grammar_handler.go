@@ -1,13 +1,17 @@
 package api
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/toeic-app/internal/db/sqlc"
+	"github.com/toeic-app/internal/logger"
 )
 
 // GrammarJSONField is a placeholder for JSON fields in Swagger docs
@@ -19,26 +23,32 @@ type GrammarJSONField struct {
 
 // GrammarResponse defines the structure for grammar information returned to clients.
 type GrammarResponse struct {
-	ID         int32            `json:"id"`
-	Level      int32            `json:"level"`
-	Title      string           `json:"title"`
-	Tag        []string         `json:"tag"`
-	GrammarKey string           `json:"grammar_key"`
-	Related    []int32          `json:"related"`
-	Contents   GrammarJSONField `json:"contents" swaggertype:"object"`
+	ID         int32           `json:"id"`
+	Level      int32           `json:"level"`
+	Title      string          `json:"title"`
+	Tag        []string        `json:"tag"`
+	GrammarKey string          `json:"grammar_key"`
+	Related    []int32         `json:"related"`
+	Contents   json.RawMessage `json:"contents,omitempty"`
 }
 
-// NewGrammarResponse creates a GrammarResponse from a db.Grammar model
+// NewGrammarResponse creates a GrammarResponse from db.Grammar model
 func NewGrammarResponse(grammar db.Grammar) GrammarResponse {
-	return GrammarResponse{
+	response := GrammarResponse{
 		ID:         grammar.ID,
 		Level:      grammar.Level,
 		Title:      grammar.Title,
 		Tag:        grammar.Tag,
 		GrammarKey: grammar.GrammarKey,
 		Related:    grammar.Related,
-		Contents:   GrammarJSONField{Raw: grammar.Contents},
 	}
+
+	// Only include Contents if it's valid
+	if grammar.Contents != nil {
+		response.Contents = grammar.Contents
+	}
+
+	return response
 }
 
 // createGrammarRequest defines the structure for creating a new grammar entry.
@@ -48,7 +58,7 @@ type createGrammarRequest struct {
 	Tag        []string         `json:"tag" binding:"required"`
 	GrammarKey string           `json:"grammar_key" binding:"required"`
 	Related    []int32          `json:"related" binding:"required"`
-	Contents   GrammarJSONField `json:"contents" binding:"required"`
+	Contents   *json.RawMessage `json:"contents,omitempty"`
 }
 
 // @Summary     Create a new grammar
@@ -68,14 +78,13 @@ func (server *Server) createGrammar(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request body", err)
 		return
 	}
-
 	arg := db.CreateGrammarParams{
 		Level:      req.Level,
 		Title:      req.Title,
 		Tag:        req.Tag,
 		GrammarKey: req.GrammarKey,
 		Related:    req.Related,
-		Contents:   toRawMessage(req.Contents),
+		Contents:   toRawMessageFromPointer(req.Contents),
 	}
 
 	grammar, err := server.store.CreateGrammar(ctx, arg)
@@ -180,10 +189,18 @@ type updateGrammarRequest struct {
 	Tag        []string         `json:"tag" binding:"omitempty"`
 	GrammarKey string           `json:"grammar_key" binding:"omitempty"`
 	Related    []int32          `json:"related" binding:"omitempty"`
-	Contents   GrammarJSONField `json:"contents" binding:"omitempty"`
+	Contents   *json.RawMessage `json:"contents,omitempty"`
 }
 
-// toRawMessage converts a GrammarJSONField to json.RawMessage
+// toRawMessageFromPointer converts a *json.RawMessage to json.RawMessage
+func toRawMessageFromPointer(field *json.RawMessage) json.RawMessage {
+	if field == nil {
+		return nil
+	}
+	return *field
+}
+
+// toRawMessage converts a GrammarJSONField to json.RawMessage (kept for backward compatibility)
 func toRawMessage(field GrammarJSONField) json.RawMessage {
 	if field.Raw == nil {
 		return nil
@@ -193,7 +210,6 @@ func toRawMessage(field GrammarJSONField) json.RawMessage {
 		return nil
 	}
 	return json.RawMessage(b)
-
 }
 
 // @Summary     Update a grammar
@@ -264,10 +280,9 @@ func (server *Server) updateGrammar(ctx *gin.Context) {
 	}
 	if len(req.Related) > 0 {
 		arg.Related = req.Related
-	}
-	// Only update Contents if provided (Raw != nil)
-	if req.Contents.Raw != nil {
-		arg.Contents = toRawMessage(req.Contents)
+	} // Only update Contents if provided (not nil)
+	if req.Contents != nil {
+		arg.Contents = toRawMessageFromPointer(req.Contents)
 	}
 
 	grammar, err := server.store.UpdateGrammar(ctx, arg)
@@ -464,6 +479,17 @@ func (server *Server) searchGrammars(ctx *gin.Context) {
 		return
 	}
 
+	// Try cache first for frequent searches
+	cacheKey := fmt.Sprintf("search:grammars:%s:%d:%d", req.Query, req.Limit, req.Offset)
+	if server.config.CacheEnabled && server.serviceCache != nil {
+		var cachedGrammars []GrammarResponse
+		if err := server.serviceCache.Get(ctx, cacheKey, &cachedGrammars); err == nil {
+			logger.Debug("Grammar search results retrieved from cache for query: %s", req.Query)
+			SuccessResponse(ctx, http.StatusOK, "Grammar search completed successfully", cachedGrammars)
+			return
+		}
+	}
+
 	arg := db.SearchGrammarsParams{
 		Column1: sql.NullString{String: req.Query, Valid: true},
 		Limit:   req.Limit,
@@ -483,6 +509,17 @@ func (server *Server) searchGrammars(ctx *gin.Context) {
 	// Ensure we return an empty array instead of null if no results
 	if grammarResponses == nil {
 		grammarResponses = []GrammarResponse{}
+	}
+
+	// Cache the results for 15 minutes (grammars change less frequently)
+	if server.config.CacheEnabled && server.serviceCache != nil && len(grammarResponses) > 0 {
+		go func() {
+			bgCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			if err := server.serviceCache.Set(bgCtx, cacheKey, grammarResponses, 15*time.Minute); err != nil {
+				logger.Warn("Failed to cache grammar search results: %v", err)
+			}
+		}()
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "Grammar search completed successfully", grammarResponses)

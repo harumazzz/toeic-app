@@ -43,7 +43,9 @@ class WordScreen extends HookConsumerWidget {
               if (searchQuery.value.isEmpty) {
                 await ref
                     .read(wordControllerProvider.notifier)
-                    .loadWords(offset: offset.value);
+                    .loadWords(
+                      offset: offset.value,
+                    );
                 offset.value++;
               } else {
                 await ref
@@ -331,8 +333,9 @@ class _ErrorStateWidget extends StatelessWidget {
               await ref
                   .read(wordControllerProvider.notifier)
                   .loadWords(
-                    offset: wordState.words.length ~/ 20,
+                    offset: offset.value,
                   );
+              offset.value++;
             },
             child: Text(context.t.common.retry),
           ),

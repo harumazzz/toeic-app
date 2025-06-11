@@ -51,9 +51,8 @@ sealed class GetProgressParams with _$GetProgressParams {
   }) = _GetProgressParams;
 }
 
-class GetReviewsProgress implements 
-UseCase<List<WordProgress>, GetReviewsProgressParams> {
-
+class GetReviewsProgress
+    implements UseCase<List<WordProgress>, GetReviewsProgressParams> {
   const GetReviewsProgress(this._progressRepository);
 
   final ProgressRepository _progressRepository;
@@ -67,7 +66,6 @@ UseCase<List<WordProgress>, GetReviewsProgressParams> {
 }
 
 class GetWorkProgress implements UseCase<WordProgress, GetWordProgressParams> {
-
   const GetWorkProgress(this._progressRepository);
 
   final ProgressRepository _progressRepository;
@@ -78,20 +76,17 @@ class GetWorkProgress implements UseCase<WordProgress, GetWordProgressParams> {
   ) => _progressRepository.getWordProgressById(
     wordId: params.wordId,
   );
-  
 }
 
-class GetProgress implements UseCase<Progress, GetProgressParams> {
-
+class GetProgress implements UseCase<Progress?, GetProgressParams> {
   const GetProgress(this._progressRepository);
 
   final ProgressRepository _progressRepository;
 
   @override
-  Future<Either<Failure, Progress>> call(
+  Future<Either<Failure, Progress?>> call(
     final GetProgressParams params,
   ) => _progressRepository.getProgressById(
     wordId: params.wordId,
   );
-  
 }

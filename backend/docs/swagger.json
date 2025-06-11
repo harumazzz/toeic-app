@@ -1,22 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "A RESTful API for the Toeic application",
-        "title": "Toeic App API",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "url": "http://www.example.com/support",
-            "email": "support@example.com"
-        },
-        "license": {
-            "name": "MIT",
-            "url": "https://opensource.org/licenses/MIT"
-        },
-        "version": "1.0"
+        "contact": {}
     },
-    "host": "192.168.31.37:8000",
-    "basePath": "/",
     "paths": {
         "/api/auth/login": {
             "post": {
@@ -588,6 +574,185 @@
                     },
                     "500": {
                         "description": "Failed to delete backup file",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/cache/clear": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Clear all cached data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Clear all cache",
+                "responses": {
+                    "200": {
+                        "description": "Cache cleared successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/cache/clear/{pattern}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Clear cached data matching a specific pattern",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Clear cache by pattern",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Cache key pattern to clear",
+                        "name": "pattern",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Cache pattern cleared successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/cache/stats": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get cache statistics and information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get cache statistics",
+                "responses": {
+                    "200": {
+                        "description": "Cache statistics",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/performance/concurrency/reset": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Resets all concurrency metrics and statistics (admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Performance"
+                ],
+                "summary": "Reset concurrency metrics",
+                "responses": {
+                    "200": {
+                        "description": "Metrics reset successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -2648,6 +2813,158 @@
                     },
                     "500": {
                         "description": "Failed to delete part",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/performance/concurrency": {
+            "get": {
+                "description": "Returns detailed concurrency metrics including active operations, worker pool status, and performance statistics",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Performance"
+                ],
+                "summary": "Get concurrency metrics",
+                "responses": {
+                    "200": {
+                        "description": "Concurrency metrics retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "concurrency_metrics": {
+                                    "type": "object"
+                                },
+                                "connection_pool_stats": {
+                                    "type": "object"
+                                },
+                                "request_handler_stats": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/performance/concurrency/health": {
+            "get": {
+                "description": "Returns health status of concurrency management components",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Performance"
+                ],
+                "summary": "Get concurrency health status",
+                "responses": {
+                    "200": {
+                        "description": "Health status retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "components": {
+                                    "type": "object"
+                                },
+                                "overall_health": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/performance/search-test": {
+            "get": {
+                "description": "Test search performance with timing information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Performance"
+                ],
+                "summary": "Get search performance test",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search query to test",
+                        "name": "query",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Search performance results",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Search failed",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/performance/stats": {
+            "get": {
+                "description": "Get comprehensive performance metrics for the application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Performance"
+                ],
+                "summary": "Get performance statistics",
+                "responses": {
+                    "200": {
+                        "description": "Performance statistics",
+                        "schema": {
+                            "$ref": "#/definitions/api.PerformanceStats"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get performance stats",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -5581,6 +5898,25 @@
         }
     },
     "definitions": {
+        "api.CacheStats": {
+            "type": "object",
+            "properties": {
+                "basic_stats": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "http_cache": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "api.ContentResponse": {
             "type": "object",
             "properties": {
@@ -5594,6 +5930,34 @@
                     "type": "integer"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.DatabaseStats": {
+            "type": "object",
+            "properties": {
+                "idle": {
+                    "type": "integer"
+                },
+                "in_use": {
+                    "type": "integer"
+                },
+                "max_idle_closed": {
+                    "type": "integer"
+                },
+                "max_lifetime": {
+                    "description": "Duration as string for Swagger compatibility",
+                    "type": "string"
+                },
+                "open_connections": {
+                    "type": "integer"
+                },
+                "wait_count": {
+                    "type": "integer"
+                },
+                "wait_duration": {
+                    "description": "Duration as string for Swagger compatibility",
                     "type": "string"
                 }
             }
@@ -5681,6 +6045,26 @@
                 }
             }
         },
+        "api.IndexStats": {
+            "type": "object",
+            "properties": {
+                "grammars_indexes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "total_indexes": {
+                    "type": "integer"
+                },
+                "words_indexes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "api.MemStats": {
             "type": "object",
             "properties": {
@@ -5697,6 +6081,32 @@
                     "type": "integer"
                 },
                 "total_alloc": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.MemoryStats": {
+            "type": "object",
+            "properties": {
+                "alloc_mb": {
+                    "type": "integer"
+                },
+                "goroutines": {
+                    "type": "integer"
+                },
+                "heap_inuse_mb": {
+                    "type": "integer"
+                },
+                "heap_objects": {
+                    "type": "integer"
+                },
+                "num_gc": {
+                    "type": "integer"
+                },
+                "sys_mb": {
+                    "type": "integer"
+                },
+                "total_alloc_mb": {
                     "type": "integer"
                 }
             }
@@ -5732,6 +6142,33 @@
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "api.PerformanceStats": {
+            "type": "object",
+            "properties": {
+                "background_tasks": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "cache": {
+                    "$ref": "#/definitions/api.CacheStats"
+                },
+                "database": {
+                    "$ref": "#/definitions/api.DatabaseStats"
+                },
+                "indexes": {
+                    "$ref": "#/definitions/api.IndexStats"
+                },
+                "memory": {
+                    "$ref": "#/definitions/api.MemoryStats"
+                },
+                "request_time": {
+                    "type": "string"
+                },
+                "server": {
+                    "$ref": "#/definitions/api.ServerStats"
                 }
             }
         },
@@ -5781,6 +6218,56 @@
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.SecurityConfig": {
+            "type": "object",
+            "properties": {
+                "max_timestamp_age": {
+                    "description": "Maximum timestamp age in seconds",
+                    "type": "integer"
+                },
+                "required_headers": {
+                    "description": "List of required headers",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "secret_key": {
+                    "description": "Client-side security secret",
+                    "type": "string"
+                },
+                "security_level": {
+                    "description": "Required security level",
+                    "type": "integer"
+                },
+                "wasm_enabled": {
+                    "description": "WASM support enabled",
+                    "type": "boolean"
+                },
+                "web_worker_enabled": {
+                    "description": "Web worker support enabled",
+                    "type": "boolean"
+                }
+            }
+        },
+        "api.ServerStats": {
+            "type": "object",
+            "properties": {
+                "compression_enabled": {
+                    "type": "boolean"
+                },
+                "http_cache_enabled": {
+                    "type": "boolean"
+                },
+                "rate_limit_enabled": {
+                    "type": "boolean"
+                },
+                "uptime": {
+                    "description": "Duration as string for Swagger compatibility",
                     "type": "string"
                 }
             }
@@ -6485,6 +6972,9 @@
                 "refresh_token": {
                     "type": "string"
                 },
+                "security_config": {
+                    "$ref": "#/definitions/api.SecurityConfig"
+                },
                 "user": {
                     "$ref": "#/definitions/api.UserResponse"
                 }
@@ -6550,6 +7040,9 @@
                 },
                 "refresh_token": {
                     "type": "string"
+                },
+                "security_config": {
+                    "$ref": "#/definitions/api.SecurityConfig"
                 },
                 "user": {
                     "$ref": "#/definitions/api.UserResponse"
@@ -6842,14 +7335,6 @@
                     "type": "string"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "ApiKeyAuth": {
-            "description": "Bearer JWT token authorization. Format: Bearer {token}",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
         }
     }
 }

@@ -16,7 +16,6 @@ ProgressRemoteDataSource progressRemoteDataSource(final Ref ref) {
 
 @RestApi()
 abstract class ProgressRemoteDataSource {
-
   factory ProgressRemoteDataSource(
     final Dio dio,
   ) = _ProgressRemoteDataSource;
@@ -37,7 +36,7 @@ abstract class ProgressRemoteDataSource {
   });
 
   @GET('/api/v1/user-word-progress/{word_id}')
-  Future<ProgressModel> getProgressById({
+  Future<ProgressModel?> getProgressById({
     @Path('word_id') required final int progressId,
   });
 
@@ -51,6 +50,4 @@ abstract class ProgressRemoteDataSource {
   Future<void> deleteWordProgress({
     @Path('word_id') required final int wordId,
   });
-
-
 }

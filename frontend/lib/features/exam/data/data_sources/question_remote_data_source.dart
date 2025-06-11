@@ -14,21 +14,19 @@ QuestionRemoteDataSource questionRemoteDataSource(final Ref ref) {
   return QuestionRemoteDataSource(dio);
 }
 
-@RestApi() 
+@RestApi()
 abstract class QuestionRemoteDataSource {
-
   factory QuestionRemoteDataSource(
     final Dio dio,
-  ) = _QuestionRemoteDataSource; 
+  ) = _QuestionRemoteDataSource;
 
   @GET('/api/v1/content-questions/{content_id}')
   Future<List<QuestionModel>> getQuestionsByContentId({
-    @Query('content_id') required final int contentId,
+    @Path('content_id') required final int contentId,
   });
 
-  @GET('/api/v1/questions/{question_id}')
+  @GET('/api/v1/questions/{id}')
   Future<QuestionModel> getQuestionById({
-    @Path('question_id') required final int questionId,
+    @Path('id') required final int questionId,
   });
-
 }

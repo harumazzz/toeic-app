@@ -45,23 +45,24 @@ func main() {
 	if err := util.CheckDatabaseTools(); err != nil {
 		logger.Warn("Database backup/restore tools not available: %v", err)
 		logger.Warn("Backup/restore functionality will be limited")
-	}
-
-	// Open a connection to the database
+	} // Open a connection to the database
 	logger.Info("Connecting to database: %s", cfg.DBDriver)
 	conn, err := sql.Open(cfg.DBDriver, cfg.DBSource)
 	if err != nil {
 		logger.Fatal("Could not connect to database: %v", err)
 	}
 
+	// Configure connection pool using enhanced configuration
+	logger.Info("Configuring enhanced database connection pool...")
+	config.SetupPool(conn)
+
 	// Test the connection
 	err = conn.Ping()
 	if err != nil {
 		logger.Fatal("Could not ping database: %v", err)
 	}
-	config.SetupPool(conn)
 
-	logger.Info("Successfully connected to database!")
+	logger.Info("Successfully connected to database with enhanced connection pool!")
 
 	// Initialize queries with connection
 	queries := db.New(conn)
@@ -69,7 +70,7 @@ func main() {
 		logger.Warn("Note: Could not create test user: %v. This may be okay if user already exists.", err)
 	} // Initialize and start the API server
 	logger.Info("Initializing API server...")
-	server, err := api.NewServer(cfg, queries)
+	server, err := api.NewServer(cfg, queries, conn)
 	if err != nil {
 		logger.Fatal("Cannot create server: %v", err)
 	}
@@ -128,7 +129,6 @@ func main() {
 	// Create a deadline to wait for current operations to complete
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
 	// First shut down the server
 	if err := server.Shutdown(ctx); err != nil {
 		logger.Fatal("Server forced to shutdown: %v", err)
@@ -136,6 +136,16 @@ func main() {
 
 	// Set release mode
 	server.SetReleaseMode()
+
+	// Close cache if enabled
+	if server.GetCache() != nil {
+		logger.Info("Closing cache connection...")
+		if err := server.GetCache().Close(); err != nil {
+			logger.Error("Error closing cache connection: %v", err)
+		} else {
+			logger.Info("Cache connection closed successfully")
+		}
+	}
 
 	// Then close the database connection
 	if conn != nil {

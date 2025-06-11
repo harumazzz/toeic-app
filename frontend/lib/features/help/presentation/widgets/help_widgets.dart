@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../../../core/services/toast_service.dart';
 import '../../../../i18n/strings.g.dart';
 
 class HelpHeader extends StatelessWidget {
@@ -233,21 +234,9 @@ class ContactSupportCard extends StatelessWidget {
       const ClipboardData(text: 'support@toeiclearning.com'),
     );
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.t.help.emailCopied,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onInverseSurface,
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.inverseSurface,
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
+      ToastService.info(
+        context: context,
+        message: context.t.help.emailCopied,
       );
     }
   }

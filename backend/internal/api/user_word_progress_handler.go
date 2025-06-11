@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -66,12 +67,33 @@ type UserWordProgressResponse struct {
 
 // createUserWordProgressRequest defines the structure for creating a user word progress record
 type createUserWordProgressRequest struct {
-	WordID         int32      `json:"word_id" binding:"required"`
-	LastReviewedAt *time.Time `json:"last_reviewed_at"`
-	NextReviewAt   *time.Time `json:"next_review_at"`
-	IntervalDays   int32      `json:"interval_days" binding:"required"`
-	EaseFactor     float32    `json:"ease_factor" binding:"required"`
-	Repetitions    int32      `json:"repetitions" binding:"required"`
+	WordID         int32   `json:"word_id" binding:"required"`
+	LastReviewedAt *string `json:"last_reviewed_at"`
+	NextReviewAt   *string `json:"next_review_at"`
+	IntervalDays   int32   `json:"interval_days" binding:"min=0"`
+	EaseFactor     float32 `json:"ease_factor" binding:"min=0"`
+	Repetitions    int32   `json:"repetitions" binding:"min=0"`
+}
+
+// parseTimeString parses a time string in various formats and returns a time.Time and error
+func parseTimeString(timeStr string) (time.Time, error) {
+	// List of time formats to try, in order of preference
+	formats := []string{
+		time.RFC3339,                 // "2006-01-02T15:04:05Z07:00"
+		time.RFC3339Nano,             // "2006-01-02T15:04:05.999999999Z07:00"
+		"2006-01-02T15:04:05.999999", // "2025-06-11T06:12:03.388916"
+		"2006-01-02T15:04:05",        // "2006-01-02T15:04:05"
+		"2006-01-02 15:04:05.999999", // "2006-01-02 15:04:05.999999"
+		"2006-01-02 15:04:05",        // "2006-01-02 15:04:05"
+	}
+
+	for _, format := range formats {
+		if t, err := time.Parse(format, timeStr); err == nil {
+			return t, nil
+		}
+	}
+
+	return time.Time{}, fmt.Errorf("unable to parse time string: %s", timeStr)
 }
 
 // NewUserWordProgressResponse creates a UserWordProgressResponse from a UserWordProgress model
@@ -133,22 +155,31 @@ func (server *Server) createUserWordProgress(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusUnauthorized, "Invalid authorization payload", nil)
 		return
 	}
-
 	// Create LastReviewedAt and NextReviewAt as sql.NullTime
 	var lastReviewedAt sql.NullTime
 	var nextReviewAt sql.NullTime
 
 	if req.LastReviewedAt != nil {
-		lastReviewedAt = sql.NullTime{
-			Time:  *req.LastReviewedAt,
-			Valid: true,
+		if parsedTime, err := parseTimeString(*req.LastReviewedAt); err != nil {
+			ErrorResponse(ctx, http.StatusBadRequest, "Invalid last_reviewed_at format", err)
+			return
+		} else {
+			lastReviewedAt = sql.NullTime{
+				Time:  parsedTime,
+				Valid: true,
+			}
 		}
 	}
 
 	if req.NextReviewAt != nil {
-		nextReviewAt = sql.NullTime{
-			Time:  *req.NextReviewAt,
-			Valid: true,
+		if parsedTime, err := parseTimeString(*req.NextReviewAt); err != nil {
+			ErrorResponse(ctx, http.StatusBadRequest, "Invalid next_review_at format", err)
+			return
+		} else {
+			nextReviewAt = sql.NullTime{
+				Time:  parsedTime,
+				Valid: true,
+			}
 		}
 	}
 
@@ -173,15 +204,14 @@ func (server *Server) createUserWordProgress(ctx *gin.Context) {
 }
 
 // @Summary Get user word progress
-// @Description Get a specific word progress record for the current user
+// @Description Get a specific word progress record for the current user. Returns null if no progress record exists.
 // @Tags user-word-progress
 // @Accept json
 // @Produce json
 // @Param word_id path int true "Word ID"
-// @Success 200 {object} Response{data=UserWordProgressResponse} "User word progress retrieved successfully"
+// @Success 200 {object} Response{data=UserWordProgressResponse} "User word progress retrieved successfully (may be null if not found)"
 // @Failure 400 {object} Response "Invalid word ID format"
 // @Failure 401 {object} Response "Unauthorized"
-// @Failure 404 {object} Response "User word progress not found"
 // @Failure 500 {object} Response "Server error"
 // @Security ApiKeyAuth
 // @Router /api/v1/user-word-progress/{word_id} [get]
@@ -209,11 +239,11 @@ func (server *Server) getUserWordProgress(ctx *gin.Context) {
 		UserID: authPayload.ID,
 		WordID: int32(wordID),
 	}
-
 	progress, err := server.store.GetUserWordProgress(ctx, arg)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ErrorResponse(ctx, http.StatusNotFound, "User word progress not found", err)
+			// Return null when no user word progress is found instead of an error
+			SuccessResponse(ctx, http.StatusOK, "User word progress retrieved successfully", nil)
 			return
 		}
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve user word progress", err)
@@ -226,11 +256,11 @@ func (server *Server) getUserWordProgress(ctx *gin.Context) {
 
 // updateUserWordProgressRequest defines the structure for updating a user word progress record
 type updateUserWordProgressRequest struct {
-	LastReviewedAt *time.Time `json:"last_reviewed_at"`
-	NextReviewAt   *time.Time `json:"next_review_at"`
-	IntervalDays   int32      `json:"interval_days" binding:"required"`
-	EaseFactor     float32    `json:"ease_factor" binding:"required"`
-	Repetitions    int32      `json:"repetitions" binding:"required"`
+	LastReviewedAt *string `json:"last_reviewed_at"`
+	NextReviewAt   *string `json:"next_review_at"`
+	IntervalDays   int32   `json:"interval_days" binding:"min=0"`
+	EaseFactor     float32 `json:"ease_factor" binding:"min=0"`
+	Repetitions    int32   `json:"repetitions" binding:"min=0"`
 }
 
 // @Summary Update user word progress
@@ -284,25 +314,36 @@ func (server *Server) updateUserWordProgress(ctx *gin.Context) {
 	}
 
 	logger.Debug("User ID from token: %d", authPayload.ID)
-
 	// Create LastReviewedAt and NextReviewAt as sql.NullTime
 	var lastReviewedAt sql.NullTime
 	var nextReviewAt sql.NullTime
 
 	if req.LastReviewedAt != nil {
-		lastReviewedAt = sql.NullTime{
-			Time:  *req.LastReviewedAt,
-			Valid: true,
+		if parsedTime, err := parseTimeString(*req.LastReviewedAt); err != nil {
+			logger.Error("Failed to parse last_reviewed_at: %v", err)
+			ErrorResponse(ctx, http.StatusBadRequest, "Invalid last_reviewed_at format", err)
+			return
+		} else {
+			lastReviewedAt = sql.NullTime{
+				Time:  parsedTime,
+				Valid: true,
+			}
+			logger.Debug("Last reviewed at: %v", parsedTime)
 		}
-		logger.Debug("Last reviewed at: %v", req.LastReviewedAt)
 	}
 
 	if req.NextReviewAt != nil {
-		nextReviewAt = sql.NullTime{
-			Time:  *req.NextReviewAt,
-			Valid: true,
+		if parsedTime, err := parseTimeString(*req.NextReviewAt); err != nil {
+			logger.Error("Failed to parse next_review_at: %v", err)
+			ErrorResponse(ctx, http.StatusBadRequest, "Invalid next_review_at format", err)
+			return
+		} else {
+			nextReviewAt = sql.NullTime{
+				Time:  parsedTime,
+				Valid: true,
+			}
+			logger.Debug("Next review at: %v", parsedTime)
 		}
-		logger.Debug("Next review at: %v", req.NextReviewAt)
 	}
 
 	arg := db.UpdateUserWordProgressParams{

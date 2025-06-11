@@ -9,8 +9,8 @@ void main() {
         createdAt: DateTime(2024),
         easeFactor: 2,
         intervalDays: 1,
-        lastReviewedAt: '2024-01-01T00:00:00Z',
-        nextReviewAt: '2024-01-02T00:00:00Z',
+        lastReviewedAt: DateTime(2024),
+        nextReviewAt: DateTime(2024, 1, 2),
         repetitions: 0,
         updatedAt: DateTime(2024),
         userId: 1,
@@ -20,8 +20,8 @@ void main() {
       expect(model.createdAt, DateTime(2024));
       expect(model.easeFactor, 2);
       expect(model.intervalDays, 1);
-      expect(model.lastReviewedAt, '2024-01-01T00:00:00Z');
-      expect(model.nextReviewAt, '2024-01-02T00:00:00Z');
+      expect(model.lastReviewedAt, DateTime(2024));
+      expect(model.nextReviewAt, DateTime(2024, 1, 2));
       expect(model.repetitions, 0);
       expect(model.updatedAt, DateTime(2024));
       expect(model.userId, 1);
@@ -43,8 +43,8 @@ void main() {
         createdAt: DateTime(2024),
         easeFactor: 2,
         intervalDays: 1,
-        lastReviewedAt: '2024-01-01T00:00:00Z',
-        nextReviewAt: '2024-01-02T00:00:00Z',
+        lastReviewedAt: DateTime(2024),
+        nextReviewAt: DateTime(2024, 1, 2),
         repetitions: 0,
         updatedAt: DateTime(2024),
         userId: 1,
@@ -61,19 +61,19 @@ void main() {
     });
 
     test('should create a valid WordProgressRequestModel instance', () {
-      const requestModel = WordProgressRequestModel(
+      final requestModel = WordProgressRequestModel(
         easeFactor: 2,
         intervalDays: 1,
-        lastReviewedAt: '2024-01-01T00:00:00Z',
-        nextReviewAt: '2024-01-02T00:00:00Z',
+        lastReviewedAt: DateTime(2024),
+        nextReviewAt: DateTime(2024, 1, 2),
         repetitions: 0,
         wordId: 1,
       );
 
       expect(requestModel.easeFactor, 2);
       expect(requestModel.intervalDays, 1);
-      expect(requestModel.lastReviewedAt, '2024-01-01T00:00:00Z');
-      expect(requestModel.nextReviewAt, '2024-01-02T00:00:00Z');
+      expect(requestModel.lastReviewedAt, DateTime(2024));
+      expect(requestModel.nextReviewAt, DateTime(2024, 1, 2));
       expect(requestModel.repetitions, 0);
       expect(requestModel.wordId, 1);
     });
@@ -83,8 +83,8 @@ void main() {
         createdAt: DateTime(2024),
         easeFactor: 2,
         intervalDays: 1,
-        lastReviewedAt: '2024-01-01T00:00:00Z',
-        nextReviewAt: '2024-01-02T00:00:00Z',
+        lastReviewedAt: DateTime(2024),
+        nextReviewAt: DateTime(2024, 1, 2),
         repetitions: 0,
         updatedAt: DateTime(2024),
         userId: 1,
@@ -119,8 +119,8 @@ void main() {
         createdAt: DateTime(2024),
         easeFactor: 2,
         intervalDays: 1,
-        lastReviewedAt: '2024-01-01T00:00:00Z',
-        nextReviewAt: '2024-01-02T00:00:00Z',
+        lastReviewedAt: DateTime(2024),
+        nextReviewAt: DateTime(2024, 1, 2),
         repetitions: 0,
         updatedAt: DateTime(2024),
         userId: 1,

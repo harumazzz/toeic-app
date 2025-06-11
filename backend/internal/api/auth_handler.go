@@ -1,8 +1,12 @@
 package api
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -22,11 +26,22 @@ type loginUserRequest struct {
 }
 
 // loginUserResponse defines the structure for user login responses.
-// It includes user details, access token, and refresh token.
+// It includes user details, access token, refresh token, and security configuration.
 type loginUserResponse struct {
-	User         UserResponse `json:"user"`
-	AccessToken  string       `json:"access_token"`
-	RefreshToken string       `json:"refresh_token"`
+	User           UserResponse   `json:"user"`
+	AccessToken    string         `json:"access_token"`
+	RefreshToken   string         `json:"refresh_token"`
+	SecurityConfig SecurityConfig `json:"security_config"`
+}
+
+// SecurityConfig defines the security configuration sent to the client
+type SecurityConfig struct {
+	SecretKey        string   `json:"secret_key"`         // Client-side security secret
+	SecurityLevel    int      `json:"security_level"`     // Required security level
+	WasmEnabled      bool     `json:"wasm_enabled"`       // WASM support enabled
+	WebWorkerEnabled bool     `json:"web_worker_enabled"` // Web worker support enabled
+	RequiredHeaders  []string `json:"required_headers"`   // List of required headers
+	MaxTimestampAge  int      `json:"max_timestamp_age"`  // Maximum timestamp age in seconds
 }
 
 // @Summary     Login user
@@ -82,13 +97,28 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to create refresh token", err)
 		return
 	}
-
 	userResp := NewUserResponse(user)
 
+	// Generate client-side security configuration
+	securityConfig := SecurityConfig{
+		SecretKey:        server.generateClientSecurityKey(user.ID),
+		SecurityLevel:    2, // Standard security level
+		WasmEnabled:      true,
+		WebWorkerEnabled: true,
+		RequiredHeaders: []string{
+			"X-Security-Token",
+			"X-Client-Signature",
+			"X-Request-Timestamp",
+			"X-Origin-Validation",
+		},
+		MaxTimestampAge: 300, // 5 minutes
+	}
+
 	response := loginUserResponse{
-		User:         userResp,
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		User:           userResp,
+		AccessToken:    accessToken,
+		RefreshToken:   refreshToken,
+		SecurityConfig: securityConfig,
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "Login successful", response)
@@ -98,16 +128,17 @@ func (server *Server) loginUser(ctx *gin.Context) {
 // It includes username, email, and password, all of which are required and validated.
 type registerUserRequest struct {
 	Username string `json:"username" binding:"required,min=3,max=50"`
-	Email    string `json:"email" binding:"required,valid_email"`
+	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=8,strong_password"`
 }
 
 // registerUserResponse defines the structure for user registration responses.
-// It includes user details, access token, and refresh token.
+// It includes user details, access token, refresh token, and security configuration.
 type registerUserResponse struct {
-	User         UserResponse `json:"user"`
-	AccessToken  string       `json:"access_token"`
-	RefreshToken string       `json:"refresh_token"`
+	User           UserResponse   `json:"user"`
+	AccessToken    string         `json:"access_token"`
+	RefreshToken   string         `json:"refresh_token"`
+	SecurityConfig SecurityConfig `json:"security_config"`
 }
 
 // @Summary     Register a new user
@@ -180,13 +211,28 @@ func (server *Server) registerUser(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to create refresh token", err)
 		return
 	}
-
 	userResp := NewUserResponse(user)
 
+	// Generate client-side security configuration
+	securityConfig := SecurityConfig{
+		SecretKey:        server.generateClientSecurityKey(user.ID),
+		SecurityLevel:    2, // Standard security level
+		WasmEnabled:      true,
+		WebWorkerEnabled: true,
+		RequiredHeaders: []string{
+			"X-Security-Token",
+			"X-Client-Signature",
+			"X-Request-Timestamp",
+			"X-Origin-Validation",
+		},
+		MaxTimestampAge: 300, // 5 minutes
+	}
+
 	response := registerUserResponse{
-		User:         userResp,
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		User:           userResp,
+		AccessToken:    accessToken,
+		RefreshToken:   refreshToken,
+		SecurityConfig: securityConfig,
 	}
 
 	SuccessResponse(ctx, http.StatusCreated, "User registered successfully", response)
@@ -199,10 +245,11 @@ type refreshTokenRequest struct {
 }
 
 // refreshTokenResponse defines the structure for refresh token responses.
-// It includes the new access token and user details.
+// It includes the new access token, refresh token, and user details.
 type refreshTokenResponse struct {
-	AccessToken string       `json:"access_token"`
-	User        UserResponse `json:"user"`
+	AccessToken  string       `json:"access_token"`
+	RefreshToken string       `json:"refresh_token"`
+	User         UserResponse `json:"user"`
 }
 
 // logoutRequest defines the structure for logout requests.
@@ -286,7 +333,18 @@ func (server *Server) logoutUser(ctx *gin.Context) {
 func (server *Server) refreshToken(ctx *gin.Context) {
 	var req refreshTokenRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request parameters", err)
+		// Handle EOF and other binding errors more gracefully
+		if err.Error() == "EOF" {
+			ErrorResponse(ctx, http.StatusBadRequest, "Empty request body - refresh token is required", nil)
+		} else {
+			ErrorResponse(ctx, http.StatusBadRequest, "Invalid request format - please provide refresh_token in JSON body", err)
+		}
+		return
+	}
+
+	// Validate that refresh token is not empty
+	if req.RefreshToken == "" {
+		ErrorResponse(ctx, http.StatusBadRequest, "Refresh token cannot be empty", nil)
 		return
 	}
 
@@ -302,6 +360,7 @@ func (server *Server) refreshToken(ctx *gin.Context) {
 		return
 	}
 
+	// Create new access token
 	accessToken, err := server.tokenMaker.CreateToken(
 		user.ID,
 		user.Username,
@@ -312,11 +371,23 @@ func (server *Server) refreshToken(ctx *gin.Context) {
 		return
 	}
 
+	// Create new refresh token
+	newRefreshToken, err := server.tokenMaker.CreateToken(
+		user.ID,
+		user.Username,
+		time.Duration(server.config.RefreshTokenDuration)*time.Second,
+	)
+	if err != nil {
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to create refresh token", err)
+		return
+	}
+
 	userResp := NewUserResponse(user)
 
 	response := refreshTokenResponse{
-		AccessToken: accessToken,
-		User:        userResp,
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
+		User:         userResp,
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "Token refreshed successfully", response)
@@ -384,4 +455,19 @@ func (server *Server) GetAuthPayload(ctx *gin.Context) (*token.Payload, error) {
 	}
 
 	return authPayload, nil
+}
+
+// generateClientSecurityKey generates a unique security key for the client
+func (server *Server) generateClientSecurityKey(userID int32) string {
+	// Generate deterministic key based on server secret and user ID (no timestamp)
+	// This allows the middleware to recreate the same key later
+	message := fmt.Sprintf("%s_user_%d", server.config.TokenSymmetricKey, userID)
+
+	// Generate HMAC-SHA256 hash
+	h := hmac.New(sha256.New, []byte(server.config.TokenSymmetricKey))
+	h.Write([]byte(message))
+	hash := h.Sum(nil)
+
+	// Return first 32 bytes as hex string (256 bits)
+	return hex.EncodeToString(hash)[:64]
 }

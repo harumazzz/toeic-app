@@ -70,7 +70,7 @@ class HeroWordHeader extends StatelessWidget {
                   letterSpacing: -0.5,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 32),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(

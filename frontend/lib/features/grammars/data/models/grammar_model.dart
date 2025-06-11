@@ -8,7 +8,7 @@ part 'grammar_model.g.dart';
 @freezed
 sealed class GrammarModel with _$GrammarModel {
   const factory GrammarModel({
-    @JsonKey(name: 'contents') final GrammarContentModel? contents,
+    @JsonKey(name: 'contents') final List<ContentModel>? contents,
     @JsonKey(name: 'grammar_key') required final String grammarKey,
     @JsonKey(name: 'id') required final int id,
     @JsonKey(name: 'level') required final int level,
@@ -20,17 +20,6 @@ sealed class GrammarModel with _$GrammarModel {
   factory GrammarModel.fromJson(
     final Map<String, dynamic> json,
   ) => _$GrammarModelFromJson(json);
-}
-
-@freezed
-sealed class GrammarContentModel with _$GrammarContentModel {
-  const factory GrammarContentModel({
-    @JsonKey(name: 'raw') required final List<ContentModel>? contents,
-  }) = _GrammarContentModel;
-
-  factory GrammarContentModel.fromJson(
-    final Map<String, dynamic> json,
-  ) => _$GrammarContentModelFromJson(json);
 }
 
 @freezed
@@ -85,7 +74,7 @@ sealed class GetRelatedGrammarsRequest with _$GetRelatedGrammarsRequest {
 
 extension GrammarModelExtension on GrammarModel {
   Grammar toEntity() => Grammar(
-    contents: contents?.contents?.map((final e) => e.toEntity()).toList() ?? [],
+    contents: [...?contents?.map((final e) => e.toEntity())],
     grammarKey: grammarKey,
     id: id,
     level: level,

@@ -9,8 +9,8 @@ void main() {
         createdAt: DateTime(2024),
         easeFactor: 2,
         intervalDays: 1,
-        lastReviewedAt: '2024-01-01T00:00:00Z',
-        nextReviewAt: '2024-01-02T00:00:00Z',
+        lastReviewedAt: DateTime(2024),
+        nextReviewAt: DateTime(2024, 1, 2),
         repetitions: 0,
         updatedAt: DateTime(2024),
         userId: 1,
@@ -20,8 +20,8 @@ void main() {
       expect(progress.createdAt, DateTime(2024));
       expect(progress.easeFactor, 2);
       expect(progress.intervalDays, 1);
-      expect(progress.lastReviewedAt, '2024-01-01T00:00:00Z');
-      expect(progress.nextReviewAt, '2024-01-02T00:00:00Z');
+      expect(progress.lastReviewedAt, DateTime(2024));
+      expect(progress.nextReviewAt, DateTime(2024, 1, 2));
       expect(progress.repetitions, 0);
       expect(progress.updatedAt, DateTime(2024));
       expect(progress.userId, 1);
@@ -43,8 +43,8 @@ void main() {
         createdAt: DateTime(2024),
         easeFactor: 2,
         intervalDays: 1,
-        lastReviewedAt: '2024-01-01T00:00:00Z',
-        nextReviewAt: '2024-01-02T00:00:00Z',
+        lastReviewedAt: DateTime(2024),
+        nextReviewAt: DateTime(2024, 1, 2),
         repetitions: 0,
         updatedAt: DateTime(2024),
         userId: 1,
@@ -61,37 +61,37 @@ void main() {
     });
 
     test('should create a valid WordProgressRequest instance', () {
-      const request = WordProgressRequest(
+      final request = WordProgressRequest(
         easeFactor: 2,
         intervalDays: 1,
-        lastReviewedAt: '2024-01-01T00:00:00Z',
-        nextReviewAt: '2024-01-02T00:00:00Z',
+        lastReviewedAt: DateTime(2024),
+        nextReviewAt: DateTime(2024, 1, 2),
         repetitions: 0,
         wordId: 1,
       );
 
       expect(request.easeFactor, 2);
       expect(request.intervalDays, 1);
-      expect(request.lastReviewedAt, '2024-01-01T00:00:00Z');
-      expect(request.nextReviewAt, '2024-01-02T00:00:00Z');
+      expect(request.lastReviewedAt, DateTime(2024));
+      expect(request.nextReviewAt, DateTime(2024, 1, 2));
       expect(request.repetitions, 0);
       expect(request.wordId, 1);
     });
 
     test('should create a valid CreateWordProgress instance', () {
-      const createProgress = CreateWordProgress(
+      final createProgress = CreateWordProgress(
         easeFactor: 2,
         intervalDays: 1,
-        lastReviewedAt: '2024-01-01T00:00:00Z',
-        nextReviewAt: '2024-01-02T00:00:00Z',
+        lastReviewedAt: DateTime(2024),
+        nextReviewAt: DateTime(2024, 1, 2),
         repetitions: 0,
         wordId: 1,
       );
 
       expect(createProgress.easeFactor, 2);
       expect(createProgress.intervalDays, 1);
-      expect(createProgress.lastReviewedAt, '2024-01-01T00:00:00Z');
-      expect(createProgress.nextReviewAt, '2024-01-02T00:00:00Z');
+      expect(createProgress.lastReviewedAt, DateTime(2024));
+      expect(createProgress.nextReviewAt, DateTime(2024, 1, 2));
       expect(createProgress.repetitions, 0);
       expect(createProgress.wordId, 1);
     });

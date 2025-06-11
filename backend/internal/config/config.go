@@ -39,9 +39,38 @@ type Config struct {
 	AuthRateLimitEnabled  bool `mapstructure:"AUTH_RATE_LIMIT_ENABLED"`
 	AuthRateLimitRequests int  `mapstructure:"AUTH_RATE_LIMIT_REQUESTS"` // Requests per second
 	AuthRateLimitBurst    int  `mapstructure:"AUTH_RATE_LIMIT_BURST"`    // Maximum burst size
-
 	// CORS configuration
 	CORSAllowedOrigins string `mapstructure:"CORS_ALLOWED_ORIGINS"` // Comma-separated list of allowed origins
+
+	// Cache configuration
+	CacheEnabled    bool          `mapstructure:"CACHE_ENABLED"`
+	CacheType       string        `mapstructure:"CACHE_TYPE"`        // "memory" or "redis"
+	CacheDefaultTTL time.Duration `mapstructure:"CACHE_DEFAULT_TTL"` // Default TTL for cache entries
+	CacheMaxEntries int           `mapstructure:"CACHE_MAX_ENTRIES"` // Max entries for memory cache
+	CacheCleanupInt time.Duration `mapstructure:"CACHE_CLEANUP_INT"` // Cleanup interval for memory cache
+
+	// Redis cache configuration
+	RedisAddr     string `mapstructure:"REDIS_ADDR"`
+	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
+	RedisDB       int    `mapstructure:"REDIS_DB"`
+	RedisPoolSize int    `mapstructure:"REDIS_POOL_SIZE"`
+	// HTTP cache configuration
+	HTTPCacheEnabled bool          `mapstructure:"HTTP_CACHE_ENABLED"`
+	HTTPCacheTTL     time.Duration `mapstructure:"HTTP_CACHE_TTL"`
+
+	// Concurrency management configuration
+	ConcurrencyEnabled      bool `mapstructure:"CONCURRENCY_ENABLED"`
+	MaxConcurrentDBOps      int  `mapstructure:"MAX_CONCURRENT_DB_OPS"`     // Max concurrent database operations
+	MaxConcurrentHTTPOps    int  `mapstructure:"MAX_CONCURRENT_HTTP_OPS"`   // Max concurrent HTTP operations
+	MaxConcurrentCacheOps   int  `mapstructure:"MAX_CONCURRENT_CACHE_OPS"`  // Max concurrent cache operations
+	WorkerPoolSizeDB        int  `mapstructure:"WORKER_POOL_SIZE_DB"`       // Database worker pool size
+	WorkerPoolSizeHTTP      int  `mapstructure:"WORKER_POOL_SIZE_HTTP"`     // HTTP worker pool size
+	WorkerPoolSizeCache     int  `mapstructure:"WORKER_POOL_SIZE_CACHE"`    // Cache worker pool size
+	BackgroundWorkerCount   int  `mapstructure:"BACKGROUND_WORKER_COUNT"`   // Background processor worker count
+	BackgroundQueueSize     int  `mapstructure:"BACKGROUND_QUEUE_SIZE"`     // Background processor queue size
+	CircuitBreakerThreshold int  `mapstructure:"CIRCUIT_BREAKER_THRESHOLD"` // Circuit breaker failure threshold
+	RequestTimeoutSeconds   int  `mapstructure:"REQUEST_TIMEOUT_SECONDS"`   // Request timeout in seconds
+	HealthCheckInterval     int  `mapstructure:"HEALTH_CHECK_INTERVAL"`     // Health check interval in seconds
 }
 
 // LoadEnv loads environment variables from .env file
@@ -123,10 +152,38 @@ func DefaultConfig() Config {
 	// Get auth rate limiting configuration
 	authRateLimitEnabled := GetEnv("AUTH_RATE_LIMIT_ENABLED", "true") == "true"
 	authRateLimitRequests := int(GetEnvAsInt("AUTH_RATE_LIMIT_REQUESTS", 3)) // 3 reqs/sec by default (more restricted)
-	authRateLimitBurst := int(GetEnvAsInt("AUTH_RATE_LIMIT_BURST", 5))       // 5 burst by default
+	authRateLimitBurst := int(GetEnvAsInt("AUTH_RATE_LIMIT_BURST", 5))       // 5 burst by default	// Get CORS configuration
+	corsAllowedOrigins := GetEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8080,http://192.168.31.37:8000,flutter-app://toeic-app")
 
-	// Get CORS configuration
-	corsAllowedOrigins := GetEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8080,http://192.168.31.37:8000")
+	// Get cache configuration
+	cacheEnabled := GetEnv("CACHE_ENABLED", "true") == "true"
+	cacheType := GetEnv("CACHE_TYPE", "memory")
+	cacheDefaultTTL := time.Duration(GetEnvAsInt("CACHE_DEFAULT_TTL", 1800)) * time.Second // 30 minutes by default
+	cacheMaxEntries := int(GetEnvAsInt("CACHE_MAX_ENTRIES", 10000))
+	cacheCleanupInt := time.Duration(GetEnvAsInt("CACHE_CLEANUP_INT", 600)) * time.Second // 10 minutes by default
+
+	// Get Redis configuration
+	redisAddr := GetEnv("REDIS_ADDR", "localhost:6379")
+	redisPassword := GetEnv("REDIS_PASSWORD", "")
+	redisDB := int(GetEnvAsInt("REDIS_DB", 0))
+	redisPoolSize := int(GetEnvAsInt("REDIS_POOL_SIZE", 10))
+	// Get HTTP cache configuration
+	httpCacheEnabled := GetEnv("HTTP_CACHE_ENABLED", "true") == "true"
+	httpCacheTTL := time.Duration(GetEnvAsInt("HTTP_CACHE_TTL", 900)) * time.Second // 15 minutes by default
+
+	// Get concurrency management configuration
+	concurrencyEnabled := GetEnv("CONCURRENCY_ENABLED", "true") == "true"
+	maxConcurrentDBOps := int(GetEnvAsInt("MAX_CONCURRENT_DB_OPS", 100))
+	maxConcurrentHTTPOps := int(GetEnvAsInt("MAX_CONCURRENT_HTTP_OPS", 200))
+	maxConcurrentCacheOps := int(GetEnvAsInt("MAX_CONCURRENT_CACHE_OPS", 150))
+	workerPoolSizeDB := int(GetEnvAsInt("WORKER_POOL_SIZE_DB", 20))
+	workerPoolSizeHTTP := int(GetEnvAsInt("WORKER_POOL_SIZE_HTTP", 30))
+	workerPoolSizeCache := int(GetEnvAsInt("WORKER_POOL_SIZE_CACHE", 25))
+	backgroundWorkerCount := int(GetEnvAsInt("BACKGROUND_WORKER_COUNT", 10))
+	backgroundQueueSize := int(GetEnvAsInt("BACKGROUND_QUEUE_SIZE", 1000))
+	circuitBreakerThreshold := int(GetEnvAsInt("CIRCUIT_BREAKER_THRESHOLD", 10))
+	requestTimeoutSeconds := int(GetEnvAsInt("REQUEST_TIMEOUT_SECONDS", 30))
+	healthCheckInterval := int(GetEnvAsInt("HEALTH_CHECK_INTERVAL", 30))
 	return Config{
 		// Database configuration
 		DBDriver:   dbDriver,
@@ -155,8 +212,37 @@ func DefaultConfig() Config {
 		AuthRateLimitEnabled:  authRateLimitEnabled,
 		AuthRateLimitRequests: authRateLimitRequests,
 		AuthRateLimitBurst:    authRateLimitBurst,
-
 		// CORS configuration
 		CORSAllowedOrigins: corsAllowedOrigins,
+
+		// Cache configuration
+		CacheEnabled:    cacheEnabled,
+		CacheType:       cacheType,
+		CacheDefaultTTL: cacheDefaultTTL,
+		CacheMaxEntries: cacheMaxEntries,
+		CacheCleanupInt: cacheCleanupInt,
+
+		// Redis configuration
+		RedisAddr:     redisAddr,
+		RedisPassword: redisPassword,
+		RedisDB:       redisDB,
+		RedisPoolSize: redisPoolSize,
+		// HTTP cache configuration
+		HTTPCacheEnabled: httpCacheEnabled,
+		HTTPCacheTTL:     httpCacheTTL,
+
+		// Concurrency management configuration
+		ConcurrencyEnabled:      concurrencyEnabled,
+		MaxConcurrentDBOps:      maxConcurrentDBOps,
+		MaxConcurrentHTTPOps:    maxConcurrentHTTPOps,
+		MaxConcurrentCacheOps:   maxConcurrentCacheOps,
+		WorkerPoolSizeDB:        workerPoolSizeDB,
+		WorkerPoolSizeHTTP:      workerPoolSizeHTTP,
+		WorkerPoolSizeCache:     workerPoolSizeCache,
+		BackgroundWorkerCount:   backgroundWorkerCount,
+		BackgroundQueueSize:     backgroundQueueSize,
+		CircuitBreakerThreshold: circuitBreakerThreshold,
+		RequestTimeoutSeconds:   requestTimeoutSeconds,
+		HealthCheckInterval:     healthCheckInterval,
 	}
 }

@@ -31,7 +31,6 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
 
   final SecureStorageService secureStorageService;
-
   @override
   Future<Either<Failure, User>> login(
     final String email,
@@ -43,6 +42,9 @@ class AuthRepositoryImpl implements AuthRepository {
       );
       await secureStorageService.saveAccessToken(result.accessToken);
       await secureStorageService.saveRefreshToken(result.refreshToken);
+      await secureStorageService.saveSecurityKey(
+        result.securityConfig.secretKey,
+      );
       return Right(result.user.toEntity());
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
@@ -84,6 +86,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
       await secureStorageService.saveAccessToken(response.accessToken);
       await secureStorageService.saveRefreshToken(response.refreshToken);
+      await secureStorageService.saveSecurityKey(
+        response.securityConfig.secretKey,
+      );
 
       return Right(response.user.toEntity());
     } on DioException catch (e) {
@@ -115,6 +120,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await remoteDataSource.logout();
       await secureStorageService.deleteAccessToken();
       await secureStorageService.deleteRefreshToken();
+      await secureStorageService.deleteSecurityKey();
       return const Right(Success());
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {

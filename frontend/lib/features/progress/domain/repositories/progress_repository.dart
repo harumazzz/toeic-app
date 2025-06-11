@@ -4,7 +4,6 @@ import '../../../../core/error/failures.dart';
 import '../entities/progress.dart';
 
 abstract class ProgressRepository {
-
   Future<Either<Failure, WordProgress>> addNewProgress({
     required final WordProgressRequest request,
   });
@@ -17,7 +16,7 @@ abstract class ProgressRepository {
     required final int wordId,
   });
 
-  Future<Either<Failure, Progress>> getProgressById({
+  Future<Either<Failure, Progress?>> getProgressById({
     required final int wordId,
   });
 
@@ -29,5 +28,4 @@ abstract class ProgressRepository {
   Future<Either<Failure, Success>> deleteProgress({
     required final int wordId,
   });
-
 }

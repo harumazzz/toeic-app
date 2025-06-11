@@ -63,7 +63,11 @@
     "playPronunciation": "Play pronunciation",
     "bookmark": "Bookmark",
     "practiceWord": "Practice word",
-    "noSynonyms": "No synonyms available"
+    "noSynonyms": "No synonyms available",
+    "addLearn": "Add to learn",
+    "removeLearn": "Remove from learn",
+    "addedToLearn": "Added to learn list",
+    "removedFromLearn": "Removed from learn list"
   },
   "page": {
     "login": "Login",

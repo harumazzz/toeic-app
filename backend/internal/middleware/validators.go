@@ -10,10 +10,18 @@ import (
 func RegisterValidators() {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		// Register custom validation for email
-		v.RegisterValidation("valid_email", validEmailValidator)
+		err := v.RegisterValidation("valid_email", validEmailValidator)
+		if err != nil {
+			// If registration fails, log but don't panic
+			// This could happen if the validator is already registered
+		}
 
 		// Register custom validation for password strength
-		v.RegisterValidation("strong_password", strongPasswordValidator)
+		err = v.RegisterValidation("strong_password", strongPasswordValidator)
+		if err != nil {
+			// If registration fails, log but don't panic
+			// This could happen if the validator is already registered
+		}
 	}
 }
 

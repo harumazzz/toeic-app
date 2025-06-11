@@ -130,7 +130,6 @@ class _LoadingSettings extends StatelessWidget {
                             ),
                           ),
                         ),
-                        // Settings icon
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(

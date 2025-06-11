@@ -41,11 +41,30 @@ sealed class LoginRequest with _$LoginRequest {
 }
 
 @freezed
+sealed class SecurityConfig with _$SecurityConfig {
+  const factory SecurityConfig({
+    @JsonKey(name: 'secret_key') required final String secretKey,
+    @JsonKey(name: 'security_level') required final int securityLevel,
+    @JsonKey(name: 'wasm_enabled') required final bool wasmEnabled,
+    @JsonKey(name: 'web_worker_enabled') required final bool webWorkerEnabled,
+    @JsonKey(name: 'required_headers')
+    required final List<String> requiredHeaders,
+    @JsonKey(name: 'max_timestamp_age') required final int maxTimestampAge,
+  }) = _SecurityConfig;
+
+  factory SecurityConfig.fromJson(
+    final Map<String, dynamic> json,
+  ) => _$SecurityConfigFromJson(json);
+}
+
+@freezed
 sealed class LoginResponse with _$LoginResponse {
   const factory LoginResponse({
     required final UserModel user,
     @JsonKey(name: 'access_token') required final String accessToken,
     @JsonKey(name: 'refresh_token') required final String refreshToken,
+    @JsonKey(name: 'security_config')
+    required final SecurityConfig securityConfig,
   }) = _LoginResponse;
 
   factory LoginResponse.fromJson(
@@ -75,6 +94,8 @@ sealed class RegisterResponse with _$RegisterResponse {
     required final UserModel user,
     @JsonKey(name: 'access_token') required final String accessToken,
     @JsonKey(name: 'refresh_token') required final String refreshToken,
+    @JsonKey(name: 'security_config')
+    required final SecurityConfig securityConfig,
   }) = _RegisterResponse;
 
   factory RegisterResponse.fromJson(

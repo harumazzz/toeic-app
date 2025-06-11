@@ -14,8 +14,9 @@ class SecureStorageService {
   static const String refreshTokenKey = 'refresh_token';
 
   static const String userIdKey = 'user_id';
-
   static const String refreshTokenExpiryKey = 'refresh_token_expiry';
+
+  static const String securityKey = 'security_key';
 
   Future<void> saveAccessToken(
     final String token,
@@ -41,6 +42,11 @@ class SecureStorageService {
   Future<void> saveUserId(final String userId) async => _secureStorage.write(
     key: userIdKey,
     value: userId,
+  );
+
+  Future<void> saveSecurityKey(final String key) async => _secureStorage.write(
+    key: securityKey,
+    value: key,
   );
 
   Future<String?> getAccessToken() async => _secureStorage.read(
@@ -75,6 +81,10 @@ class SecureStorageService {
 
   Future<String?> getUserId() async => _secureStorage.read(key: userIdKey);
 
+  Future<String?> getSecurityKey() async => _secureStorage.read(
+    key: securityKey,
+  );
+
   Future<void> deleteAccessToken() async => _secureStorage.delete(
     key: accessTokenKey,
   );
@@ -88,9 +98,14 @@ class SecureStorageService {
     key: userIdKey,
   );
 
+  Future<void> deleteSecurityKey() async => _secureStorage.delete(
+    key: securityKey,
+  );
+
   Future<void> clearAllTokens() async {
     await deleteAccessToken();
     await deleteRefreshToken();
     await deleteUserId();
+    await deleteSecurityKey();
   }
 }

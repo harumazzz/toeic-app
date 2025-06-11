@@ -78,6 +78,52 @@ func (q *Queries) DeleteWord(ctx context.Context, id int32) error {
 	return err
 }
 
+const getPopularWords = `-- name: GetPopularWords :many
+SELECT id, word, pronounce, level, descript_level, short_mean, means, snym, freq, conjugation FROM words
+ORDER BY freq DESC, level
+LIMIT $1
+OFFSET $2
+`
+
+type GetPopularWordsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) GetPopularWords(ctx context.Context, arg GetPopularWordsParams) ([]Word, error) {
+	rows, err := q.db.QueryContext(ctx, getPopularWords, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Word
+	for rows.Next() {
+		var i Word
+		if err := rows.Scan(
+			&i.ID,
+			&i.Word,
+			&i.Pronounce,
+			&i.Level,
+			&i.DescriptLevel,
+			&i.ShortMean,
+			&i.Means,
+			&i.Snym,
+			&i.Freq,
+			&i.Conjugation,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getWord = `-- name: GetWord :one
 SELECT id, word, pronounce, level, descript_level, short_mean, means, snym, freq, conjugation FROM words
 WHERE id = $1 LIMIT 1
@@ -99,6 +145,54 @@ func (q *Queries) GetWord(ctx context.Context, id int32) (Word, error) {
 		&i.Conjugation,
 	)
 	return i, err
+}
+
+const getWordsByLevel = `-- name: GetWordsByLevel :many
+SELECT id, word, pronounce, level, descript_level, short_mean, means, snym, freq, conjugation FROM words
+WHERE level = $1
+ORDER BY freq DESC, id
+LIMIT $2
+OFFSET $3
+`
+
+type GetWordsByLevelParams struct {
+	Level  int32 `json:"level"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) GetWordsByLevel(ctx context.Context, arg GetWordsByLevelParams) ([]Word, error) {
+	rows, err := q.db.QueryContext(ctx, getWordsByLevel, arg.Level, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Word
+	for rows.Next() {
+		var i Word
+		if err := rows.Scan(
+			&i.ID,
+			&i.Word,
+			&i.Pronounce,
+			&i.Level,
+			&i.DescriptLevel,
+			&i.ShortMean,
+			&i.Means,
+			&i.Snym,
+			&i.Freq,
+			&i.Conjugation,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listWords = `-- name: ListWords :many
@@ -150,8 +244,20 @@ func (q *Queries) ListWords(ctx context.Context, arg ListWordsParams) ([]Word, e
 const searchWords = `-- name: SearchWords :many
 SELECT id, word, pronounce, level, descript_level, short_mean, means, snym, freq, conjugation FROM words
 WHERE
-    word ILIKE '%' || $1 || '%'
-ORDER BY level, freq DESC, id
+    word ILIKE '%' || $1 || '%' OR
+    short_mean ILIKE '%' || $1 || '%' OR
+    means::text ILIKE '%' || $1 || '%' OR
+    snym::text ILIKE '%' || $1 || '%'
+ORDER BY 
+    CASE 
+        WHEN LOWER(word) = LOWER($1) THEN 1
+        WHEN word ILIKE $1 || '%' THEN 2
+        WHEN word ILIKE '%' || $1 || '%' THEN 3
+        WHEN short_mean ILIKE $1 || '%' THEN 4
+        WHEN short_mean ILIKE '%' || $1 || '%' THEN 5
+        ELSE 6
+    END,
+    level, freq DESC, id
 LIMIT $2
 OFFSET $3
 `
@@ -182,6 +288,128 @@ func (q *Queries) SearchWords(ctx context.Context, arg SearchWordsParams) ([]Wor
 			&i.Snym,
 			&i.Freq,
 			&i.Conjugation,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchWordsFast = `-- name: SearchWordsFast :many
+SELECT id, word, pronounce, level, descript_level, short_mean, means, snym, freq, conjugation FROM words
+WHERE
+    word % $1 OR
+    short_mean % $1 OR
+    word ILIKE $1 || '%' OR
+    short_mean ILIKE $1 || '%'
+ORDER BY 
+    similarity(word, $1) DESC,
+    similarity(short_mean, $1) DESC,
+    level, freq DESC
+LIMIT $2
+OFFSET $3
+`
+
+type SearchWordsFastParams struct {
+	Word   string `json:"word"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
+}
+
+func (q *Queries) SearchWordsFast(ctx context.Context, arg SearchWordsFastParams) ([]Word, error) {
+	rows, err := q.db.QueryContext(ctx, searchWordsFast, arg.Word, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Word
+	for rows.Next() {
+		var i Word
+		if err := rows.Scan(
+			&i.ID,
+			&i.Word,
+			&i.Pronounce,
+			&i.Level,
+			&i.DescriptLevel,
+			&i.ShortMean,
+			&i.Means,
+			&i.Snym,
+			&i.Freq,
+			&i.Conjugation,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchWordsFullText = `-- name: SearchWordsFullText :many
+SELECT id, word, pronounce, level, descript_level, short_mean, means, snym, freq, conjugation, 
+       ts_rank(to_tsvector('english', word || ' ' || short_mean || ' ' || COALESCE(means::text, '') || ' ' || COALESCE(snym::text, '')), 
+               plainto_tsquery('english', $1)) as rank
+FROM words
+WHERE to_tsvector('english', word || ' ' || short_mean || ' ' || COALESCE(means::text, '') || ' ' || COALESCE(snym::text, '')) 
+      @@ plainto_tsquery('english', $1)
+ORDER BY rank DESC, level, freq DESC, id
+LIMIT $2
+OFFSET $3
+`
+
+type SearchWordsFullTextParams struct {
+	PlaintoTsquery string `json:"plainto_tsquery"`
+	Limit          int32  `json:"limit"`
+	Offset         int32  `json:"offset"`
+}
+
+type SearchWordsFullTextRow struct {
+	ID            int32                 `json:"id"`
+	Word          string                `json:"word"`
+	Pronounce     string                `json:"pronounce"`
+	Level         int32                 `json:"level"`
+	DescriptLevel string                `json:"descript_level"`
+	ShortMean     string                `json:"short_mean"`
+	Means         pqtype.NullRawMessage `json:"means"`
+	Snym          pqtype.NullRawMessage `json:"snym"`
+	Freq          float32               `json:"freq"`
+	Conjugation   pqtype.NullRawMessage `json:"conjugation"`
+	Rank          float32               `json:"rank"`
+}
+
+func (q *Queries) SearchWordsFullText(ctx context.Context, arg SearchWordsFullTextParams) ([]SearchWordsFullTextRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchWordsFullText, arg.PlaintoTsquery, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchWordsFullTextRow
+	for rows.Next() {
+		var i SearchWordsFullTextRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Word,
+			&i.Pronounce,
+			&i.Level,
+			&i.DescriptLevel,
+			&i.ShortMean,
+			&i.Means,
+			&i.Snym,
+			&i.Freq,
+			&i.Conjugation,
+			&i.Rank,
 		); err != nil {
 			return nil, err
 		}

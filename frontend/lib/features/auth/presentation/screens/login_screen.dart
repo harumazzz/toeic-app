@@ -3,6 +3,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../../core/services/toast_service.dart';
 import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../providers/auth_provider.dart';
@@ -24,8 +25,9 @@ class LoginScreen extends HookConsumerWidget {
         if (next is AuthAuthenticated) {
           const HomeRoute().go(context);
         } else if (next is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(next.message)),
+          ToastService.error(
+            context: context,
+            message: next.message,
           );
         }
       },

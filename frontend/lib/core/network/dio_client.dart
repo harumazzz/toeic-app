@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../security/security_interceptor.dart';
 import 'api_constants.dart';
 import 'interceptors/auth_interceptor.dart';
 import 'interceptors/logging_interceptor.dart';
@@ -14,8 +15,10 @@ DioClient dioClient(final Ref ref) {
   final loggingInterceptor = ref.watch(loggingInterceptorProvider);
   final authInterceptor = ref.watch(authInterceptorProvider);
   final responseInterceptor = ref.watch(responseInterceptorProvider);
+  final securityInterceptor = ref.watch(securityInterceptorProvider);
   final dio = Dio();
   dio.interceptors.addAll([
+    securityInterceptor,
     authInterceptor,
     responseInterceptor,
     loggingInterceptor,
@@ -33,10 +36,12 @@ DioClient dioClient(final Ref ref) {
 @Riverpod(keepAlive: true)
 Dio dioToken(final Ref ref) {
   final loggingInterceptor = ref.watch(loggingInterceptorProvider);
+  final securityInterceptor = ref.watch(securityInterceptorProvider);
   final dio = Dio();
-  dio.interceptors.add(
+  dio.interceptors.addAll([
+    securityInterceptor,
     loggingInterceptor,
-  );
+  ]);
   dio.options = BaseOptions(
     baseUrl: ApiConstants.baseUrl,
     connectTimeout: const Duration(seconds: 30),

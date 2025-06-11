@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../../../../core/services/tts_service.dart';
 import '../../../../../i18n/strings.g.dart';
 import '../../../domain/entities/word.dart';
 
@@ -62,8 +63,8 @@ class PronunciationCard extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {
-              // TODO(dev): Implement text-to-speech
+            onPressed: () async {
+              await TTSService.speak(text: word.word);
             },
             icon: Icon(
               Symbols.volume_up,

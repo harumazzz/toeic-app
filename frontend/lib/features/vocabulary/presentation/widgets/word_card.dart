@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../../../core/services/tts_service.dart';
 import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../domain/entities/word.dart';
@@ -68,7 +69,7 @@ class WordCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       onTap: () async {
-                        // TODO(dev): Implement pronunciation playback
+                        await TTSService.speak(text: word.word);
                       },
                       child: const Icon(
                         Symbols.volume_up,

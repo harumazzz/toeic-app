@@ -97,13 +97,12 @@ class SynonymGroupItem extends StatelessWidget {
       if (synonym.kind != null) SynonymKindBadge(kind: synonym.kind!),
       if (synonym.content != null) ...[
         for (
-          int contentIndex = 0;
+          var contentIndex = 0;
           contentIndex < synonym.content!.length;
           contentIndex++
         ) ...[
           SynonymContentItem(content: synonym.content![contentIndex]),
-          if (contentIndex < synonym.content!.length - 1)
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
         ],
       ],
     ],

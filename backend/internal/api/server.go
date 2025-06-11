@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,10 +12,12 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/toeic-app/internal/cache"
 	"github.com/toeic-app/internal/config"
 	db "github.com/toeic-app/internal/db/sqlc"
 	"github.com/toeic-app/internal/logger"
 	"github.com/toeic-app/internal/middleware"
+	"github.com/toeic-app/internal/performance"
 	"github.com/toeic-app/internal/scheduler"
 	"github.com/toeic-app/internal/token"
 	"github.com/toeic-app/internal/uploader"
@@ -28,34 +31,130 @@ import (
 
 // Server serves HTTP requests for our banking service.
 type Server struct {
-	config          config.Config
-	store           db.Querier
-	tokenMaker      token.Maker
-	router          *gin.Engine
-	uploader        *uploader.CloudinaryUploader
-	rateLimiter     *middleware.AdvancedRateLimit // Store the rate limiter instance
-	httpServer      *http.Server                  // Store the HTTP server instance
-	backupScheduler *scheduler.BackupScheduler    // Automated backup scheduler
+	config              config.Config
+	store               db.Querier
+	tokenMaker          token.Maker
+	router              *gin.Engine
+	uploader            *uploader.CloudinaryUploader
+	rateLimiter         *middleware.AdvancedRateLimit    // Store the rate limiter instance
+	httpServer          *http.Server                     // Store the HTTP server instance
+	backupScheduler     *scheduler.BackupScheduler       // Automated backup scheduler
+	cache               cache.Cache                      // Cache instance
+	serviceCache        *cache.ServiceCache              // Service layer cache
+	httpCache           *cache.HTTPCacheMiddleware       // HTTP cache middleware
+	objectPool          *performance.ObjectPool          // Object pool for memory optimization
+	responseOptimizer   *performance.ResponseOptimizer   // Response optimization
+	backgroundProcessor *performance.BackgroundProcessor // Background task processor
+
+	// Enhanced concurrency management
+	concurrencyManager *performance.ConcurrencyManager      // Advanced concurrency management
+	poolManager        *performance.ConnectionPoolManager   // Database connection pool management
+	concurrentHandler  *middleware.ConcurrentRequestHandler // Concurrent request handling
 }
 
 // NewServer creates a new HTTP server and setup routing.
-func NewServer(config config.Config, store db.Querier) (*Server, error) {
+func NewServer(config config.Config, store db.Querier, dbConn *sql.DB) (*Server, error) {
 	tokenMaker, err := token.NewJWTMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, err
 	}
-
 	cloudinaryUploader, err := uploader.NewCloudinaryUploader(config)
 	if err != nil {
 		return nil, err
 	}
 
-	// Initialize the server
+	// Initialize cache if enabled
+	var cacheInstance cache.Cache
+	var serviceCache *cache.ServiceCache
+	var httpCache *cache.HTTPCacheMiddleware
+
+	if config.CacheEnabled {
+		cacheConfig := cache.CacheConfig{
+			Type:            config.CacheType,
+			MaxEntries:      config.CacheMaxEntries,
+			DefaultTTL:      config.CacheDefaultTTL,
+			CleanupInterval: config.CacheCleanupInt,
+			RedisAddr:       config.RedisAddr,
+			RedisPassword:   config.RedisPassword,
+			RedisDB:         config.RedisDB,
+			RedisPoolSize:   config.RedisPoolSize,
+			KeyPrefix:       "toeic:",
+		}
+
+		cacheInstance, err = cache.NewCache(cacheConfig)
+		if err != nil {
+			logger.Warn("Failed to initialize cache: %v. Continuing without cache.", err)
+		} else {
+			serviceCache = cache.NewServiceCache(cacheInstance)
+
+			if config.HTTPCacheEnabled {
+				httpCacheConfig := cache.DefaultHTTPCacheConfig()
+				httpCacheConfig.DefaultTTL = config.HTTPCacheTTL
+				httpCache = cache.NewHTTPCacheMiddleware(cacheInstance, httpCacheConfig)
+			}
+
+			logger.Info("Cache initialized successfully with type: %s", config.CacheType)
+		}
+	} // Initialize the server
 	server := &Server{
-		config:     config,
-		store:      store,
-		tokenMaker: tokenMaker,
-		uploader:   cloudinaryUploader,
+		config:              config,
+		store:               store,
+		tokenMaker:          tokenMaker,
+		uploader:            cloudinaryUploader,
+		cache:               cacheInstance,
+		serviceCache:        serviceCache,
+		httpCache:           httpCache,
+		objectPool:          performance.NewObjectPool(),
+		responseOptimizer:   performance.NewResponseOptimizer(),
+		backgroundProcessor: performance.NewBackgroundProcessor(config.BackgroundWorkerCount, config.BackgroundQueueSize),
+	}
+
+	logger.Info("Performance optimizations initialized: Object Pool, Response Optimizer, Background Processor")
+
+	// Initialize concurrency management components if enabled
+	if config.ConcurrencyEnabled {
+		logger.Info("Initializing concurrency management components...")
+
+		// Initialize concurrency manager
+		concurrencyConfig := performance.ConcurrencyConfig{
+			MaxDBWorkers:          config.WorkerPoolSizeDB,
+			MaxHTTPWorkers:        config.WorkerPoolSizeHTTP,
+			MaxCacheWorkers:       config.WorkerPoolSizeCache,
+			DBSemaphoreSize:       config.MaxConcurrentDBOps,
+			HTTPSemaphoreSize:     config.MaxConcurrentHTTPOps,
+			CacheSemaphoreSize:    config.MaxConcurrentCacheOps,
+			MonitoringInterval:    time.Duration(config.HealthCheckInterval) * time.Second,
+			MetricRetentionPeriod: 24 * time.Hour,
+		}
+		server.concurrencyManager = performance.NewConcurrencyManager(dbConn, concurrencyConfig)
+
+		// Initialize connection pool manager
+		poolConfig := performance.ConnectionPoolConfig{
+			InitialMaxOpen:     config.MaxConcurrentDBOps,
+			InitialMaxIdle:     config.MaxConcurrentDBOps / 4,
+			MinMaxOpen:         10,
+			MaxMaxOpen:         config.MaxConcurrentDBOps * 2,
+			ScaleUpThreshold:   0.8,
+			ScaleDownThreshold: 0.3,
+			ScaleStep:          5,
+			MonitorInterval:    time.Duration(config.HealthCheckInterval) * time.Second,
+			StatsRetention:     24 * time.Hour,
+		}
+		server.poolManager = performance.NewConnectionPoolManager(dbConn, poolConfig)
+
+		// Initialize concurrent request handler
+		handlerConfig := middleware.ConcurrentHandlerConfig{
+			MaxConcurrentRequests:   int64(config.MaxConcurrentHTTPOps),
+			DegradationThreshold:    int64(float64(config.MaxConcurrentHTTPOps) * 0.8),
+			CircuitBreakerThreshold: config.CircuitBreakerThreshold,
+			CircuitBreakerTimeout:   5 * time.Minute,
+			HealthCheckInterval:     time.Duration(config.HealthCheckInterval) * time.Second,
+			RequestTimeout:          time.Duration(config.RequestTimeoutSeconds) * time.Second,
+			SlowRequestThreshold:    time.Duration(config.RequestTimeoutSeconds/2) * time.Second,
+		}
+		server.concurrentHandler = middleware.NewConcurrentRequestHandler(handlerConfig)
+
+		logger.Info("Concurrency management components initialized successfully")
 	}
 
 	// Initialize rate limiter if enabled
@@ -145,26 +244,40 @@ func (server *Server) uploadAudioFile(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Error uploading audio to cloudinary", err)
 		return
 	}
-
 	ctx.JSON(http.StatusOK, gin.H{"url": audioURL})
 }
 
 func (server *Server) setupRouter() {
-	router := gin.New() // Create a new clean router without default middleware
-	// Apply middleware
+	router := gin.New()                        // Create a new clean router without default middleware	// Apply middleware
 	router.Use(gin.Recovery())                 // Recovery middleware recovers from panics
 	router.Use(middleware.Logger())            // Our custom logger
 	router.Use(middleware.CORS(server.config)) // Enable CORS with config
-
 	// Apply rate limiting middleware based on config
-	if server.config.RateLimitEnabled {
+	if server.config.RateLimitEnabled && server.rateLimiter != nil {
 		logger.Info("Enabling rate limiting with %d requests/sec, %d burst",
 			server.config.RateLimitRequests, server.config.RateLimitBurst)
 
-		// Initialize advanced rate limiter
-		advancedLimiter := middleware.NewAdvancedRateLimit(server.config, server.tokenMaker)
-		router.Use(advancedLimiter.Middleware())
+		// Use the rate limiter that was already initialized in NewServer
+		router.Use(server.rateLimiter.Middleware())
 	}
+	// Apply HTTP cache middleware if enabled
+	if server.config.HTTPCacheEnabled && server.httpCache != nil {
+		logger.Info("Enabling HTTP cache with TTL: %v", server.config.HTTPCacheTTL)
+		router.Use(server.httpCache.Middleware())
+	} // Apply advanced security middleware for enhanced protection beyond JWT
+	advancedSecurity := middleware.NewAdvancedSecurityMiddleware(server.config, server.tokenMaker)
+	router.Use(advancedSecurity.Middleware())
+	logger.Info("Advanced security middleware enabled - additional headers required for authentication")
+
+	// TEMPORARILY DISABLE GZIP COMPRESSION TO DEBUG JSON PARSING ISSUES
+	// Add gzip compression middleware after security middleware to prevent conflicts
+	// Only compress successful responses to avoid corrupting error messages
+	// gzipConfig := middleware.DefaultGzipConfig()
+	// gzipConfig.ExcludePaths = append(gzipConfig.ExcludePaths, "/api/auth/login", "/api/auth/register")
+	// gzipConfig.MinSize = 2048 // Increase minimum size to avoid compressing small error responses
+	// router.Use(middleware.Gzip(gzipConfig))
+	logger.Info("Gzip compression temporarily disabled for debugging")
+
 	// Health check and metrics routes
 	router.GET("/health", server.healthCheck)
 	router.GET("/metrics", server.getMetrics)
@@ -195,12 +308,19 @@ func (server *Server) setupRouter() {
 			grammarsPublic.GET("/tag", server.listGrammarsByTag)
 			grammarsPublic.GET("/search", server.searchGrammars)
 			grammarsPublic.POST("/batch", server.batchGetGrammars)
+		} // Performance monitoring routes (publicly accessible)
+		performance := v1.Group("/performance")
+		{
+			performance.GET("/stats", server.getPerformanceStats)
+			performance.GET("/search-test", server.searchPerformanceTest)
+			performance.GET("/concurrency", server.getConcurrencyMetrics)
+			performance.GET("/concurrency/health", server.getConcurrencyHealth)
 		}
-
 		// Protected routes requiring authentication
 		authRoutes := v1.Group("/")
 		authRoutes.Use(server.authMiddleware())
-		{ // Admin routes for database management
+		{
+			// Admin routes for database management
 			adminRoutes := authRoutes.Group("/admin")
 			adminRoutes.Use(middleware.AdminOnly(server.IsUserAdmin))
 			{
@@ -212,6 +332,22 @@ func (server *Server) setupRouter() {
 					backups.DELETE("/:filename", server.deleteBackup)         // Delete a backup
 					backups.POST("/restore", server.restoreBackup)            // Restore from a backup
 					backups.POST("/upload", server.uploadBackup)              // Upload a backup file
+				} // Cache management routes
+				if server.config.CacheEnabled {
+					cacheRoutes := adminRoutes.Group("/cache")
+					{
+						cacheRoutes.GET("/stats", server.getCacheStats)                   // Get cache statistics
+						cacheRoutes.DELETE("/clear", server.clearCache)                   // Clear all cache
+						cacheRoutes.DELETE("/clear/:pattern", server.clearCacheByPattern) // Clear cache by pattern
+					}
+				}
+
+				// Concurrency management routes
+				if server.config.ConcurrencyEnabled {
+					concurrencyRoutes := adminRoutes.Group("/performance/concurrency")
+					{
+						concurrencyRoutes.POST("/reset", server.resetConcurrencyMetrics) // Reset concurrency metrics
+					}
 				}
 			}
 
@@ -407,10 +543,41 @@ func (server *Server) Shutdown(ctx context.Context) error {
 		server.tokenMaker.Stop()
 		logger.Info("Token blacklist cleanup stopped")
 	}
-
 	// Stop automatic backups
 	if err := server.StopAutomaticBackups(); err != nil {
 		logger.Error("Error stopping automatic backups: %v", err)
+	} // Stop background processor
+	if server.backgroundProcessor != nil {
+		server.backgroundProcessor.Stop()
+		logger.Info("Background processor shutdown complete")
+	}
+
+	// Stop concurrency management components if enabled
+	if server.config.ConcurrencyEnabled {
+		logger.Info("Shutting down concurrency management components...")
+
+		// Stop concurrency manager
+		if server.concurrencyManager != nil {
+			shutdownCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+			defer cancel()
+			if err := server.concurrencyManager.Shutdown(shutdownCtx); err != nil {
+				logger.Error("Error shutting down concurrency manager: %v", err)
+			} else {
+				logger.Info("Concurrency manager shutdown complete")
+			}
+		}
+
+		// Stop connection pool manager
+		if server.poolManager != nil {
+			server.poolManager.Stop()
+			logger.Info("Connection pool manager shutdown complete")
+		}
+
+		// Note: ConcurrentRequestHandler doesn't have a Stop method
+		// It will be cleaned up when the HTTP server shuts down
+		if server.concurrentHandler != nil {
+			logger.Info("Concurrent request handler will be cleaned up with HTTP server shutdown")
+		}
 	}
 
 	// Close database connections if needed
@@ -521,4 +688,9 @@ func (server *Server) CleanupOldBackups(maxAge time.Duration) error {
 
 func (server *Server) SetReleaseMode() {
 	gin.SetMode(gin.ReleaseMode)
+}
+
+// GetCache returns the cache instance
+func (server *Server) GetCache() cache.Cache {
+	return server.cache
 }

@@ -1,5 +1,17 @@
-basePath: /
 definitions:
+  api.CacheStats:
+    properties:
+      basic_stats:
+        additionalProperties: true
+        type: object
+      enabled:
+        type: boolean
+      http_cache:
+        additionalProperties: true
+        type: object
+      type:
+        type: string
+    type: object
   api.ContentResponse:
     properties:
       content_id:
@@ -9,6 +21,25 @@ definitions:
       part_id:
         type: integer
       type:
+        type: string
+    type: object
+  api.DatabaseStats:
+    properties:
+      idle:
+        type: integer
+      in_use:
+        type: integer
+      max_idle_closed:
+        type: integer
+      max_lifetime:
+        description: Duration as string for Swagger compatibility
+        type: string
+      open_connections:
+        type: integer
+      wait_count:
+        type: integer
+      wait_duration:
+        description: Duration as string for Swagger compatibility
         type: string
     type: object
   api.ExamResponse:
@@ -65,6 +96,19 @@ definitions:
       timestamp:
         type: string
     type: object
+  api.IndexStats:
+    properties:
+      grammars_indexes:
+        items:
+          type: string
+        type: array
+      total_indexes:
+        type: integer
+      words_indexes:
+        items:
+          type: string
+        type: array
+    type: object
   api.MemStats:
     properties:
       alloc:
@@ -76,6 +120,23 @@ definitions:
       sys:
         type: integer
       total_alloc:
+        type: integer
+    type: object
+  api.MemoryStats:
+    properties:
+      alloc_mb:
+        type: integer
+      goroutines:
+        type: integer
+      heap_inuse_mb:
+        type: integer
+      heap_objects:
+        type: integer
+      num_gc:
+        type: integer
+      sys_mb:
+        type: integer
+      total_alloc_mb:
         type: integer
     type: object
   api.MetricsResponse:
@@ -99,6 +160,24 @@ definitions:
         type: integer
       title:
         type: string
+    type: object
+  api.PerformanceStats:
+    properties:
+      background_tasks:
+        additionalProperties: true
+        type: object
+      cache:
+        $ref: '#/definitions/api.CacheStats'
+      database:
+        $ref: '#/definitions/api.DatabaseStats'
+      indexes:
+        $ref: '#/definitions/api.IndexStats'
+      memory:
+        $ref: '#/definitions/api.MemoryStats'
+      request_time:
+        type: string
+      server:
+        $ref: '#/definitions/api.ServerStats'
     type: object
   api.QuestionResponse:
     properties:
@@ -131,6 +210,41 @@ definitions:
       message:
         type: string
       status:
+        type: string
+    type: object
+  api.SecurityConfig:
+    properties:
+      max_timestamp_age:
+        description: Maximum timestamp age in seconds
+        type: integer
+      required_headers:
+        description: List of required headers
+        items:
+          type: string
+        type: array
+      secret_key:
+        description: Client-side security secret
+        type: string
+      security_level:
+        description: Required security level
+        type: integer
+      wasm_enabled:
+        description: WASM support enabled
+        type: boolean
+      web_worker_enabled:
+        description: Web worker support enabled
+        type: boolean
+    type: object
+  api.ServerStats:
+    properties:
+      compression_enabled:
+        type: boolean
+      http_cache_enabled:
+        type: boolean
+      rate_limit_enabled:
+        type: boolean
+      uptime:
+        description: Duration as string for Swagger compatibility
         type: string
     type: object
   api.SpeakingSessionResponse:
@@ -607,6 +721,8 @@ definitions:
         type: string
       refresh_token:
         type: string
+      security_config:
+        $ref: '#/definitions/api.SecurityConfig'
       user:
         $ref: '#/definitions/api.UserResponse'
     type: object
@@ -651,6 +767,8 @@ definitions:
         type: string
       refresh_token:
         type: string
+      security_config:
+        $ref: '#/definitions/api.SecurityConfig'
       user:
         $ref: '#/definitions/api.UserResponse'
     type: object
@@ -846,19 +964,8 @@ definitions:
       topic:
         type: string
     type: object
-host: 192.168.31.37:8000
 info:
-  contact:
-    email: support@example.com
-    name: API Support
-    url: http://www.example.com/support
-  description: A RESTful API for the Toeic application
-  license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
-  termsOfService: http://swagger.io/terms/
-  title: Toeic App API
-  version: "1.0"
+  contact: {}
 paths:
   /api/auth/login:
     post:
@@ -1212,6 +1319,119 @@ paths:
       summary: Upload database backup
       tags:
       - admin
+  /api/v1/admin/cache/clear:
+    delete:
+      consumes:
+      - application/json
+      description: Clear all cached data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cache cleared successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Clear all cache
+      tags:
+      - Admin
+  /api/v1/admin/cache/clear/{pattern}:
+    delete:
+      consumes:
+      - application/json
+      description: Clear cached data matching a specific pattern
+      parameters:
+      - description: Cache key pattern to clear
+        in: path
+        name: pattern
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cache pattern cleared successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Clear cache by pattern
+      tags:
+      - Admin
+  /api/v1/admin/cache/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get cache statistics and information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cache statistics
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get cache statistics
+      tags:
+      - Admin
+  /api/v1/admin/performance/concurrency/reset:
+    post:
+      description: Resets all concurrency metrics and statistics (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Metrics reset successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Reset concurrency metrics
+      tags:
+      - Performance
   /api/v1/content-questions/{content_id}:
     get:
       consumes:
@@ -2457,6 +2677,107 @@ paths:
       summary: Update a part
       tags:
       - parts
+  /api/v1/performance/concurrency:
+    get:
+      description: Returns detailed concurrency metrics including active operations,
+        worker pool status, and performance statistics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Concurrency metrics retrieved successfully
+          schema:
+            properties:
+              concurrency_metrics:
+                type: object
+              connection_pool_stats:
+                type: object
+              request_handler_stats:
+                type: object
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get concurrency metrics
+      tags:
+      - Performance
+  /api/v1/performance/concurrency/health:
+    get:
+      description: Returns health status of concurrency management components
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Health status retrieved successfully
+          schema:
+            properties:
+              components:
+                type: object
+              overall_health:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get concurrency health status
+      tags:
+      - Performance
+  /api/v1/performance/search-test:
+    get:
+      consumes:
+      - application/json
+      description: Test search performance with timing information
+      parameters:
+      - description: Search query to test
+        in: query
+        name: query
+        required: true
+        type: string
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Search performance results
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Search failed
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get search performance test
+      tags:
+      - Performance
+  /api/v1/performance/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get comprehensive performance metrics for the application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Performance statistics
+          schema:
+            $ref: '#/definitions/api.PerformanceStats'
+        "500":
+          description: Failed to get performance stats
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get performance statistics
+      tags:
+      - Performance
   /api/v1/questions:
     post:
       consumes:
@@ -4231,10 +4552,4 @@ paths:
       summary: Upload an audio file
       tags:
       - Uploads
-securityDefinitions:
-  ApiKeyAuth:
-    description: 'Bearer JWT token authorization. Format: Bearer {token}'
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"

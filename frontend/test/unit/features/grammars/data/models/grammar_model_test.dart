@@ -94,7 +94,7 @@ void main() {
         title: 'Present Simple',
         grammarKey: 'present_simple',
         level: 2,
-        contents: GrammarContentModel(contents: [contentModel]),
+        contents: [contentModel],
         tag: ['basic', 'tense'],
         related: [2, 3],
       );

@@ -8,30 +8,20 @@ part 'word_model.g.dart';
 @freezed
 sealed class WordModel with _$WordModel {
   const factory WordModel({
-    @JsonKey(name: 'conjugation') final ConjugationModel? conjugation,
+    @JsonKey(name: 'conjugation') final ConjugationData? conjugation,
     @JsonKey(name: 'descript_level') required final String descriptLevel,
     @JsonKey(name: 'freq') required final int freq,
     @JsonKey(name: 'id') required final int id,
     @JsonKey(name: 'level') required final int level,
-    @JsonKey(name: 'means') final MeaningModel? means,
+    @JsonKey(name: 'means') final List<MeaningData>? means,
     @JsonKey(name: 'pronounce') required final String pronounce,
     @JsonKey(name: 'short_mean') required final String shortMean,
-    @JsonKey(name: 'snym') final SynonymModel? snym,
+    @JsonKey(name: 'snym') final List<SynonymData>? snym,
     @JsonKey(name: 'word') required final String word,
   }) = _WordModel;
 
   factory WordModel.fromJson(final Map<String, dynamic> json) =>
       _$WordModelFromJson(json);
-}
-
-@freezed
-sealed class ConjugationModel with _$ConjugationModel {
-  const factory ConjugationModel({
-    @JsonKey(name: 'RawMessage') final ConjugationData? data,
-  }) = _ConjugationModel;
-
-  factory ConjugationModel.fromJson(final Map<String, dynamic> json) =>
-      _$ConjugationModelFromJson(json);
 }
 
 @freezed
@@ -43,16 +33,6 @@ sealed class WordStateModel with _$WordStateModel {
 
   factory WordStateModel.fromJson(final Map<String, dynamic> json) =>
       _$WordStateModelFromJson(json);
-}
-
-@freezed
-sealed class SynonymModel with _$SynonymModel {
-  const factory SynonymModel({
-    @JsonKey(name: 'RawMessage') final List<SynonymData>? data,
-  }) = _SynonymModel;
-
-  factory SynonymModel.fromJson(final Map<String, dynamic> json) =>
-      _$SynonymModelFromJson(json);
 }
 
 @freezed
@@ -75,16 +55,6 @@ sealed class ContentModel with _$ContentModel {
 
   factory ContentModel.fromJson(final Map<String, dynamic> json) =>
       _$ContentModelFromJson(json);
-}
-
-@freezed
-sealed class MeaningModel with _$MeaningModel {
-  const factory MeaningModel({
-    @JsonKey(name: 'RawMessage') final List<MeaningData>? data,
-  }) = _MeaningModel;
-
-  factory MeaningModel.fromJson(final Map<String, dynamic> json) =>
-      _$MeaningModelFromJson(json);
 }
 
 @freezed
@@ -129,18 +99,12 @@ extension WordModelExtension on WordModel {
     freq: freq,
     id: id,
     level: level,
-    means: means?.toEntity() ?? [],
+    means: [...?means?.map((final e) => e.toEntity())],
     pronounce: pronounce,
     shortMean: shortMean,
-    snym: snym?.toEntity() ?? [],
+    snym: [...?snym?.map((final e) => e.toEntity())],
     word: word,
   );
-}
-
-extension MeaningModelExtension on MeaningModel {
-  List<Meaning> toEntity() => [
-    ...?data?.map((final e) => e.toEntity()),
-  ];
 }
 
 extension MeaningDataExtension on MeaningData {
@@ -164,12 +128,6 @@ extension WordStateModelExtension on WordStateModel {
   );
 }
 
-extension SynonymModelExtension on SynonymModel {
-  List<Synonym> toEntity() => [
-    ...?data?.map((final e) => e.toEntity()),
-  ];
-}
-
 extension SynonymDataExtension on SynonymData {
   Synonym toEntity() => Synonym(
     kind: kind,
@@ -184,11 +142,11 @@ extension ContentModelExtension on ContentModel {
   );
 }
 
-extension ConjugationModelExtension on ConjugationModel {
+extension ConjugationDataExtension on ConjugationData {
   Conjugation toEntity() => Conjugation(
-    presentContinuous: data?.presentContinuous?.toEntity(),
-    presentParticiple: data?.presentParticiple?.toEntity(),
-    simplePast: data?.simplePast?.toEntity(),
-    simplePresent: data?.simplePresent?.toEntity(),
+    simplePresent: simplePresent?.toEntity(),
+    simplePast: simplePast?.toEntity(),
+    presentParticiple: presentParticiple?.toEntity(),
+    presentContinuous: presentContinuous?.toEntity(),
   );
 }

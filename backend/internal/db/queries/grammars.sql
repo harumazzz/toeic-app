@@ -46,8 +46,18 @@ SELECT * FROM grammars
 WHERE
     title ILIKE '%' || $1 || '%' OR
     grammar_key ILIKE '%' || $1 || '%' OR
-    EXISTS (SELECT 1 FROM unnest(tag) AS t WHERE t ILIKE '%' || $1 || '%')
-ORDER BY level, id
+    EXISTS (SELECT 1 FROM unnest(tag) AS t WHERE t ILIKE '%' || $1 || '%') OR
+    contents::text ILIKE '%' || $1 || '%'
+ORDER BY 
+    CASE 
+        WHEN LOWER(title) = LOWER($1) THEN 1
+        WHEN title ILIKE $1 || '%' THEN 2
+        WHEN title ILIKE '%' || $1 || '%' THEN 3
+        WHEN grammar_key ILIKE $1 || '%' THEN 4
+        WHEN grammar_key ILIKE '%' || $1 || '%' THEN 5
+        ELSE 6
+    END,
+    level, id
 LIMIT $2
 OFFSET $3;
 

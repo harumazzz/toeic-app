@@ -1,5 +1,6 @@
 import 'package:dart_either/dart_either.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -18,7 +19,6 @@ ProgressRepository progressRepository(final Ref ref) {
 }
 
 class ProgressRepositoryImpl implements ProgressRepository {
-  
   const ProgressRepositoryImpl(this._remoteDataSource);
 
   final ProgressRemoteDataSource _remoteDataSource;
@@ -32,11 +32,9 @@ class ProgressRepositoryImpl implements ProgressRepository {
         request: request.toModel(),
       );
       return Right(response.toEntity());
-    }
-    on DioException catch (e) {
+    } on DioException catch (e) {
       return Left(ServerFailure(message: e.message.toString()));
-    }
-    catch (e) {
+    } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
@@ -50,29 +48,29 @@ class ProgressRepositoryImpl implements ProgressRepository {
         wordId: wordId,
       );
       return const Right(Success());
-    }
-    on DioException catch (e) {
+    } on DioException catch (e) {
       return Left(ServerFailure(message: e.message.toString()));
-    }
-    catch (e) {
+    } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, Progress>> getProgressById({
+  Future<Either<Failure, Progress?>> getProgressById({
     required final int wordId,
   }) async {
     try {
       final response = await _remoteDataSource.getProgressById(
         progressId: wordId,
       );
+      if (response == null) {
+        return const Right(null);
+      }
       return Right(response.toEntity());
-    }
-    on DioException catch (e) {
+    } on DioException catch (e) {
       return Left(ServerFailure(message: e.message.toString()));
-    }
-    catch (e) {
+    } catch (e, s) {
+      debugPrintStack(stackTrace: s);
       return Left(ServerFailure(message: e.toString()));
     }
   }
@@ -86,11 +84,9 @@ class ProgressRepositoryImpl implements ProgressRepository {
         limit: limit,
       );
       return Right([...response.map((final e) => e.toEntity())]);
-    } 
-    on DioException catch (e) {
+    } on DioException catch (e) {
       return Left(ServerFailure(message: e.message.toString()));
-    }
-    catch (e) {
+    } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
@@ -104,18 +100,16 @@ class ProgressRepositoryImpl implements ProgressRepository {
         wordId: wordId,
       );
       return Right(response.toEntity());
-    } 
-    on DioException catch (e) {
+    } on DioException catch (e) {
       return Left(ServerFailure(message: e.message.toString()));
-    }
-    catch (e) {
+    } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
   @override
   Future<Either<Failure, WordProgress>> updateProgress({
-    required final int wordId, 
+    required final int wordId,
     required final WordProgressRequest request,
   }) async {
     try {
@@ -124,13 +118,10 @@ class ProgressRepositoryImpl implements ProgressRepository {
         request: request.toModel(),
       );
       return Right(response.toEntity());
-    }
-    on DioException catch (e) {
+    } on DioException catch (e) {
       return Left(ServerFailure(message: e.message.toString()));
-    }
-    catch (e) {
+    } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
-
 }

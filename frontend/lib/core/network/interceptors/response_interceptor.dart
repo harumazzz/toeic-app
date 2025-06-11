@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -28,9 +29,7 @@ final class ResponseInterceptor extends Interceptor {
             responseData,
             (final json) => json,
           );
-          if (apiResponse.data != null) {
-            response.data = apiResponse.data;
-          }
+          response.data = apiResponse.data;
           if (apiResponse.status == 'error') {
             final error = DioException(
               requestOptions: response.requestOptions,
@@ -79,7 +78,7 @@ final class ResponseInterceptor extends Interceptor {
           return handler.next(enhancedError);
         }
       } catch (e) {
-        // If parsing fails, we still want to propagate the original error
+        debugPrint(e.toString());
       }
     }
 

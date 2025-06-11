@@ -63,7 +63,11 @@
     "playPronunciation": "Phát âm",
     "bookmark": "Đánh dấu",
     "practiceWord": "Luyện tập từ",
-    "noSynonyms": "Không có từ đồng nghĩa"
+    "noSynonyms": "Không có từ đồng nghĩa",
+    "addLearn": "Thêm vào mục học tập",
+    "removeLearn": "Xóa khỏi mục học tập",
+    "addedToLearn": "Đã thêm vào mục học tập",
+    "removedFromLearn": "Đã xóa khỏi mục học tập"
   },
   "page": {
     "login": "Đăng nhập",

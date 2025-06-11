@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -104,7 +106,10 @@ class WordController extends _$WordController {
       ifRight: (final List<Word> words) {
         final isFinished = words.isEmpty;
         return WordState.loaded(
-          words: offset > 0 ? [...currentWords, ...words] : words,
+          words:
+              offset > 0
+                  ? HashSet<Word>.from([...currentWords, ...words]).toList()
+                  : words,
           isFinished: isFinished,
         );
       },
