@@ -50,3 +50,11 @@ SELECT sqlc.embed(words), sqlc.embed(user_word_progress)
 FROM words
 LEFT JOIN user_word_progress ON words.id = user_word_progress.word_id AND user_word_progress.user_id = $2
 WHERE words.id = $1;
+
+-- name: GetAllUserSavedWords :many
+SELECT sqlc.embed(words), sqlc.embed(user_word_progress)
+FROM words
+JOIN user_word_progress ON words.id = user_word_progress.word_id
+WHERE user_word_progress.user_id = $1
+ORDER BY user_word_progress.created_at DESC
+LIMIT $2 OFFSET $3;

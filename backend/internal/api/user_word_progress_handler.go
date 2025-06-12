@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -13,43 +14,55 @@ import (
 	"github.com/toeic-app/internal/token"
 )
 
-// WordProgressJSONField is a placeholder for JSON fields in Swagger docs
-// swagger:model
-// example: {"en": "example"}
-type WordProgressJSONField struct {
-	Raw interface{} `json:"raw"`
-}
-
 // WordProgressResponse is used for Swagger documentation only
 // swagger:model
-// example: {"id":1,"word":"example","pronounce":"ex-am-ple","level":1,"descript_level":"A1","short_mean":"short meaning","means":{"raw":{"en":"meaning"}},"snym":{"raw":null},"freq":1.0,"conjugation":{"raw":null}}
+// example: {"id":1,"word":"example","pronounce":"ex-am-ple","level":1,"descript_level":"A1","short_mean":"short meaning","means":[{"kind":"noun","means":[{"mean":"example meaning","examples":[1,2]}]}],"snym":[{"kind":"synonym","content":[{"syno":["sample","instance"]}]}],"freq":1.0,"conjugation":{"htd":{"p":"present","w":"example"}}}
 type WordProgressResponse struct {
-	ID            int32                 `json:"id"`
-	Word          string                `json:"word"`
-	Pronounce     string                `json:"pronounce"`
-	Level         int32                 `json:"level"`
-	DescriptLevel string                `json:"descript_level"`
-	ShortMean     string                `json:"short_mean"`
-	Means         WordProgressJSONField `json:"means"`
-	Snym          WordProgressJSONField `json:"snym"`
-	Freq          float32               `json:"freq"`
-	Conjugation   WordProgressJSONField `json:"conjugation"`
+	ID            int32            `json:"id"`
+	Word          string           `json:"word"`
+	Pronounce     string           `json:"pronounce"`
+	Level         int32            `json:"level"`
+	DescriptLevel string           `json:"descript_level"`
+	ShortMean     string           `json:"short_mean"`
+	Means         []MeaningData    `json:"means,omitempty"`
+	Snym          []SynonymData    `json:"snym,omitempty"`
+	Freq          float32          `json:"freq"`
+	Conjugation   *ConjugationData `json:"conjugation,omitempty"`
 }
 
 // NewWordProgressResponse creates a WordProgressResponse from a db.Word
 func NewWordProgressResponse(word db.Word) WordProgressResponse {
-	return WordProgressResponse{
+	response := WordProgressResponse{
 		ID:            word.ID,
 		Word:          word.Word,
 		Pronounce:     word.Pronounce,
 		Level:         word.Level,
 		DescriptLevel: word.DescriptLevel,
 		ShortMean:     word.ShortMean,
-		Means:         WordProgressJSONField{Raw: word.Means.RawMessage},
-		Snym:          WordProgressJSONField{Raw: word.Snym.RawMessage},
 		Freq:          word.Freq,
-		Conjugation:   WordProgressJSONField{Raw: word.Conjugation.RawMessage},
 	}
+
+	// Parse JSON fields if they are valid
+	if word.Means.Valid {
+		var means []MeaningData
+		if err := json.Unmarshal(word.Means.RawMessage, &means); err == nil {
+			response.Means = means
+		}
+	}
+	if word.Snym.Valid {
+		var snym []SynonymData
+		if err := json.Unmarshal(word.Snym.RawMessage, &snym); err == nil {
+			response.Snym = snym
+		}
+	}
+	if word.Conjugation.Valid {
+		var conjugation ConjugationData
+		if err := json.Unmarshal(word.Conjugation.RawMessage, &conjugation); err == nil {
+			response.Conjugation = &conjugation
+		}
+	}
+
+	return response
 }
 
 // UserWordProgressResponse defines the structure for user word progress information returned to clients
@@ -430,6 +443,12 @@ type listWordsForReviewRequest struct {
 	Limit int32 `form:"limit" binding:"omitempty,min=1"`
 }
 
+// listUserSavedWordsRequest defines the query parameters for listing all user saved words
+type listUserSavedWordsRequest struct {
+	Limit  int32 `form:"limit" binding:"omitempty,min=1" default:"20"`
+	Offset int32 `form:"offset" binding:"omitempty,min=0" default:"0"`
+}
+
 // WordWithProgressResponse defines the structure for a word with its progress information
 // swagger:model
 type WordWithProgressResponse struct {
@@ -550,4 +569,65 @@ func (server *Server) getWordWithProgress(ctx *gin.Context) {
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "Word with progress retrieved successfully", wordResp)
+}
+
+// @Summary Get all saved words
+// @Description Get a list of all words saved by the current user
+// @Tags user-word-progress
+// @Accept json
+// @Produce json
+// @Param limit query int false "Maximum number of words to return (optional)"
+// @Param offset query int false "Number of words to skip (optional)"
+// @Success 200 {object} Response{data=[]WordProgressResponse} "Saved words retrieved successfully"
+// @Failure 401 {object} Response "Unauthorized"
+// @Failure 500 {object} Response "Server error"
+// @Security ApiKeyAuth
+// @Router /api/v1/user-word-progress/saved [get]
+func (server *Server) getAllSavedWords(ctx *gin.Context) {
+	var req listUserSavedWordsRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ErrorResponse(ctx, http.StatusBadRequest, "Invalid query parameters", err)
+		return
+	}
+
+	// Get user ID from authorization payload
+	payload, exists := ctx.Get(AuthorizationPayloadKey)
+	if !exists {
+		ErrorResponse(ctx, http.StatusUnauthorized, "Authorization payload not found", nil)
+		return
+	}
+
+	authPayload, ok := payload.(*token.Payload)
+	if !ok {
+		ErrorResponse(ctx, http.StatusUnauthorized, "Invalid authorization payload", nil)
+		return
+	}
+	// Set default values if not provided
+	if req.Limit == 0 {
+		req.Limit = 20
+	}
+
+	arg := db.GetAllUserSavedWordsParams{
+		UserID: authPayload.ID,
+		Limit:  req.Limit,
+		Offset: req.Offset,
+	}
+
+	words, err := server.store.GetAllUserSavedWords(ctx, arg)
+	if err != nil {
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve saved words", err)
+		return
+	}
+
+	// Convert to response format
+	wordsResp := make([]WordWithProgressResponse, len(words))
+	for i, word := range words {
+		progress := NewUserWordProgressResponse(word.UserWordProgress)
+		wordsResp[i] = WordWithProgressResponse{
+			Word:     NewWordProgressResponse(word.Word),
+			Progress: &progress,
+		}
+	}
+
+	SuccessResponse(ctx, http.StatusOK, "Saved words retrieved successfully", wordsResp)
 }

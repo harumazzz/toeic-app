@@ -118,19 +118,39 @@ func (r *RedisCache) SetNX(ctx context.Context, key string, value []byte, expira
 
 // Increment atomically increments a counter
 func (r *RedisCache) Increment(ctx context.Context, key string, delta int64) (int64, error) {
-	result, err := r.client.IncrBy(ctx, r.keyWithPrefix(key), delta).Result()
+	prefixedKey := r.keyWithPrefix(key)
+
+	// Use a pipeline for atomic operations
+	pipe := r.client.Pipeline()
+	incrCmd := pipe.IncrBy(ctx, prefixedKey, delta)
+	expireCmd := pipe.Expire(ctx, prefixedKey, r.config.DefaultTTL)
+
+	_, err := pipe.Exec(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	// Set expiration if this is a new key
-	r.client.Expire(ctx, r.keyWithPrefix(key), r.config.DefaultTTL)
+	result, err := incrCmd.Result()
+	if err != nil {
+		return 0, err
+	}
+
+	// Check if expire command succeeded, if not, try again
+	if expireResult, expireErr := expireCmd.Result(); expireErr != nil || !expireResult {
+		// Fallback: set TTL separately if pipeline expire failed
+		go func() {
+			r.client.Expire(context.Background(), prefixedKey, r.config.DefaultTTL)
+		}()
+	}
 
 	return result, nil
 }
 
 // Close closes the Redis connection
 func (r *RedisCache) Close() error {
+	if r == nil || r.client == nil {
+		return nil // Nothing to close
+	}
 	return r.client.Close()
 }
 
@@ -143,6 +163,139 @@ func (r *RedisCache) keyWithPrefix(key string) string {
 }
 
 // Additional Redis-specific methods
+
+// Pipeline provides access to Redis pipeline for batch operations
+func (r *RedisCache) Pipeline() redis.Pipeliner {
+	return r.client.Pipeline()
+}
+
+// ExecPipeline executes a Redis pipeline
+func (r *RedisCache) ExecPipeline(ctx context.Context, pipe redis.Pipeliner) ([]redis.Cmder, error) {
+	return pipe.Exec(ctx)
+}
+
+// GetKeysWithPattern retrieves keys matching a pattern using SCAN for better performance
+func (r *RedisCache) GetKeysWithPattern(ctx context.Context, pattern string) ([]string, error) {
+	var keys []string
+	var cursor uint64
+	var err error
+
+	// Use SCAN instead of KEYS for better performance
+	for {
+		var scanKeys []string
+		scanKeys, cursor, err = r.client.Scan(ctx, cursor, r.keyWithPrefix(pattern), 100).Result()
+		if err != nil {
+			return nil, err
+		}
+		keys = append(keys, scanKeys...)
+
+		if cursor == 0 {
+			break
+		}
+	}
+
+	return keys, nil
+}
+
+// DeleteByPattern deletes keys matching a pattern efficiently
+func (r *RedisCache) DeleteByPattern(ctx context.Context, pattern string) error {
+	keys, err := r.GetKeysWithPattern(ctx, pattern)
+	if err != nil {
+		return err
+	}
+
+	if len(keys) == 0 {
+		return nil
+	}
+
+	// Delete in batches for better performance
+	batchSize := 100
+	for i := 0; i < len(keys); i += batchSize {
+		end := i + batchSize
+		if end > len(keys) {
+			end = len(keys)
+		}
+
+		batch := keys[i:end]
+		if err := r.client.Del(ctx, batch...).Err(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// IncrementWithExpiry atomically increments and sets expiry using Lua script
+func (r *RedisCache) IncrementWithExpiry(ctx context.Context, key string, delta int64, expiry time.Duration) (int64, error) {
+	luaScript := `
+		local key = KEYS[1]
+		local delta = tonumber(ARGV[1])
+		local expiry = tonumber(ARGV[2])
+		
+		local current = redis.call('INCRBY', key, delta)
+		redis.call('EXPIRE', key, expiry)
+		
+		return current
+	`
+
+	script := redis.NewScript(luaScript)
+	result, err := script.Run(ctx, r.client, []string{r.keyWithPrefix(key)}, delta, int64(expiry.Seconds())).Result()
+	if err != nil {
+		return 0, err
+	}
+
+	return result.(int64), nil
+}
+
+// SetWithTags sets a key with tags for advanced cache invalidation
+func (r *RedisCache) SetWithTags(ctx context.Context, key string, value []byte, expiration time.Duration, tags []string) error {
+	pipe := r.client.Pipeline()
+
+	// Set the main key
+	prefixedKey := r.keyWithPrefix(key)
+	pipe.Set(ctx, prefixedKey, value, expiration)
+
+	// Add key to tag sets for invalidation
+	for _, tag := range tags {
+		tagKey := r.keyWithPrefix("tag:" + tag)
+		pipe.SAdd(ctx, tagKey, prefixedKey)
+		pipe.Expire(ctx, tagKey, expiration+time.Hour) // Tags expire slightly later
+	}
+
+	_, err := pipe.Exec(ctx)
+	return err
+}
+
+// InvalidateByTag invalidates all keys associated with a tag
+func (r *RedisCache) InvalidateByTag(ctx context.Context, tag string) error {
+	tagKey := r.keyWithPrefix("tag:" + tag)
+
+	// Get all keys for this tag
+	keys, err := r.client.SMembers(ctx, tagKey).Result()
+	if err != nil {
+		return err
+	}
+
+	if len(keys) == 0 {
+		return nil
+	}
+
+	// Delete all keys and the tag set
+	allKeys := append(keys, tagKey)
+	return r.client.Del(ctx, allKeys...).Err()
+}
+
+// WarmCache preloads frequently accessed data
+func (r *RedisCache) WarmCache(ctx context.Context, warmupData map[string][]byte, defaultTTL time.Duration) error {
+	pipe := r.client.Pipeline()
+
+	for key, value := range warmupData {
+		pipe.Set(ctx, r.keyWithPrefix(key), value, defaultTTL)
+	}
+
+	_, err := pipe.Exec(ctx)
+	return err
+}
 
 // GetMultiple retrieves multiple values at once
 func (r *RedisCache) GetMultiple(ctx context.Context, keys []string) (map[string][]byte, error) {

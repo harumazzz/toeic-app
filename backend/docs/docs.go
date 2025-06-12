@@ -592,6 +592,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/admin/cache/advanced-stats": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get comprehensive cache statistics including distributed cache, warming, and metrics",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get advanced cache statistics",
+                "responses": {
+                    "200": {
+                        "description": "Advanced cache statistics",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/cache/clear": {
             "delete": {
                 "security": [
@@ -687,6 +728,102 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/admin/cache/health": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get health status of all cache components",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get cache health status",
+                "responses": {
+                    "200": {
+                        "description": "Cache health status",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/cache/invalidate/tag/{tag}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Invalidate all cache entries associated with a specific tag",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Invalidate cache by tag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tag to invalidate",
+                        "name": "tag",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Cache invalidated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/cache/stats": {
             "get": {
                 "security": [
@@ -721,6 +858,256 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/cache/warm": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Manually trigger cache warming for frequently accessed data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Trigger manual cache warming",
+                "responses": {
+                    "200": {
+                        "description": "Cache warming initiated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Cache warming not available",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/i18n/languages/{language}/export": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Export all messages for a specific language as JSON",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "i18n"
+                ],
+                "summary": "Export messages (Admin only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Language code (en, vi)",
+                        "name": "language",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Messages exported successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid language",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/i18n/languages/{language}/messages": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Add or update a translation message for a specific language",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "i18n"
+                ],
+                "summary": "Add or update a message (Admin only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Language code (en, vi)",
+                        "name": "language",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Message details",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.MessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "201": {
+                        "description": "Message created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/i18n/languages/{language}/messages/batch": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Add or update multiple translation messages for a specific language",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "i18n"
+                ],
+                "summary": "Add or update multiple messages (Admin only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Language code (en, vi)",
+                        "name": "language",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Messages details",
+                        "name": "messages",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.MessagesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Messages updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -2516,6 +2903,162 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/i18n/current": {
+            "get": {
+                "description": "Get the current language being used for the request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "i18n"
+                ],
+                "summary": "Get current language",
+                "responses": {
+                    "200": {
+                        "description": "Current language retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.LanguageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/i18n/languages": {
+            "get": {
+                "description": "Get list of all supported languages with their information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "i18n"
+                ],
+                "summary": "Get supported languages",
+                "responses": {
+                    "200": {
+                        "description": "Languages retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.I18nStatsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/i18n/stats": {
+            "get": {
+                "description": "Get detailed statistics about the i18n system",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "i18n"
+                ],
+                "summary": "Get i18n statistics",
+                "responses": {
+                    "200": {
+                        "description": "I18n statistics retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": true
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/i18n/translate": {
+            "get": {
+                "description": "Test translation of a message key with the current language",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "i18n"
+                ],
+                "summary": "Test message translation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Message key to translate",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message translated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/part-contents/{part_id}": {
             "get": {
                 "security": [
@@ -3864,6 +4407,522 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/upgrade/check": {
+            "post": {
+                "description": "Check if there are any updates available for the current app version",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "upgrade"
+                ],
+                "summary": "Check for app updates",
+                "parameters": [
+                    {
+                        "description": "Current version information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.upgradeCheckRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Update check completed",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/upgrade.UpdateCheckResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/upgrade/current": {
+            "get": {
+                "description": "Get the current latest version of the application",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "upgrade"
+                ],
+                "summary": "Get current app version",
+                "responses": {
+                    "200": {
+                        "description": "Current version retrieved",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/upgrade.AppVersion"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/upgrade/notify": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Send upgrade notification to users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "upgrade"
+                ],
+                "summary": "Send upgrade notification (Admin only)",
+                "parameters": [
+                    {
+                        "description": "Notification information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.notifyUpgradeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notification sent successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Version not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/upgrade/stats": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get statistics about the upgrade service (admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "upgrade"
+                ],
+                "summary": "Get upgrade service statistics",
+                "responses": {
+                    "200": {
+                        "description": "Upgrade statistics retrieved",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": true
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/upgrade/subscribe": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Subscribe to real-time upgrade notifications with preferences",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "upgrade"
+                ],
+                "summary": "Subscribe to upgrade notifications",
+                "parameters": [
+                    {
+                        "description": "Subscription preferences",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.subscriptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscribed to upgrade notifications",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/upgrade/unsubscribe": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Unsubscribe from real-time upgrade notifications",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "upgrade"
+                ],
+                "summary": "Unsubscribe from upgrade notifications",
+                "responses": {
+                    "200": {
+                        "description": "Unsubscribed from upgrade notifications",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/upgrade/versions": {
+            "get": {
+                "description": "Get all available versions of the application",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "upgrade"
+                ],
+                "summary": "Get all app versions",
+                "responses": {
+                    "200": {
+                        "description": "All versions retrieved",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "$ref": "#/definitions/upgrade.AppVersion"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Add a new version to the system and optionally notify users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "upgrade"
+                ],
+                "summary": "Add new app version (Admin only)",
+                "parameters": [
+                    {
+                        "description": "Version information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.addVersionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Version added successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/upgrade.AppVersion"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/upgrade/versions/{version}": {
+            "get": {
+                "description": "Get details of a specific version",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "upgrade"
+                ],
+                "summary": "Get specific app version",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Version number (e.g., 1.0.0)",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Version details retrieved",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/upgrade.AppVersion"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Version not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/upgrade/ws": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Upgrade HTTP connection to WebSocket for real-time upgrade notifications",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "upgrade"
+                ],
+                "summary": "WebSocket upgrade for real-time notifications",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer JWT token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/upgrade/ws/status": {
+            "get": {
+                "description": "Get the current WebSocket connection statistics",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "upgrade"
+                ],
+                "summary": "Get WebSocket connection status",
+                "responses": {
+                    "200": {
+                        "description": "WebSocket status retrieved",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": true
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user-word-progress": {
             "post": {
                 "security": [
@@ -3996,6 +5055,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/user-word-progress/saved": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get a list of all words saved by the current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-word-progress"
+                ],
+                "summary": "Get all saved words",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Maximum number of words to return (optional)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of words to skip (optional)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Saved words retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.WordProgressResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user-word-progress/word/{word_id}": {
             "get": {
                 "security": [
@@ -4076,7 +5204,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get a specific word progress record for the current user",
+                "description": "Get a specific word progress record for the current user. Returns null if no progress record exists.",
                 "consumes": [
                     "application/json"
                 ],
@@ -4098,7 +5226,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "User word progress retrieved successfully",
+                        "description": "User word progress retrieved successfully (may be null if not found)",
                         "schema": {
                             "allOf": [
                                 {
@@ -4123,12 +5251,6 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/api.Response"
-                        }
-                    },
-                    "404": {
-                        "description": "User word progress not found",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -4796,7 +5918,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Search words by word, short meaning, or meanings with pagination",
+                "description": "Search words by query string",
                 "consumes": [
                     "application/json"
                 ],
@@ -4820,8 +5942,7 @@ const docTemplate = `{
                         "default": 10,
                         "description": "Limit",
                         "name": "limit",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "integer",
@@ -4833,7 +5954,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Words search completed successfully",
+                        "description": "Search results",
                         "schema": {
                             "allOf": [
                                 {
@@ -5928,6 +7049,60 @@ const docTemplate = `{
                 }
             }
         },
+        "api.ConjugationData": {
+            "type": "object",
+            "properties": {
+                "htd": {
+                    "description": "simplePresent",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/api.WordState"
+                        }
+                    ]
+                },
+                "htht": {
+                    "description": "presentParticiple",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/api.WordState"
+                        }
+                    ]
+                },
+                "httd": {
+                    "description": "presentContinuous",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/api.WordState"
+                        }
+                    ]
+                },
+                "qkd": {
+                    "description": "simplePast",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/api.WordState"
+                        }
+                    ]
+                }
+            }
+        },
+        "api.ContentModel": {
+            "type": "object",
+            "properties": {
+                "anto": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "syno": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "api.ContentResponse": {
             "type": "object",
             "properties": {
@@ -6004,17 +7179,56 @@ const docTemplate = `{
                 }
             }
         },
-        "api.GrammarJSONField": {
+        "api.GrammarContent": {
             "type": "object",
             "properties": {
-                "raw": {}
+                "content": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.GrammarContentElement"
+                    }
+                },
+                "sub_title": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.GrammarContentElement": {
+            "type": "object",
+            "properties": {
+                "c": {
+                    "type": "string"
+                },
+                "e": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.GrammarExample"
+                    }
+                },
+                "f": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "api.GrammarExample": {
+            "type": "object",
+            "properties": {
+                "e": {
+                    "type": "string"
+                }
             }
         },
         "api.GrammarResponse": {
             "type": "object",
             "properties": {
                 "contents": {
-                    "type": "object"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.GrammarContent"
+                    }
                 },
                 "grammar_key": {
                     "type": "string"
@@ -6056,6 +7270,30 @@ const docTemplate = `{
                 }
             }
         },
+        "api.I18nStatsResponse": {
+            "type": "object",
+            "properties": {
+                "current_language": {
+                    "type": "string"
+                },
+                "fallback_language": {
+                    "type": "string"
+                },
+                "languages": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/api.LanguageResponse"
+                    }
+                },
+                "statistics": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "supported_languages": {
+                    "type": "integer"
+                }
+            }
+        },
         "api.IndexStats": {
             "type": "object",
             "properties": {
@@ -6072,6 +7310,60 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
+                    }
+                }
+            }
+        },
+        "api.LanguageResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "currently_used": {
+                    "type": "boolean"
+                },
+                "is_default": {
+                    "type": "boolean"
+                },
+                "is_supported": {
+                    "type": "boolean"
+                },
+                "message_count": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "native_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.MeanModel": {
+            "type": "object",
+            "properties": {
+                "examples": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "mean": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.MeaningData": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "type": "string"
+                },
+                "means": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.MeanModel"
                     }
                 }
             }
@@ -6119,6 +7411,35 @@ const docTemplate = `{
                 },
                 "total_alloc_mb": {
                     "type": "integer"
+                }
+            }
+        },
+        "api.MessageRequest": {
+            "type": "object",
+            "required": [
+                "key",
+                "message"
+            ],
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.MessagesRequest": {
+            "type": "object",
+            "required": [
+                "messages"
+            ],
+            "properties": {
+                "messages": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -6223,6 +7544,9 @@ const docTemplate = `{
             "properties": {
                 "data": {},
                 "error": {
+                    "type": "string"
+                },
+                "language": {
                     "type": "string"
                 },
                 "message": {
@@ -6335,6 +7659,20 @@ const docTemplate = `{
                 }
             }
         },
+        "api.SynonymData": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.ContentModel"
+                    }
+                },
+                "kind": {
+                    "type": "string"
+                }
+            }
+        },
         "api.UserResponse": {
             "type": "object",
             "properties": {
@@ -6424,23 +7762,11 @@ const docTemplate = `{
                 }
             }
         },
-        "api.WordJSONField": {
-            "type": "object",
-            "properties": {
-                "raw": {}
-            }
-        },
-        "api.WordProgressJSONField": {
-            "type": "object",
-            "properties": {
-                "raw": {}
-            }
-        },
         "api.WordProgressResponse": {
             "type": "object",
             "properties": {
                 "conjugation": {
-                    "$ref": "#/definitions/api.WordProgressJSONField"
+                    "$ref": "#/definitions/api.ConjugationData"
                 },
                 "descript_level": {
                     "type": "string"
@@ -6455,7 +7781,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "means": {
-                    "$ref": "#/definitions/api.WordProgressJSONField"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.MeaningData"
+                    }
                 },
                 "pronounce": {
                     "type": "string"
@@ -6464,7 +7793,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "snym": {
-                    "$ref": "#/definitions/api.WordProgressJSONField"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.SynonymData"
+                    }
                 },
                 "word": {
                     "type": "string"
@@ -6475,7 +7807,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "conjugation": {
-                    "$ref": "#/definitions/api.WordJSONField"
+                    "$ref": "#/definitions/api.ConjugationData"
                 },
                 "descript_level": {
                     "type": "string"
@@ -6490,7 +7822,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "means": {
-                    "$ref": "#/definitions/api.WordJSONField"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.MeaningData"
+                    }
                 },
                 "pronounce": {
                     "type": "string"
@@ -6499,9 +7834,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "snym": {
-                    "$ref": "#/definitions/api.WordJSONField"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.SynonymData"
+                    }
                 },
                 "word": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.WordState": {
+            "type": "object",
+            "properties": {
+                "p": {
+                    "type": "string"
+                },
+                "w": {
                     "type": "string"
                 }
             }
@@ -6537,6 +7886,55 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "api.addVersionRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "title",
+                "version"
+            ],
+            "properties": {
+                "changes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "deprecated": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "downloads": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "min_version": {
+                    "type": "string"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
                 }
             }
         },
@@ -6676,7 +8074,6 @@ const docTemplate = `{
         "api.createGrammarRequest": {
             "type": "object",
             "required": [
-                "contents",
                 "grammar_key",
                 "level",
                 "related",
@@ -6685,7 +8082,10 @@ const docTemplate = `{
             ],
             "properties": {
                 "contents": {
-                    "$ref": "#/definitions/api.GrammarJSONField"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.GrammarContent"
+                    }
                 },
                 "grammar_key": {
                     "type": "string"
@@ -6845,17 +8245,16 @@ const docTemplate = `{
         "api.createUserWordProgressRequest": {
             "type": "object",
             "required": [
-                "ease_factor",
-                "interval_days",
-                "repetitions",
                 "word_id"
             ],
             "properties": {
                 "ease_factor": {
-                    "type": "number"
+                    "type": "number",
+                    "minimum": 0
                 },
                 "interval_days": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "last_reviewed_at": {
                     "type": "string"
@@ -6864,7 +8263,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "repetitions": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "word_id": {
                     "type": "integer"
@@ -6910,7 +8310,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "conjugation": {
-                    "$ref": "#/definitions/api.WordJSONField"
+                    "$ref": "#/definitions/api.ConjugationData"
                 },
                 "descript_level": {
                     "type": "string"
@@ -6922,7 +8322,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "means": {
-                    "$ref": "#/definitions/api.WordJSONField"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.MeaningData"
+                    }
                 },
                 "pronounce": {
                     "type": "string"
@@ -6931,7 +8334,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "snym": {
-                    "$ref": "#/definitions/api.WordJSONField"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.SynonymData"
+                    }
                 },
                 "word": {
                     "type": "string"
@@ -6999,6 +8405,24 @@ const docTemplate = `{
                 }
             }
         },
+        "api.notifyUpgradeRequest": {
+            "type": "object",
+            "required": [
+                "version"
+            ],
+            "properties": {
+                "target_users": {
+                    "description": "If empty, broadcasts to all",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "api.refreshTokenRequest": {
             "type": "object",
             "required": [
@@ -7014,6 +8438,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
                     "type": "string"
                 },
                 "user": {
@@ -7071,6 +8498,29 @@ const docTemplate = `{
                 }
             }
         },
+        "api.subscriptionRequest": {
+            "type": "object",
+            "properties": {
+                "client_version": {
+                    "type": "string"
+                },
+                "notify_major": {
+                    "type": "boolean"
+                },
+                "notify_minor": {
+                    "type": "boolean"
+                },
+                "notify_patches": {
+                    "type": "boolean"
+                },
+                "notify_required": {
+                    "type": "boolean"
+                },
+                "platform": {
+                    "type": "string"
+                }
+            }
+        },
         "api.updateContentRequest": {
             "type": "object",
             "properties": {
@@ -7123,7 +8573,10 @@ const docTemplate = `{
             ],
             "properties": {
                 "contents": {
-                    "$ref": "#/definitions/api.GrammarJSONField"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.GrammarContent"
+                    }
                 },
                 "grammar_key": {
                     "type": "string"
@@ -7252,17 +8705,14 @@ const docTemplate = `{
         },
         "api.updateUserWordProgressRequest": {
             "type": "object",
-            "required": [
-                "ease_factor",
-                "interval_days",
-                "repetitions"
-            ],
             "properties": {
                 "ease_factor": {
-                    "type": "number"
+                    "type": "number",
+                    "minimum": 0
                 },
                 "interval_days": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "last_reviewed_at": {
                     "type": "string"
@@ -7271,7 +8721,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "repetitions": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 }
             }
         },
@@ -7301,7 +8752,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "conjugation": {
-                    "$ref": "#/definitions/api.WordJSONField"
+                    "$ref": "#/definitions/api.ConjugationData"
                 },
                 "descript_level": {
                     "type": "string"
@@ -7317,7 +8768,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "means": {
-                    "$ref": "#/definitions/api.WordJSONField"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.MeaningData"
+                    }
                 },
                 "pronounce": {
                     "type": "string"
@@ -7326,7 +8780,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "snym": {
-                    "$ref": "#/definitions/api.WordJSONField"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.SynonymData"
+                    }
                 },
                 "word": {
                     "type": "string"
@@ -7343,6 +8800,124 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "topic": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.upgradeCheckRequest": {
+            "type": "object",
+            "required": [
+                "current_version"
+            ],
+            "properties": {
+                "current_version": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "user_agent": {
+                    "type": "string"
+                }
+            }
+        },
+        "upgrade.AppVersion": {
+            "type": "object",
+            "properties": {
+                "changes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "deprecated": {
+                    "description": "versions that are deprecated",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "downloads": {
+                    "description": "platform -\u003e download URL",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "min_version": {
+                    "type": "string"
+                },
+                "release_date": {
+                    "type": "string"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "upgrade.UpdateCheckResponse": {
+            "type": "object",
+            "properties": {
+                "has_update": {
+                    "type": "boolean"
+                },
+                "latest_version": {
+                    "$ref": "#/definitions/upgrade.AppVersion"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "notifications": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/websocket.UpgradeNotification"
+                    }
+                },
+                "update_required": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "websocket.UpgradeNotification": {
+            "type": "object",
+            "properties": {
+                "changes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "release_date": {
+                    "type": "string"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "update_url": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }

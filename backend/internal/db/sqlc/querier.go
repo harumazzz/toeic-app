@@ -38,6 +38,7 @@ type Querier interface {
 	DeleteUserWriting(ctx context.Context, id int32) error
 	DeleteWord(ctx context.Context, id int32) error
 	DeleteWritingPrompt(ctx context.Context, id int32) error
+	GetAllUserSavedWords(ctx context.Context, arg GetAllUserSavedWordsParams) ([]GetAllUserSavedWordsRow, error)
 	GetContent(ctx context.Context, contentID int32) (Content, error)
 	GetExam(ctx context.Context, examID int32) (Exam, error)
 	GetExample(ctx context.Context, id int32) (Example, error)

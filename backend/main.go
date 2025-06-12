@@ -136,15 +136,17 @@ func main() {
 
 	// Set release mode
 	server.SetReleaseMode()
-
 	// Close cache if enabled
-	if server.GetCache() != nil {
+	cache := server.GetCache()
+	if cache != nil {
 		logger.Info("Closing cache connection...")
-		if err := server.GetCache().Close(); err != nil {
+		if err := cache.Close(); err != nil {
 			logger.Error("Error closing cache connection: %v", err)
 		} else {
 			logger.Info("Cache connection closed successfully")
 		}
+	} else {
+		logger.Debug("No cache connection to close")
 	}
 
 	// Then close the database connection

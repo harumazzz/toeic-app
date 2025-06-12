@@ -15,12 +15,15 @@ import (
 	"github.com/toeic-app/internal/cache"
 	"github.com/toeic-app/internal/config"
 	db "github.com/toeic-app/internal/db/sqlc"
+	"github.com/toeic-app/internal/i18n"
 	"github.com/toeic-app/internal/logger"
 	"github.com/toeic-app/internal/middleware"
 	"github.com/toeic-app/internal/performance"
 	"github.com/toeic-app/internal/scheduler"
 	"github.com/toeic-app/internal/token"
+	"github.com/toeic-app/internal/upgrade"
 	"github.com/toeic-app/internal/uploader"
+	"github.com/toeic-app/internal/websocket"
 )
 
 // @BasePath /api/v1
@@ -50,6 +53,15 @@ type Server struct {
 	concurrencyManager *performance.ConcurrencyManager      // Advanced concurrency management
 	poolManager        *performance.ConnectionPoolManager   // Database connection pool management
 	concurrentHandler  *middleware.ConcurrentRequestHandler // Concurrent request handling
+
+	// Real-time upgrade notifications
+	wsManager      *websocket.Manager // WebSocket manager for real-time connections
+	upgradeService *upgrade.Service   // Upgrade notification service
+
+	// Cache management components
+	cacheManager     *cache.CacheManager     // Advanced cache coordinator
+	distributedCache *cache.DistributedCache // Distributed cache for horizontal scaling
+	cacheWarmer      *cache.CacheWarmer      // Cache warming system
 }
 
 // NewServer creates a new HTTP server and setup routing.
@@ -67,8 +79,14 @@ func NewServer(config config.Config, store db.Querier, dbConn *sql.DB) (*Server,
 	var cacheInstance cache.Cache
 	var serviceCache *cache.ServiceCache
 	var httpCache *cache.HTTPCacheMiddleware
+	var cacheManager *cache.CacheManager
+	var distributedCache *cache.DistributedCache
+	var cacheWarmer *cache.CacheWarmer
 
 	if config.CacheEnabled {
+		logger.Info("Initializing advanced caching system for 1M user scalability...")
+
+		// Setup cache configuration
 		cacheConfig := cache.CacheConfig{
 			Type:            config.CacheType,
 			MaxEntries:      config.CacheMaxEntries,
@@ -81,21 +99,83 @@ func NewServer(config config.Config, store db.Querier, dbConn *sql.DB) (*Server,
 			KeyPrefix:       "toeic:",
 		}
 
+		// Initialize primary cache
 		cacheInstance, err = cache.NewCache(cacheConfig)
 		if err != nil {
-			logger.Warn("Failed to initialize cache: %v. Continuing without cache.", err)
+			logger.Warn("Failed to initialize primary cache: %v. Continuing without cache.", err)
 		} else {
+			// Initialize service cache
 			serviceCache = cache.NewServiceCache(cacheInstance)
 
+			// Initialize HTTP cache if enabled
 			if config.HTTPCacheEnabled {
 				httpCacheConfig := cache.DefaultHTTPCacheConfig()
 				httpCacheConfig.DefaultTTL = config.HTTPCacheTTL
 				httpCache = cache.NewHTTPCacheMiddleware(cacheInstance, httpCacheConfig)
 			}
 
-			logger.Info("Cache initialized successfully with type: %s", config.CacheType)
+			// Initialize distributed cache for high scalability
+			if config.CacheType == "redis" && config.CacheShardCount > 1 {
+				logger.Info("Setting up distributed Redis cache with %d shards", config.CacheShardCount)
+
+				shardConfigs := make([]cache.CacheConfig, config.CacheShardCount)
+				for i := 0; i < config.CacheShardCount; i++ {
+					shardConfig := cacheConfig
+					// Distribute across multiple Redis instances (would need multiple Redis addresses in production)
+					shardConfig.RedisDB = config.RedisDB + i
+					shardConfig.KeyPrefix = fmt.Sprintf("toeic:shard%d:", i)
+					shardConfigs[i] = shardConfig
+				}
+
+				distributedConfig := cache.DistributedCacheConfig{
+					ShardConfigs:        shardConfigs,
+					HealthCheckInterval: 30 * time.Second,
+					FallbackEnabled:     true,
+					ConsistentHashing:   true,
+					ReplicationFactor:   config.CacheReplication,
+				}
+
+				distributedCache, err = cache.NewDistributedCache(distributedConfig)
+				if err != nil {
+					logger.Warn("Failed to initialize distributed cache: %v. Using single cache instance.", err)
+				} else {
+					logger.Info("Distributed cache initialized successfully")
+				}
+			}
+
+			// Initialize cache warmer for preloading data
+			if config.CacheWarmingEnabled {
+				warmerConfig := cache.DefaultCacheWarmerConfig()
+				cacheWarmer = cache.NewCacheWarmer(cacheInstance, store, warmerConfig)
+				logger.Info("Cache warmer initialized")
+			}
+
+			// Initialize cache manager to coordinate everything
+			managerConfig := cache.DefaultCacheManagerConfig()
+			managerConfig.EnableDistributed = distributedCache != nil
+			managerConfig.EnableWarming = cacheWarmer != nil
+			managerConfig.CompressionEnabled = config.CacheCompressionEnabled
+			managerConfig.MetricsEnabled = config.CacheMetricsEnabled
+			managerConfig.MaxMemoryUsage = config.CacheMaxMemoryUsage
+
+			cacheManager = cache.NewCacheManager(cacheInstance, managerConfig)
+			if distributedCache != nil {
+				cacheManager.SetDistributedCache(distributedCache)
+			}
+			if cacheWarmer != nil {
+				cacheManager.SetWarmer(cacheWarmer)
+			}
+
+			logger.Info("Advanced cache system initialized: type=%s, shards=%d, warming=%v, compression=%v",
+				config.CacheType, config.CacheShardCount, config.CacheWarmingEnabled, config.CacheCompressionEnabled)
 		}
-	} // Initialize the server
+	}
+
+	// Initialize WebSocket manager and upgrade service
+	wsManager := websocket.NewManager()
+	upgradeService := upgrade.NewService(wsManager)
+
+	// Initialize the server
 	server := &Server{
 		config:              config,
 		store:               store,
@@ -107,9 +187,18 @@ func NewServer(config config.Config, store db.Querier, dbConn *sql.DB) (*Server,
 		objectPool:          performance.NewObjectPool(),
 		responseOptimizer:   performance.NewResponseOptimizer(),
 		backgroundProcessor: performance.NewBackgroundProcessor(config.BackgroundWorkerCount, config.BackgroundQueueSize),
+		wsManager:           wsManager,
+		upgradeService:      upgradeService,
+		cacheManager:        cacheManager,     // Add cache manager
+		distributedCache:    distributedCache, // Add distributed cache
+		cacheWarmer:         cacheWarmer,      // Add cache warmer
 	}
 
 	logger.Info("Performance optimizations initialized: Object Pool, Response Optimizer, Background Processor")
+	logger.Info("WebSocket manager and upgrade service initialized")
+
+	// Start WebSocket manager
+	wsManager.Start()
 
 	// Initialize concurrency management components if enabled
 	if config.ConcurrencyEnabled {
@@ -252,6 +341,11 @@ func (server *Server) setupRouter() {
 	router.Use(gin.Recovery())                 // Recovery middleware recovers from panics
 	router.Use(middleware.Logger())            // Our custom logger
 	router.Use(middleware.CORS(server.config)) // Enable CORS with config
+
+	// Apply i18n middleware for language detection and setting
+	router.Use(i18n.LanguageMiddleware())
+	logger.Info("I18n middleware enabled - supporting multiple languages")
+
 	// Apply rate limiting middleware based on config
 	if server.config.RateLimitEnabled && server.rateLimiter != nil {
 		logger.Info("Enabling rate limiting with %d requests/sec, %d burst",
@@ -308,7 +402,9 @@ func (server *Server) setupRouter() {
 			grammarsPublic.GET("/tag", server.listGrammarsByTag)
 			grammarsPublic.GET("/search", server.searchGrammars)
 			grammarsPublic.POST("/batch", server.batchGetGrammars)
-		} // Performance monitoring routes (publicly accessible)
+		}
+
+		// Performance monitoring routes (publicly accessible)
 		performance := v1.Group("/performance")
 		{
 			performance.GET("/stats", server.getPerformanceStats)
@@ -316,6 +412,24 @@ func (server *Server) setupRouter() {
 			performance.GET("/concurrency", server.getConcurrencyMetrics)
 			performance.GET("/concurrency/health", server.getConcurrencyHealth)
 		}
+		// Upgrade notification routes (publicly accessible)
+		upgrade := v1.Group("/upgrade")
+		{
+			upgrade.POST("/check", server.checkForUpdates)       // Check for updates
+			upgrade.GET("/current", server.getCurrentVersion)    // Get current version
+			upgrade.GET("/versions", server.getAllVersions)      // Get all versions
+			upgrade.GET("/versions/:version", server.getVersion) // Get specific version
+			upgrade.GET("/ws/status", server.getWebSocketStatus) // WebSocket status
+		}
+		// I18n routes (publicly accessible)
+		i18nRoutes := v1.Group("/i18n")
+		{
+			i18nRoutes.GET("/languages", server.getLanguages)     // Get supported languages
+			i18nRoutes.GET("/current", server.getCurrentLanguage) // Get current language
+			i18nRoutes.GET("/stats", server.getI18nStats)         // Get i18n statistics
+			i18nRoutes.GET("/translate", server.testTranslation)  // Test translation
+		}
+
 		// Protected routes requiring authentication
 		authRoutes := v1.Group("/")
 		authRoutes.Use(server.authMiddleware())
@@ -339,15 +453,33 @@ func (server *Server) setupRouter() {
 						cacheRoutes.GET("/stats", server.getCacheStats)                   // Get cache statistics
 						cacheRoutes.DELETE("/clear", server.clearCache)                   // Clear all cache
 						cacheRoutes.DELETE("/clear/:pattern", server.clearCacheByPattern) // Clear cache by pattern
-					}
-				}
 
-				// Concurrency management routes
+						// Advanced cache management routes
+						cacheRoutes.GET("/advanced-stats", server.getAdvancedCacheStats)      // Get advanced cache statistics
+						cacheRoutes.GET("/health", server.getCacheHealth)                     // Get cache health status
+						cacheRoutes.POST("/warm", server.triggerCacheWarming)                 // Trigger manual cache warming
+						cacheRoutes.POST("/invalidate/tag/:tag", server.invalidateCacheByTag) // Invalidate cache by tag
+					}
+				} // Concurrency management routes
 				if server.config.ConcurrencyEnabled {
 					concurrencyRoutes := adminRoutes.Group("/performance/concurrency")
 					{
 						concurrencyRoutes.POST("/reset", server.resetConcurrencyMetrics) // Reset concurrency metrics
 					}
+				} // Admin upgrade management routes
+				upgradeAdmin := adminRoutes.Group("/upgrade")
+				{
+					upgradeAdmin.GET("/stats", server.getUpgradeStats) // Get upgrade statistics
+					upgradeAdmin.POST("/versions", server.addVersion)  // Add new version
+					upgradeAdmin.POST("/notify", server.notifyUpgrade) // Send upgrade notification
+				}
+
+				// Admin i18n management routes
+				i18nAdmin := adminRoutes.Group("/i18n")
+				{
+					i18nAdmin.POST("/languages/:language/messages", server.addMessage)        // Add/update single message
+					i18nAdmin.POST("/languages/:language/messages/batch", server.addMessages) // Add/update multiple messages
+					i18nAdmin.GET("/languages/:language/export", server.exportMessages)       // Export messages for language
 				}
 			}
 
@@ -367,15 +499,23 @@ func (server *Server) setupRouter() {
 				words.POST("", server.createWord)
 				words.PUT("/:id", server.updateWord)
 				words.DELETE("/:id", server.deleteWord)
-			}
-
-			// Protected Grammar routes (e.g., for admin management)
+			} // Protected Grammar routes (e.g., for admin management)
 			grammarsProtected := authRoutes.Group("/grammars")
 			{
 				grammarsProtected.POST("", server.createGrammar)
 				grammarsProtected.PUT("/:id", server.updateGrammar)
 				grammarsProtected.DELETE("/:id", server.deleteGrammar)
-			} // Example routes
+			}
+
+			// Protected upgrade routes (for authenticated users)
+			upgradeProtected := authRoutes.Group("/upgrade")
+			{
+				upgradeProtected.GET("/ws", server.upgradeWebSocket)                  // WebSocket upgrade
+				upgradeProtected.POST("/subscribe", server.subscribeToUpgrades)       // Subscribe to notifications
+				upgradeProtected.POST("/unsubscribe", server.unsubscribeFromUpgrades) // Unsubscribe from notifications
+			}
+
+			// Example routes
 			examples := authRoutes.Group("/examples")
 			{
 				examples.GET("/:id", server.getExample)
@@ -435,6 +575,7 @@ func (server *Server) setupRouter() {
 				userWordProgress.DELETE("/:word_id", server.deleteUserWordProgress)
 				userWordProgress.GET("/reviews", server.getWordsForReview)
 				userWordProgress.GET("/word/:word_id", server.getWordWithProgress)
+				userWordProgress.GET("/saved", server.getAllSavedWords)
 			} // Writing routes
 			writing := authRoutes.Group("/writing")
 			{ // Writing prompt routes
@@ -503,6 +644,34 @@ func (server *Server) setupRouter() {
 // Start runs the HTTP server on a specific address.
 func (server *Server) Start(address string) error {
 	logger.Info("Starting HTTP server on address: %s", address)
+	// Start cache manager if available
+	if server.cacheManager != nil {
+		logger.Info("Starting advanced cache manager...")
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		if err := server.cacheManager.Start(ctx); err != nil {
+			logger.Error("Failed to start cache manager: %v", err)
+			logger.Warn("Continuing without advanced cache management")
+		} else {
+			logger.Info("Cache manager started successfully")
+		}
+	}
+
+	// Start cache warming if available (via cache manager)
+	if server.cacheManager != nil {
+		logger.Info("Starting cache warming process...")
+		go func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+			defer cancel()
+
+			if err := server.cacheManager.WarmCache(ctx); err != nil {
+				logger.Warn("Initial cache warming failed: %v", err)
+			} else {
+				logger.Info("Initial cache warming completed successfully")
+			}
+		}()
+	}
 
 	// Create a proper http.Server with reasonable timeouts
 	server.httpServer = &http.Server{
@@ -542,11 +711,21 @@ func (server *Server) Shutdown(ctx context.Context) error {
 	if server.tokenMaker != nil {
 		server.tokenMaker.Stop()
 		logger.Info("Token blacklist cleanup stopped")
-	}
-	// Stop automatic backups
+	} // Stop automatic backups
 	if err := server.StopAutomaticBackups(); err != nil {
 		logger.Error("Error stopping automatic backups: %v", err)
-	} // Stop background processor
+	}
+
+	// Shutdown WebSocket manager
+	if server.wsManager != nil {
+		if err := server.wsManager.Shutdown(ctx); err != nil {
+			logger.Error("Error shutting down WebSocket manager: %v", err)
+		} else {
+			logger.Info("WebSocket manager shutdown complete")
+		}
+	}
+
+	// Stop background processor
 	if server.backgroundProcessor != nil {
 		server.backgroundProcessor.Stop()
 		logger.Info("Background processor shutdown complete")

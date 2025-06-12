@@ -49,6 +49,55 @@ restore:
 	@echo "Restoring database from $(file)..."
 	docker cp $(file) toeic_postgres:/tmp/restore.sql
 	docker exec -it toeic_postgres psql -U root -d toeic_db -f /tmp/restore.sql
+
+# Production deployment commands
+.PHONY: prod-check prod-deploy prod-deploy-full prod-logs prod-status prod-stop prod-restart
+
+prod-check:
+	@echo "Checking production environment..."
+	powershell -ExecutionPolicy Bypass -File ./deploy.ps1 check
+
+prod-deploy:
+	@echo "Deploying to production..."
+	powershell -ExecutionPolicy Bypass -File ./deploy.ps1 deploy
+
+prod-deploy-full:
+	@echo "Deploying full stack to production..."
+	powershell -ExecutionPolicy Bypass -File ./deploy.ps1 deploy-full
+
+prod-logs:
+	@echo "Showing production logs..."
+	powershell -ExecutionPolicy Bypass -File ./deploy.ps1 logs
+
+prod-status:
+	@echo "Checking production status..."
+	powershell -ExecutionPolicy Bypass -File ./deploy.ps1 status
+
+prod-stop:
+	@echo "Stopping production services..."
+	powershell -ExecutionPolicy Bypass -File ./deploy.ps1 stop
+
+prod-restart:
+	@echo "Restarting production services..."
+	powershell -ExecutionPolicy Bypass -File ./deploy.ps1 restart
+
+prod-backup:
+	@echo "Creating production backup..."
+	powershell -ExecutionPolicy Bypass -File ./deploy.ps1 backup
+
+# Build Docker image
+build-image:
+	docker build -t toeic-app-backend .
+
+# Development with Docker
+dev-up:
+	docker-compose up -d
+
+dev-down:
+	docker-compose down
+
+dev-logs:
+	docker-compose logs -f
 	@echo "Database restored from $(file)"
 
 backup-list:

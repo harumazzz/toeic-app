@@ -40,18 +40,6 @@ type backupListItem struct {
 	DownloadURL string    `json:"download_url"`
 }
 
-// backupJob represents a database backup or restore job
-type backupJob struct {
-	ID          string    `json:"id"`
-	Type        string    `json:"type"` // "backup" or "restore"
-	Status      string    `json:"status"`
-	Filename    string    `json:"filename"`
-	Description string    `json:"description"`
-	StartedAt   time.Time `json:"started_at"`
-	FinishedAt  time.Time `json:"finished_at,omitempty"`
-	Error       string    `json:"error,omitempty"`
-}
-
 // ensureBackupDir creates the backup directory if it doesn't exist
 func ensureBackupDir(backupDir string) error {
 	if _, err := os.Stat(backupDir); os.IsNotExist(err) {

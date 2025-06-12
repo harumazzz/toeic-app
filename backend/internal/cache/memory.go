@@ -209,11 +209,17 @@ func (c *MemoryCache) Increment(ctx context.Context, key string, delta int64) (i
 
 // Close closes the cache
 func (c *MemoryCache) Close() error {
+	if c == nil {
+		return nil // Nothing to close
+	}
+
 	if c.cleanup != nil {
 		c.cleanup.Stop()
 	}
 
-	close(c.done)
+	if c.done != nil {
+		close(c.done)
+	}
 
 	c.mu.Lock()
 	c.data = nil

@@ -14,22 +14,37 @@ import (
 	"github.com/toeic-app/internal/logger"
 )
 
-// GrammarJSONField is a placeholder for JSON fields in Swagger docs
+// GrammarExample represents an example in grammar content
 // swagger:model
-// example: {"content": "example"}
-type GrammarJSONField struct {
-	Raw interface{} `json:"raw"`
+type GrammarExample struct {
+	Example *string `json:"e,omitempty"`
+}
+
+// GrammarContentElement represents individual content element in grammar
+// swagger:model
+type GrammarContentElement struct {
+	Content  *string          `json:"c,omitempty"`
+	Examples []GrammarExample `json:"e,omitempty"`
+	Formulas []string         `json:"f,omitempty"`
+}
+
+// GrammarContent represents content section in grammar
+// swagger:model
+type GrammarContent struct {
+	Content  []GrammarContentElement `json:"content,omitempty"`
+	SubTitle *string                 `json:"sub_title,omitempty"`
 }
 
 // GrammarResponse defines the structure for grammar information returned to clients.
+// swagger:model
 type GrammarResponse struct {
-	ID         int32           `json:"id"`
-	Level      int32           `json:"level"`
-	Title      string          `json:"title"`
-	Tag        []string        `json:"tag"`
-	GrammarKey string          `json:"grammar_key"`
-	Related    []int32         `json:"related"`
-	Contents   json.RawMessage `json:"contents,omitempty"`
+	ID         int32            `json:"id"`
+	Level      int32            `json:"level"`
+	Title      string           `json:"title"`
+	Tag        []string         `json:"tag"`
+	GrammarKey string           `json:"grammar_key"`
+	Related    []int32          `json:"related"`
+	Contents   []GrammarContent `json:"contents,omitempty"`
 }
 
 // NewGrammarResponse creates a GrammarResponse from db.Grammar model
@@ -43,22 +58,26 @@ func NewGrammarResponse(grammar db.Grammar) GrammarResponse {
 		Related:    grammar.Related,
 	}
 
-	// Only include Contents if it's valid
+	// Parse Contents if it's valid
 	if grammar.Contents != nil {
-		response.Contents = grammar.Contents
+		var contents []GrammarContent
+		if err := json.Unmarshal(grammar.Contents, &contents); err == nil {
+			response.Contents = contents
+		}
 	}
 
 	return response
 }
 
 // createGrammarRequest defines the structure for creating a new grammar entry.
+// swagger:model
 type createGrammarRequest struct {
 	Level      int32            `json:"level" binding:"required,min=1"`
 	Title      string           `json:"title" binding:"required"`
 	Tag        []string         `json:"tag" binding:"required"`
 	GrammarKey string           `json:"grammar_key" binding:"required"`
 	Related    []int32          `json:"related" binding:"required"`
-	Contents   *json.RawMessage `json:"contents,omitempty"`
+	Contents   []GrammarContent `json:"contents,omitempty"`
 }
 
 // @Summary     Create a new grammar
@@ -78,13 +97,14 @@ func (server *Server) createGrammar(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request body", err)
 		return
 	}
+
 	arg := db.CreateGrammarParams{
 		Level:      req.Level,
 		Title:      req.Title,
 		Tag:        req.Tag,
 		GrammarKey: req.GrammarKey,
 		Related:    req.Related,
-		Contents:   toRawMessageFromPointer(req.Contents),
+		Contents:   toRawMessageFromGrammarContents(req.Contents),
 	}
 
 	grammar, err := server.store.CreateGrammar(ctx, arg)
@@ -182,6 +202,7 @@ func (server *Server) listGrammars(ctx *gin.Context) {
 }
 
 // updateGrammarRequest defines the structure for updating an existing grammar entry.
+// swagger:model
 type updateGrammarRequest struct {
 	ID         int32            `json:"id" binding:"required,min=1"`
 	Level      int32            `json:"level" binding:"omitempty,min=1"`
@@ -189,27 +210,22 @@ type updateGrammarRequest struct {
 	Tag        []string         `json:"tag" binding:"omitempty"`
 	GrammarKey string           `json:"grammar_key" binding:"omitempty"`
 	Related    []int32          `json:"related" binding:"omitempty"`
-	Contents   *json.RawMessage `json:"contents,omitempty"`
+	Contents   []GrammarContent `json:"contents,omitempty"`
 }
 
-// toRawMessageFromPointer converts a *json.RawMessage to json.RawMessage
-func toRawMessageFromPointer(field *json.RawMessage) json.RawMessage {
-	if field == nil {
+// toRawMessageFromGrammarContents converts []GrammarContent to json.RawMessage
+func toRawMessageFromGrammarContents(contents []GrammarContent) json.RawMessage {
+	if contents == nil {
+		return nil
+	} // Marshal the contents to json.RawMessage
+	if len(contents) == 0 {
 		return nil
 	}
-	return *field
-}
-
-// toRawMessage converts a GrammarJSONField to json.RawMessage (kept for backward compatibility)
-func toRawMessage(field GrammarJSONField) json.RawMessage {
-	if field.Raw == nil {
-		return nil
-	}
-	b, err := json.Marshal(field.Raw)
+	data, err := json.Marshal(contents)
 	if err != nil {
 		return nil
 	}
-	return json.RawMessage(b)
+	return json.RawMessage(data)
 }
 
 // @Summary     Update a grammar
@@ -265,7 +281,6 @@ func (server *Server) updateGrammar(ctx *gin.Context) {
 		Related:    existingGrammar.Related,
 		Contents:   existingGrammar.Contents,
 	}
-
 	if req.Level != 0 {
 		arg.Level = req.Level
 	}
@@ -278,13 +293,14 @@ func (server *Server) updateGrammar(ctx *gin.Context) {
 	if req.GrammarKey != "" {
 		arg.GrammarKey = req.GrammarKey
 	}
-	if len(req.Related) > 0 {
-		arg.Related = req.Related
-	} // Only update Contents if provided (not nil)
-	if req.Contents != nil {
-		arg.Contents = toRawMessageFromPointer(req.Contents)
+	if arg.Related == nil {
+		return
 	}
-
+	if req.Contents != nil {
+		if len(req.Contents) > 0 {
+			arg.Contents = toRawMessageFromGrammarContents(req.Contents)
+		}
+	}
 	grammar, err := server.store.UpdateGrammar(ctx, arg)
 	if err != nil {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to update grammar", err)

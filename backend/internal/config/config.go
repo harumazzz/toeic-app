@@ -58,6 +58,17 @@ type Config struct {
 	HTTPCacheEnabled bool          `mapstructure:"HTTP_CACHE_ENABLED"`
 	HTTPCacheTTL     time.Duration `mapstructure:"HTTP_CACHE_TTL"`
 
+	// Advanced cache configuration for 1M users scalability
+	CacheShardCount         int  `mapstructure:"CACHE_SHARD_COUNT"`         // Number of Redis shards
+	CacheReplication        int  `mapstructure:"CACHE_REPLICATION"`         // Replication factor
+	CacheWarmingEnabled     bool `mapstructure:"CACHE_WARMING_ENABLED"`     // Enable cache warming
+	CacheCompressionEnabled bool `mapstructure:"CACHE_COMPRESSION_ENABLED"` // Enable compression
+
+	// Cache performance settings
+	CacheMaxMemoryUsage int64  `mapstructure:"CACHE_MAX_MEMORY_USAGE"` // Max memory usage in bytes
+	CacheEvictionPolicy string `mapstructure:"CACHE_EVICTION_POLICY"`  // "lru", "lfu", "ttl"
+	CacheMetricsEnabled bool   `mapstructure:"CACHE_METRICS_ENABLED"`  // Enable metrics collection
+
 	// Concurrency management configuration
 	ConcurrencyEnabled      bool `mapstructure:"CONCURRENCY_ENABLED"`
 	MaxConcurrentDBOps      int  `mapstructure:"MAX_CONCURRENT_DB_OPS"`     // Max concurrent database operations
@@ -123,9 +134,19 @@ func DefaultConfig() Config {
 	dbUser := GetEnv("DB_USER", "root")
 	dbPassword := GetEnv("DB_PASSWORD", "password")
 	dbName := GetEnv("DB_NAME", "toeic_db")
-
 	// Get server configuration
-	serverAddress := GetEnv("SERVER_ADDRESS", "127.0.0.1:8000")
+	// Support both SERVER_ADDRESS and PORT environment variables
+	// PORT takes precedence for cloud platforms like Heroku, Railway, etc.
+	port := GetEnv("PORT", "")
+	serverAddress := GetEnv("SERVER_ADDRESS", "")
+
+	if port != "" {
+		// If PORT is set, bind to all interfaces on that port (for cloud platforms)
+		serverAddress = "0.0.0.0:" + port
+	} else if serverAddress == "" {
+		// Default fallback
+		serverAddress = "127.0.0.1:8000"
+	}
 
 	// Get JWT configuration
 	tokenKey := GetEnv("TOKEN_SYMMETRIC_KEY", "12345678901234567890123456789012")
@@ -170,6 +191,15 @@ func DefaultConfig() Config {
 	// Get HTTP cache configuration
 	httpCacheEnabled := GetEnv("HTTP_CACHE_ENABLED", "true") == "true"
 	httpCacheTTL := time.Duration(GetEnvAsInt("HTTP_CACHE_TTL", 900)) * time.Second // 15 minutes by default
+
+	// Get advanced cache configuration for 1M users scalability
+	cacheShardCount := int(GetEnvAsInt("CACHE_SHARD_COUNT", 3))  // 3 Redis shards by default
+	cacheReplication := int(GetEnvAsInt("CACHE_REPLICATION", 2)) // 2x replication by default
+	cacheWarmingEnabled := GetEnv("CACHE_WARMING_ENABLED", "true") == "true"
+	cacheCompressionEnabled := GetEnv("CACHE_COMPRESSION_ENABLED", "false") == "true"
+	cacheMaxMemoryUsage := GetEnvAsInt("CACHE_MAX_MEMORY_USAGE", 256*1024*1024) // 256MB default
+	cacheEvictionPolicy := GetEnv("CACHE_EVICTION_POLICY", "lru")
+	cacheMetricsEnabled := GetEnv("CACHE_METRICS_ENABLED", "true") == "true"
 
 	// Get concurrency management configuration
 	concurrencyEnabled := GetEnv("CONCURRENCY_ENABLED", "true") == "true"
@@ -230,6 +260,15 @@ func DefaultConfig() Config {
 		// HTTP cache configuration
 		HTTPCacheEnabled: httpCacheEnabled,
 		HTTPCacheTTL:     httpCacheTTL,
+
+		// Advanced cache configuration for 1M users scalability
+		CacheShardCount:         cacheShardCount,
+		CacheReplication:        cacheReplication,
+		CacheWarmingEnabled:     cacheWarmingEnabled,
+		CacheCompressionEnabled: cacheCompressionEnabled,
+		CacheMaxMemoryUsage:     cacheMaxMemoryUsage,
+		CacheEvictionPolicy:     cacheEvictionPolicy,
+		CacheMetricsEnabled:     cacheMetricsEnabled,
 
 		// Concurrency management configuration
 		ConcurrencyEnabled:      concurrencyEnabled,

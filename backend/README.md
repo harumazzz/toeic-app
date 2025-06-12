@@ -1,6 +1,27 @@
 # TOEIC App Backend
 
-This is a backend service for a TOEIC application using Go, PostgreSQL, and sqlc.
+This is a backend service for a TOEIC application using Go, PostgreSQL, and sqlc, designed for high-performance and scalability to support 1M+ users.
+
+## 🚀 Performance & Scalability Features
+
+### Advanced Caching System
+- **Multi-Layer Caching**: HTTP response caching, service layer caching, and distributed Redis caching
+- **Horizontal Scaling**: Support for multiple Redis shards with consistent hashing
+- **Cache Warming**: Preloads frequently accessed data for optimal performance  
+- **Cache Compression**: Automatic compression for large cached values
+- **Tag-Based Invalidation**: Advanced cache invalidation strategies
+
+### High-Performance Architecture
+- **Connection Pooling**: Auto-scaling database connection pools with circuit breakers
+- **Concurrency Management**: Advanced worker pools for DB, HTTP, and cache operations
+- **Background Processing**: Async task processing with configurable worker pools
+- **Rate Limiting**: DDoS protection with burst support and per-user limits
+
+### Monitoring & Observability
+- **Performance Metrics**: Real-time monitoring of cache hit rates, latency, and throughput
+- **Health Checks**: Comprehensive health monitoring for all system components
+- **Admin Dashboard**: Advanced cache and performance management endpoints
+- **Alerting**: Configurable thresholds for proactive monitoring
 
 ## Features
 
@@ -13,6 +34,9 @@ This is a backend service for a TOEIC application using Go, PostgreSQL, and sqlc
 - CORS support
 - Health and metrics endpoints for monitoring
 - Database backup and restore functionality
+- **Multi-language support (i18n)** with dynamic language switching
+- **Real-time upgrade notifications** via WebSocket
+- **Advanced security middleware** with enhanced headers and protection
 
 ## Prerequisites
 
@@ -158,3 +182,86 @@ The backup/restore functionality requires PostgreSQL client tools (`pg_dump` and
 
 ## Docker command
 - ` docker exec -it toeic_postgres psql -U root -d toeic_db`
+
+## 📈 Scalability Configuration
+
+### Environment Setup for 1M+ Users
+
+Copy the scalability configuration template:
+
+```bash
+cp .env.scalability.example .env
+```
+
+### Key Configuration for High Scale
+
+```env
+# Distributed Redis Cache
+CACHE_TYPE=redis
+CACHE_SHARD_COUNT=5
+CACHE_REPLICATION=3
+CACHE_WARMING_ENABLED=true
+CACHE_COMPRESSION_ENABLED=true
+
+# High-Performance Settings
+MAX_CONCURRENT_DB_OPS=200
+WORKER_POOL_SIZE_DB=50
+BACKGROUND_WORKER_COUNT=30
+CACHE_MAX_MEMORY_USAGE=1073741824  # 1GB
+
+# Production Deployment
+SERVER_ADDRESS=0.0.0.0:8000
+GIN_MODE=release
+```
+
+### Performance Targets
+
+| Metric | Target | Configuration |
+|--------|---------|---------------|
+| **Concurrent Users** | 1M+ | Distributed cache + worker pools |
+| **Response Time** | <100ms | Cache warming + compression |
+| **Cache Hit Rate** | >95% | Multi-layer caching strategy |
+| **Throughput** | 10K+ req/s | Optimized concurrency management |
+
+### Quick Deployment
+
+```bash
+# Basic deployment (single instance)
+docker-compose up -d
+
+# High-scale deployment (with Redis cluster)
+docker-compose -f docker-compose.prod.yml --profile with-redis up -d
+
+# Full production (with Nginx + Redis)
+docker-compose -f docker-compose.prod.yml --profile with-nginx up -d
+```
+
+## 🔧 Advanced Cache Management
+
+### Admin Cache Endpoints
+
+```bash
+# Get cache statistics
+GET /api/v1/admin/cache/stats
+
+# Advanced cache metrics
+GET /api/v1/admin/cache/advanced-stats
+
+# Cache health status
+GET /api/v1/admin/cache/health
+
+# Trigger manual cache warming
+POST /api/v1/admin/cache/warm
+
+# Invalidate cache by tag
+POST /api/v1/admin/cache/invalidate/tag/{tag}
+```
+
+### Cache Performance Monitoring
+
+The system provides comprehensive cache metrics:
+- Hit/miss ratios
+- Memory usage and limits
+- Latency statistics
+- Shard distribution (distributed cache)
+- Warming cycle performance

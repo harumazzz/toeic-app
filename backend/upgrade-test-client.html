@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOEIC App Upgrade Notifications</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .message {
+            padding: 8px;
+            margin: 5px 0;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+        .upgrade-notification {
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+            background: #fff3cd;
+            border-radius: 4px;
+        }
+        .upgrade-notification.required {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .version-info {
+            background: #e9ecef;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        #messages {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 TOEIC App Upgrade Notifications</h1>
+        
+        <div id="status" class="status disconnected">
+            Disconnected
+        </div>
+
+        <div class="controls">
+            <h3>🔐 Authentication</h3>
+            <input type="text" id="username" placeholder="Username" value="testuser">
+            <input type="password" id="password" placeholder="Password" value="testpass123">
+            <button class="btn-primary" onclick="login()">Login</button>
+            <button class="btn-secondary" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="controls">
+            <h3>🌐 WebSocket Connection</h3>
+            <button class="btn-success" onclick="connect()">Connect</button>
+            <button class="btn-danger" onclick="disconnect()">Disconnect</button>
+        </div>
+
+        <div class="controls">
+            <h3>📱 Version Management</h3>
+            <input type="text" id="currentVersion" placeholder="Current Version" value="1.0.0">
+            <select id="platform">
+                <option value="web">Web</option>
+                <option value="android">Android</option>
+                <option value="ios">iOS</option>
+            </select>
+            <button class="btn-primary" onclick="checkForUpdates()">Check for Updates</button>
+            <button class="btn-secondary" onclick="getCurrentVersion()">Get Current Version</button>
+        </div>
+
+        <div class="controls">
+            <h3>🔔 Subscription Management</h3>
+            <label><input type="checkbox" id="notifyMajor" checked> Major Updates</label>
+            <label><input type="checkbox" id="notifyMinor" checked> Minor Updates</label>
+            <label><input type="checkbox" id="notifyPatches"> Patch Updates</label>
+            <label><input type="checkbox" id="notifyRequired" checked> Required Updates</label>
+            <br>
+            <button class="btn-success" onclick="subscribe()">Subscribe</button>
+            <button class="btn-danger" onclick="unsubscribe()">Unsubscribe</button>
+        </div>
+
+        <div id="currentVersionInfo" class="version-info" style="display: none;">
+            <h4>📋 Current App Version</h4>
+            <div id="versionDetails"></div>
+        </div>
+
+        <div>
+            <h3>📨 Messages</h3>
+            <div id="messages"></div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let authToken = null;
+        let baseURL = 'http://localhost:8000'; // Adjust this to your backend URL
+
+        function addMessage(content, type = 'message') {
+            const messages = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> - ${content}`;
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function updateStatus(connected) {
+            const status = document.getElementById('status');
+            if (connected) {
+                status.textContent = 'Connected ✅';
+                status.className = 'status connected';
+            } else {
+                status.textContent = 'Disconnected ❌';
+                status.className = 'status disconnected';
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                addMessage('Please enter both username and password', 'message');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseURL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.data && result.data.access_token) {
+                    authToken = result.data.access_token;
+                    addMessage(`✅ Login successful! Welcome ${username}`, 'message');
+                } else {
+                    addMessage(`❌ Login failed: ${result.message || 'Unknown error'}`, 'message');
+                }
+            } catch (error) {
+                addMessage(`❌ Login error: ${error.message}`, 'message');
+            }
+        }
+
+        function logout() {
+            authToken = null;
+            if (ws) {
+                disconnect();
+            }
+            addMessage('🚪 Logged out', 'message');
+        }
+
+        function connect() {
+            if (!authToken) {
+                addMessage('❌ Please login first', 'message');
+                return;
+            }
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                addMessage('Already connected', 'message');
+                return;
+            }
+
+            const wsURL = baseURL.replace('http://', 'ws://').replace('https://', 'wss://');
+            ws = new WebSocket(`${wsURL}/api/v1/upgrade/ws`);
+
+            // Add auth token to the connection (sent as a header during handshake)
+            ws.onopen = function(event) {
+                updateStatus(true);
+                addMessage('🔗 WebSocket connected successfully!', 'message');
+                
+                // Send authentication after connection
+                ws.send(JSON.stringify({
+                    type: 'auth',
+                    token: authToken
+                }));
+            };
+
+            ws.onmessage = function(event) {
+                try {
+                    const message = JSON.parse(event.data);
+                    handleWebSocketMessage(message);
+                } catch (error) {
+                    addMessage(`📨 Raw message: ${event.data}`, 'message');
+                }
+            };
+
+            ws.onclose = function(event) {
+                updateStatus(false);
+                addMessage(`🔌 WebSocket disconnected (Code: ${event.code})`, 'message');
+            };
+
+            ws.onerror = function(error) {
+                addMessage(`❌ WebSocket error: ${error}`, 'message');
+            };
+        }
+
+        function disconnect() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+            updateStatus(false);
+        }
+
+        function handleWebSocketMessage(message) {
+            console.log('Received message:', message);
+            
+            switch (message.type) {
+                case 'welcome':
+                    addMessage(`🎉 ${message.data.message}`, 'message');
+                    break;
+                    
+                case 'upgrade_notification':
+                    const notification = message.data;
+                    const isRequired = notification.required ? ' (REQUIRED)' : '';
+                    const className = notification.required ? 'upgrade-notification required' : 'upgrade-notification';
+                    
+                    let content = `
+                        <h4>🚀 New Version Available: ${notification.version}${isRequired}</h4>
+                        <p><strong>${notification.title}</strong></p>
+                        <p>${notification.description}</p>
+                        <p><strong>Release Date:</strong> ${new Date(notification.release_date).toLocaleDateString()}</p>
+                    `;
+                    
+                    if (notification.changes && notification.changes.length > 0) {
+                        content += '<p><strong>Changes:</strong></p><ul>';
+                        notification.changes.forEach(change => {
+                            content += `<li>${change}</li>`;
+                        });
+                        content += '</ul>';
+                    }
+                    
+                    if (notification.update_url) {
+                        content += `<p><a href="${notification.update_url}" target="_blank">Download Update</a></p>`;
+                    }
+                    
+                    addMessage(content, className);
+                    break;
+                    
+                default:
+                    addMessage(`📨 ${message.type}: ${JSON.stringify(message.data)}`, 'message');
+            }
+        }
+
+        async function checkForUpdates() {
+            const currentVersion = document.getElementById('currentVersion').value;
+            const platform = document.getElementById('platform').value;
+
+            if (!currentVersion) {
+                addMessage('Please enter current version', 'message');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseURL}/api/v1/upgrade/check`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        current_version: currentVersion,
+                        platform: platform
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    const data = result.data;
+                    if (data.has_update) {
+                        const updateMsg = data.update_required ? 
+                            `🚨 REQUIRED UPDATE: ${data.message}` : 
+                            `📱 ${data.message}`;
+                        addMessage(updateMsg, 'upgrade-notification');
+                        
+                        if (data.latest_version) {
+                            addMessage(`Latest version: ${data.latest_version.version} - ${data.latest_version.title}`, 'message');
+                        }
+                    } else {
+                        addMessage(`✅ ${data.message}`, 'message');
+                    }
+                } else {
+                    addMessage(`❌ Update check failed: ${result.message}`, 'message');
+                }
+            } catch (error) {
+                addMessage(`❌ Update check error: ${error.message}`, 'message');
+            }
+        }
+
+        async function getCurrentVersion() {
+            try {
+                const response = await fetch(`${baseURL}/api/v1/upgrade/current`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    const version = result.data;
+                    const versionInfo = document.getElementById('currentVersionInfo');
+                    const versionDetails = document.getElementById('versionDetails');
+                    
+                    let details = `
+                        <p><strong>Version:</strong> ${version.version}</p>
+                        <p><strong>Title:</strong> ${version.title}</p>
+                        <p><strong>Description:</strong> ${version.description}</p>
+                        <p><strong>Release Date:</strong> ${new Date(version.release_date).toLocaleDateString()}</p>
+                        <p><strong>Required:</strong> ${version.required ? 'Yes' : 'No'}</p>
+                    `;
+                    
+                    if (version.changes && version.changes.length > 0) {
+                        details += '<p><strong>Changes:</strong></p><ul>';
+                        version.changes.forEach(change => {
+                            details += `<li>${change}</li>`;
+                        });
+                        details += '</ul>';
+                    }
+                    
+                    versionDetails.innerHTML = details;
+                    versionInfo.style.display = 'block';
+                    
+                    addMessage('📋 Current version information loaded', 'message');
+                } else {
+                    addMessage(`❌ Failed to get current version: ${result.message}`, 'message');
+                }
+            } catch (error) {
+                addMessage(`❌ Error getting current version: ${error.message}`, 'message');
+            }
+        }
+
+        async function subscribe() {
+            if (!authToken) {
+                addMessage('❌ Please login first', 'message');
+                return;
+            }
+
+            const preferences = {
+                notify_major: document.getElementById('notifyMajor').checked,
+                notify_minor: document.getElementById('notifyMinor').checked,
+                notify_patches: document.getElementById('notifyPatches').checked,
+                notify_required: document.getElementById('notifyRequired').checked,
+                client_version: document.getElementById('currentVersion').value,
+                platform: document.getElementById('platform').value
+            };
+
+            try {
+                const response = await fetch(`${baseURL}/api/v1/upgrade/subscribe`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(preferences)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    addMessage('🔔 Successfully subscribed to upgrade notifications!', 'message');
+                } else {
+                    addMessage(`❌ Subscription failed: ${result.message}`, 'message');
+                }
+            } catch (error) {
+                addMessage(`❌ Subscription error: ${error.message}`, 'message');
+            }
+        }
+
+        async function unsubscribe() {
+            if (!authToken) {
+                addMessage('❌ Please login first', 'message');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseURL}/api/v1/upgrade/unsubscribe`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    addMessage('🔕 Successfully unsubscribed from upgrade notifications', 'message');
+                } else {
+                    addMessage(`❌ Unsubscribe failed: ${result.message}`, 'message');
+                }
+            } catch (error) {
+                addMessage(`❌ Unsubscribe error: ${error.message}`, 'message');
+            }
+        }
+
+        // Initialize
+        updateStatus(false);
+        addMessage('🚀 TOEIC App Upgrade Notification System Ready', 'message');
+        addMessage('👆 Please login first, then connect to WebSocket to receive real-time notifications', 'message');
+        
+        // Load current version on page load
+        getCurrentVersion();
+    </script>
+</body>
+</html>

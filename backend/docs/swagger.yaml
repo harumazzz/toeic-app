@@ -12,6 +12,36 @@ definitions:
       type:
         type: string
     type: object
+  api.ConjugationData:
+    properties:
+      htd:
+        allOf:
+        - $ref: '#/definitions/api.WordState'
+        description: simplePresent
+      htht:
+        allOf:
+        - $ref: '#/definitions/api.WordState'
+        description: presentParticiple
+      httd:
+        allOf:
+        - $ref: '#/definitions/api.WordState'
+        description: presentContinuous
+      qkd:
+        allOf:
+        - $ref: '#/definitions/api.WordState'
+        description: simplePast
+    type: object
+  api.ContentModel:
+    properties:
+      anto:
+        items:
+          type: string
+        type: array
+      syno:
+        items:
+          type: string
+        type: array
+    type: object
   api.ContentResponse:
     properties:
       content_id:
@@ -62,14 +92,39 @@ definitions:
       title:
         type: string
     type: object
-  api.GrammarJSONField:
+  api.GrammarContent:
     properties:
-      raw: {}
+      content:
+        items:
+          $ref: '#/definitions/api.GrammarContentElement'
+        type: array
+      sub_title:
+        type: string
+    type: object
+  api.GrammarContentElement:
+    properties:
+      c:
+        type: string
+      e:
+        items:
+          $ref: '#/definitions/api.GrammarExample'
+        type: array
+      f:
+        items:
+          type: string
+        type: array
+    type: object
+  api.GrammarExample:
+    properties:
+      e:
+        type: string
     type: object
   api.GrammarResponse:
     properties:
       contents:
-        type: object
+        items:
+          $ref: '#/definitions/api.GrammarContent'
+        type: array
       grammar_key:
         type: string
       id:
@@ -96,6 +151,22 @@ definitions:
       timestamp:
         type: string
     type: object
+  api.I18nStatsResponse:
+    properties:
+      current_language:
+        type: string
+      fallback_language:
+        type: string
+      languages:
+        additionalProperties:
+          $ref: '#/definitions/api.LanguageResponse'
+        type: object
+      statistics:
+        additionalProperties: true
+        type: object
+      supported_languages:
+        type: integer
+    type: object
   api.IndexStats:
     properties:
       grammars_indexes:
@@ -107,6 +178,41 @@ definitions:
       words_indexes:
         items:
           type: string
+        type: array
+    type: object
+  api.LanguageResponse:
+    properties:
+      code:
+        type: string
+      currently_used:
+        type: boolean
+      is_default:
+        type: boolean
+      is_supported:
+        type: boolean
+      message_count:
+        type: integer
+      name:
+        type: string
+      native_name:
+        type: string
+    type: object
+  api.MeanModel:
+    properties:
+      examples:
+        items:
+          type: integer
+        type: array
+      mean:
+        type: string
+    type: object
+  api.MeaningData:
+    properties:
+      kind:
+        type: string
+      means:
+        items:
+          $ref: '#/definitions/api.MeanModel'
         type: array
     type: object
   api.MemStats:
@@ -138,6 +244,25 @@ definitions:
         type: integer
       total_alloc_mb:
         type: integer
+    type: object
+  api.MessageRequest:
+    properties:
+      key:
+        type: string
+      message:
+        type: string
+    required:
+    - key
+    - message
+    type: object
+  api.MessagesRequest:
+    properties:
+      messages:
+        additionalProperties:
+          type: string
+        type: object
+    required:
+    - messages
     type: object
   api.MetricsResponse:
     properties:
@@ -206,6 +331,8 @@ definitions:
     properties:
       data: {}
       error:
+        type: string
+      language:
         type: string
       message:
         type: string
@@ -281,6 +408,15 @@ definitions:
       timestamp:
         type: string
     type: object
+  api.SynonymData:
+    properties:
+      content:
+        items:
+          $ref: '#/definitions/api.ContentModel'
+        type: array
+      kind:
+        type: string
+    type: object
   api.UserResponse:
     properties:
       created_at:
@@ -342,18 +478,10 @@ definitions:
       user_id:
         type: integer
     type: object
-  api.WordJSONField:
-    properties:
-      raw: {}
-    type: object
-  api.WordProgressJSONField:
-    properties:
-      raw: {}
-    type: object
   api.WordProgressResponse:
     properties:
       conjugation:
-        $ref: '#/definitions/api.WordProgressJSONField'
+        $ref: '#/definitions/api.ConjugationData'
       descript_level:
         type: string
       freq:
@@ -363,20 +491,24 @@ definitions:
       level:
         type: integer
       means:
-        $ref: '#/definitions/api.WordProgressJSONField'
+        items:
+          $ref: '#/definitions/api.MeaningData'
+        type: array
       pronounce:
         type: string
       short_mean:
         type: string
       snym:
-        $ref: '#/definitions/api.WordProgressJSONField'
+        items:
+          $ref: '#/definitions/api.SynonymData'
+        type: array
       word:
         type: string
     type: object
   api.WordResponse:
     properties:
       conjugation:
-        $ref: '#/definitions/api.WordJSONField'
+        $ref: '#/definitions/api.ConjugationData'
       descript_level:
         type: string
       freq:
@@ -386,14 +518,25 @@ definitions:
       level:
         type: integer
       means:
-        $ref: '#/definitions/api.WordJSONField'
+        items:
+          $ref: '#/definitions/api.MeaningData'
+        type: array
       pronounce:
         type: string
       short_mean:
         type: string
       snym:
-        $ref: '#/definitions/api.WordJSONField'
+        items:
+          $ref: '#/definitions/api.SynonymData'
+        type: array
       word:
+        type: string
+    type: object
+  api.WordState:
+    properties:
+      p:
+        type: string
+      w:
         type: string
     type: object
   api.WordWithProgressResponse:
@@ -417,6 +560,39 @@ definitions:
         type: string
       user_id:
         type: integer
+    type: object
+  api.addVersionRequest:
+    properties:
+      changes:
+        items:
+          type: string
+        type: array
+      deprecated:
+        items:
+          type: string
+        type: array
+      description:
+        type: string
+      downloads:
+        additionalProperties:
+          type: string
+        type: object
+      metadata:
+        additionalProperties:
+          type: string
+        type: object
+      min_version:
+        type: string
+      required:
+        type: boolean
+      title:
+        type: string
+      version:
+        type: string
+    required:
+    - description
+    - title
+    - version
     type: object
   api.backupListItem:
     properties:
@@ -509,7 +685,9 @@ definitions:
   api.createGrammarRequest:
     properties:
       contents:
-        $ref: '#/definitions/api.GrammarJSONField'
+        items:
+          $ref: '#/definitions/api.GrammarContent'
+        type: array
       grammar_key:
         type: string
       level:
@@ -526,7 +704,6 @@ definitions:
       title:
         type: string
     required:
-    - contents
     - grammar_key
     - level
     - related
@@ -627,21 +804,21 @@ definitions:
   api.createUserWordProgressRequest:
     properties:
       ease_factor:
+        minimum: 0
         type: number
       interval_days:
+        minimum: 0
         type: integer
       last_reviewed_at:
         type: string
       next_review_at:
         type: string
       repetitions:
+        minimum: 0
         type: integer
       word_id:
         type: integer
     required:
-    - ease_factor
-    - interval_days
-    - repetitions
     - word_id
     type: object
   api.createUserWritingRequest:
@@ -666,7 +843,7 @@ definitions:
   api.createWordRequest:
     properties:
       conjugation:
-        $ref: '#/definitions/api.WordJSONField'
+        $ref: '#/definitions/api.ConjugationData'
       descript_level:
         type: string
       freq:
@@ -674,13 +851,17 @@ definitions:
       level:
         type: integer
       means:
-        $ref: '#/definitions/api.WordJSONField'
+        items:
+          $ref: '#/definitions/api.MeaningData'
+        type: array
       pronounce:
         type: string
       short_mean:
         type: string
       snym:
-        $ref: '#/definitions/api.WordJSONField'
+        items:
+          $ref: '#/definitions/api.SynonymData'
+        type: array
       word:
         type: string
     required:
@@ -731,6 +912,18 @@ definitions:
       refresh_token:
         type: string
     type: object
+  api.notifyUpgradeRequest:
+    properties:
+      target_users:
+        description: If empty, broadcasts to all
+        items:
+          type: string
+        type: array
+      version:
+        type: string
+    required:
+    - version
+    type: object
   api.refreshTokenRequest:
     properties:
       refresh_token:
@@ -741,6 +934,8 @@ definitions:
   api.refreshTokenResponse:
     properties:
       access_token:
+        type: string
+      refresh_token:
         type: string
       user:
         $ref: '#/definitions/api.UserResponse'
@@ -779,6 +974,21 @@ definitions:
     required:
     - filename
     type: object
+  api.subscriptionRequest:
+    properties:
+      client_version:
+        type: string
+      notify_major:
+        type: boolean
+      notify_minor:
+        type: boolean
+      notify_patches:
+        type: boolean
+      notify_required:
+        type: boolean
+      platform:
+        type: string
+    type: object
   api.updateContentRequest:
     properties:
       description:
@@ -812,7 +1022,9 @@ definitions:
   api.updateGrammarRequest:
     properties:
       contents:
-        $ref: '#/definitions/api.GrammarJSONField'
+        items:
+          $ref: '#/definitions/api.GrammarContent'
+        type: array
       grammar_key:
         type: string
       id:
@@ -902,19 +1114,18 @@ definitions:
   api.updateUserWordProgressRequest:
     properties:
       ease_factor:
+        minimum: 0
         type: number
       interval_days:
+        minimum: 0
         type: integer
       last_reviewed_at:
         type: string
       next_review_at:
         type: string
       repetitions:
+        minimum: 0
         type: integer
-    required:
-    - ease_factor
-    - interval_days
-    - repetitions
     type: object
   api.updateUserWritingRequest:
     description: Request object for updating user writing submissions
@@ -932,7 +1143,7 @@ definitions:
   api.updateWordRequest:
     properties:
       conjugation:
-        $ref: '#/definitions/api.WordJSONField'
+        $ref: '#/definitions/api.ConjugationData'
       descript_level:
         type: string
       freq:
@@ -943,13 +1154,17 @@ definitions:
       level:
         type: integer
       means:
-        $ref: '#/definitions/api.WordJSONField'
+        items:
+          $ref: '#/definitions/api.MeaningData'
+        type: array
       pronounce:
         type: string
       short_mean:
         type: string
       snym:
-        $ref: '#/definitions/api.WordJSONField'
+        items:
+          $ref: '#/definitions/api.SynonymData'
+        type: array
       word:
         type: string
     required:
@@ -962,6 +1177,84 @@ definitions:
       prompt_text:
         type: string
       topic:
+        type: string
+    type: object
+  api.upgradeCheckRequest:
+    properties:
+      current_version:
+        type: string
+      platform:
+        type: string
+      user_agent:
+        type: string
+    required:
+    - current_version
+    type: object
+  upgrade.AppVersion:
+    properties:
+      changes:
+        items:
+          type: string
+        type: array
+      deprecated:
+        description: versions that are deprecated
+        items:
+          type: string
+        type: array
+      description:
+        type: string
+      downloads:
+        additionalProperties:
+          type: string
+        description: platform -> download URL
+        type: object
+      metadata:
+        additionalProperties:
+          type: string
+        type: object
+      min_version:
+        type: string
+      release_date:
+        type: string
+      required:
+        type: boolean
+      title:
+        type: string
+      version:
+        type: string
+    type: object
+  upgrade.UpdateCheckResponse:
+    properties:
+      has_update:
+        type: boolean
+      latest_version:
+        $ref: '#/definitions/upgrade.AppVersion'
+      message:
+        type: string
+      notifications:
+        items:
+          $ref: '#/definitions/websocket.UpgradeNotification'
+        type: array
+      update_required:
+        type: boolean
+    type: object
+  websocket.UpgradeNotification:
+    properties:
+      changes:
+        items:
+          type: string
+        type: array
+      description:
+        type: string
+      release_date:
+        type: string
+      required:
+        type: boolean
+      title:
+        type: string
+      update_url:
+        type: string
+      version:
         type: string
     type: object
 info:
@@ -1319,6 +1612,33 @@ paths:
       summary: Upload database backup
       tags:
       - admin
+  /api/v1/admin/cache/advanced-stats:
+    get:
+      consumes:
+      - application/json
+      description: Get comprehensive cache statistics including distributed cache,
+        warming, and metrics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Advanced cache statistics
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get advanced cache statistics
+      tags:
+      - Admin
   /api/v1/admin/cache/clear:
     delete:
       consumes:
@@ -1379,6 +1699,67 @@ paths:
       summary: Clear cache by pattern
       tags:
       - Admin
+  /api/v1/admin/cache/health:
+    get:
+      consumes:
+      - application/json
+      description: Get health status of all cache components
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cache health status
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get cache health status
+      tags:
+      - Admin
+  /api/v1/admin/cache/invalidate/tag/{tag}:
+    delete:
+      consumes:
+      - application/json
+      description: Invalidate all cache entries associated with a specific tag
+      parameters:
+      - description: Tag to invalidate
+        in: path
+        name: tag
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cache invalidated successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Invalidate cache by tag
+      tags:
+      - Admin
   /api/v1/admin/cache/stats:
     get:
       consumes:
@@ -1405,6 +1786,163 @@ paths:
       summary: Get cache statistics
       tags:
       - Admin
+  /api/v1/admin/cache/warm:
+    post:
+      consumes:
+      - application/json
+      description: Manually trigger cache warming for frequently accessed data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cache warming initiated successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Cache warming not available
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Trigger manual cache warming
+      tags:
+      - Admin
+  /api/v1/admin/i18n/languages/{language}/export:
+    get:
+      consumes:
+      - application/json
+      description: Export all messages for a specific language as JSON
+      parameters:
+      - description: Language code (en, vi)
+        in: path
+        name: language
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Messages exported successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+        "400":
+          description: Invalid language
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Export messages (Admin only)
+      tags:
+      - i18n
+  /api/v1/admin/i18n/languages/{language}/messages:
+    post:
+      consumes:
+      - application/json
+      description: Add or update a translation message for a specific language
+      parameters:
+      - description: Language code (en, vi)
+        in: path
+        name: language
+        required: true
+        type: string
+      - description: Message details
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/api.MessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message updated successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "201":
+          description: Message created successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Add or update a message (Admin only)
+      tags:
+      - i18n
+  /api/v1/admin/i18n/languages/{language}/messages/batch:
+    post:
+      consumes:
+      - application/json
+      description: Add or update multiple translation messages for a specific language
+      parameters:
+      - description: Language code (en, vi)
+        in: path
+        name: language
+        required: true
+        type: string
+      - description: Messages details
+        in: body
+        name: messages
+        required: true
+        schema:
+          $ref: '#/definitions/api.MessagesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Messages updated successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Add or update multiple messages (Admin only)
+      tags:
+      - i18n
   /api/v1/admin/performance/concurrency/reset:
     post:
       description: Resets all concurrency metrics and statistics (admin only)
@@ -2487,6 +3025,97 @@ paths:
       summary: List grammars by tag
       tags:
       - grammars
+  /api/v1/i18n/current:
+    get:
+      consumes:
+      - application/json
+      description: Get the current language being used for the request
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Current language retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.LanguageResponse'
+              type: object
+      summary: Get current language
+      tags:
+      - i18n
+  /api/v1/i18n/languages:
+    get:
+      consumes:
+      - application/json
+      description: Get list of all supported languages with their information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Languages retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.I18nStatsResponse'
+              type: object
+      summary: Get supported languages
+      tags:
+      - i18n
+  /api/v1/i18n/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed statistics about the i18n system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: I18n statistics retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  additionalProperties: true
+                  type: object
+              type: object
+      summary: Get i18n statistics
+      tags:
+      - i18n
+  /api/v1/i18n/translate:
+    get:
+      consumes:
+      - application/json
+      description: Test translation of a message key with the current language
+      parameters:
+      - description: Message key to translate
+        in: query
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message translated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Test message translation
+      tags:
+      - i18n
   /api/v1/part-contents/{part_id}:
     get:
       consumes:
@@ -3310,6 +3939,317 @@ paths:
       summary: List speaking sessions by user ID
       tags:
       - speaking
+  /api/v1/upgrade/check:
+    post:
+      consumes:
+      - application/json
+      description: Check if there are any updates available for the current app version
+      parameters:
+      - description: Current version information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.upgradeCheckRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update check completed
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/upgrade.UpdateCheckResponse'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Check for app updates
+      tags:
+      - upgrade
+  /api/v1/upgrade/current:
+    get:
+      description: Get the current latest version of the application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Current version retrieved
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/upgrade.AppVersion'
+              type: object
+      summary: Get current app version
+      tags:
+      - upgrade
+  /api/v1/upgrade/notify:
+    post:
+      consumes:
+      - application/json
+      description: Send upgrade notification to users
+      parameters:
+      - description: Notification information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.notifyUpgradeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notification sent successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Version not found
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Send upgrade notification (Admin only)
+      tags:
+      - upgrade
+  /api/v1/upgrade/stats:
+    get:
+      description: Get statistics about the upgrade service (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Upgrade statistics retrieved
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  additionalProperties: true
+                  type: object
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get upgrade service statistics
+      tags:
+      - upgrade
+  /api/v1/upgrade/subscribe:
+    post:
+      consumes:
+      - application/json
+      description: Subscribe to real-time upgrade notifications with preferences
+      parameters:
+      - description: Subscription preferences
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.subscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Subscribed to upgrade notifications
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Subscribe to upgrade notifications
+      tags:
+      - upgrade
+  /api/v1/upgrade/unsubscribe:
+    post:
+      description: Unsubscribe from real-time upgrade notifications
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Unsubscribed from upgrade notifications
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Unsubscribe from upgrade notifications
+      tags:
+      - upgrade
+  /api/v1/upgrade/versions:
+    get:
+      description: Get all available versions of the application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All versions retrieved
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    $ref: '#/definitions/upgrade.AppVersion'
+                  type: object
+              type: object
+      summary: Get all app versions
+      tags:
+      - upgrade
+    post:
+      consumes:
+      - application/json
+      description: Add a new version to the system and optionally notify users
+      parameters:
+      - description: Version information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.addVersionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Version added successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/upgrade.AppVersion'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Add new app version (Admin only)
+      tags:
+      - upgrade
+  /api/v1/upgrade/versions/{version}:
+    get:
+      description: Get details of a specific version
+      parameters:
+      - description: Version number (e.g., 1.0.0)
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Version details retrieved
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/upgrade.AppVersion'
+              type: object
+        "404":
+          description: Version not found
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Get specific app version
+      tags:
+      - upgrade
+  /api/v1/upgrade/ws:
+    get:
+      consumes:
+      - application/json
+      description: Upgrade HTTP connection to WebSocket for real-time upgrade notifications
+      parameters:
+      - description: Bearer JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: WebSocket upgrade for real-time notifications
+      tags:
+      - upgrade
+  /api/v1/upgrade/ws/status:
+    get:
+      description: Get the current WebSocket connection statistics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: WebSocket status retrieved
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  additionalProperties: true
+                  type: object
+              type: object
+      summary: Get WebSocket connection status
+      tags:
+      - upgrade
   /api/v1/user-word-progress:
     post:
       consumes:
@@ -3389,7 +4329,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get a specific word progress record for the current user
+      description: Get a specific word progress record for the current user. Returns
+        null if no progress record exists.
       parameters:
       - description: Word ID
         in: path
@@ -3400,7 +4341,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: User word progress retrieved successfully
+          description: User word progress retrieved successfully (may be null if not
+            found)
           schema:
             allOf:
             - $ref: '#/definitions/api.Response'
@@ -3414,10 +4356,6 @@ paths:
             $ref: '#/definitions/api.Response'
         "401":
           description: Unauthorized
-          schema:
-            $ref: '#/definitions/api.Response'
-        "404":
-          description: User word progress not found
           schema:
             $ref: '#/definitions/api.Response'
         "500":
@@ -3513,6 +4451,47 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get words for review
+      tags:
+      - user-word-progress
+  /api/v1/user-word-progress/saved:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all words saved by the current user
+      parameters:
+      - description: Maximum number of words to return (optional)
+        in: query
+        name: limit
+        type: integer
+      - description: Number of words to skip (optional)
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Saved words retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.WordProgressResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all saved words
       tags:
       - user-word-progress
   /api/v1/user-word-progress/word/{word_id}:
@@ -3996,7 +4975,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Search words by word, short meaning, or meanings with pagination
+      description: Search words by query string
       parameters:
       - description: Search query
         in: query
@@ -4007,7 +4986,6 @@ paths:
         description: Limit
         in: query
         name: limit
-        required: true
         type: integer
       - default: 0
         description: Offset
@@ -4018,7 +4996,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Words search completed successfully
+          description: Search results
           schema:
             allOf:
             - $ref: '#/definitions/api.Response'

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -12,30 +11,66 @@ import (
 	"github.com/sqlc-dev/pqtype"
 	db "github.com/toeic-app/internal/db/sqlc" // Adjust import path if necessary
 	"github.com/toeic-app/internal/logger"
-	"github.com/toeic-app/internal/performance"
 )
 
-// WordJSONField is a placeholder for JSONB fields in Swagger docs
+// WordState represents the word state structure
 // swagger:model
-// example: {"en": "example"}
-type WordJSONField struct {
-	Raw interface{} `json:"raw"`
+type WordState struct {
+	P string `json:"p"`
+	W string `json:"w"`
+}
+
+// ConjugationData represents verb conjugation information
+// swagger:model
+type ConjugationData struct {
+	HTD  *WordState `json:"htd,omitempty"`  // simplePresent
+	QKD  *WordState `json:"qkd,omitempty"`  // simplePast
+	HTHT *WordState `json:"htht,omitempty"` // presentParticiple
+	HTTD *WordState `json:"httd,omitempty"` // presentContinuous
+}
+
+// MeanModel represents individual meaning with examples
+// swagger:model
+type MeanModel struct {
+	Mean     *string `json:"mean,omitempty"`
+	Examples []int   `json:"examples,omitempty"`
+}
+
+// MeaningData represents meanings grouped by kind (noun, verb, etc.)
+// swagger:model
+type MeaningData struct {
+	Kind  *string     `json:"kind,omitempty"`
+	Means []MeanModel `json:"means,omitempty"`
+}
+
+// ContentModel represents synonym/antonym content
+// swagger:model
+type ContentModel struct {
+	Antonym []string `json:"anto,omitempty"`
+	Synonym []string `json:"syno,omitempty"`
+}
+
+// SynonymData represents synonym information
+// swagger:model
+type SynonymData struct {
+	Kind    string         `json:"kind"`
+	Content []ContentModel `json:"content"`
 }
 
 // WordResponse is used for Swagger documentation only
 // swagger:model
-// example: {"id":1,"word":"example","pronounce":"ex-am-ple","level":1,"descript_level":"A1","short_mean":"short meaning","means":{"en":"meaning"},"snym":null,"freq":1.0,"conjugation":null}
+// example: {"id":1,"word":"example","pronounce":"ex-am-ple","level":1,"descript_level":"A1","short_mean":"short meaning","means":[{"kind":"noun","means":[{"mean":"example meaning","examples":[1,2]}]}],"snym":[{"kind":"synonym","content":[{"syno":["sample","instance"]}]}],"freq":1.0,"conjugation":{"htd":{"p":"present","w":"example"}}}
 type WordResponse struct {
-	ID            int32           `json:"id"`
-	Word          string          `json:"word"`
-	Pronounce     string          `json:"pronounce"`
-	Level         int32           `json:"level"`
-	DescriptLevel string          `json:"descript_level"`
-	ShortMean     string          `json:"short_mean"`
-	Means         json.RawMessage `json:"means,omitempty"`
-	Snym          json.RawMessage `json:"snym,omitempty"`
-	Freq          float32         `json:"freq"`
-	Conjugation   json.RawMessage `json:"conjugation,omitempty"`
+	ID            int32            `json:"id"`
+	Word          string           `json:"word"`
+	Pronounce     string           `json:"pronounce"`
+	Level         int32            `json:"level"`
+	DescriptLevel string           `json:"descript_level"`
+	ShortMean     string           `json:"short_mean"`
+	Means         []MeaningData    `json:"means,omitempty"`
+	Snym          []SynonymData    `json:"snym,omitempty"`
+	Freq          float32          `json:"freq"`
+	Conjugation   *ConjugationData `json:"conjugation,omitempty"`
 }
 
 // NewWordResponse creates a WordResponse from db.Word model
@@ -50,15 +85,24 @@ func NewWordResponse(word db.Word) WordResponse {
 		Freq:          word.Freq,
 	}
 
-	// Only include JSON fields if they are valid
+	// Parse JSON fields if they are valid
 	if word.Means.Valid {
-		response.Means = word.Means.RawMessage
+		var means []MeaningData
+		if err := json.Unmarshal(word.Means.RawMessage, &means); err == nil {
+			response.Means = means
+		}
 	}
 	if word.Snym.Valid {
-		response.Snym = word.Snym.RawMessage
+		var snym []SynonymData
+		if err := json.Unmarshal(word.Snym.RawMessage, &snym); err == nil {
+			response.Snym = snym
+		}
 	}
 	if word.Conjugation.Valid {
-		response.Conjugation = word.Conjugation.RawMessage
+		var conjugation ConjugationData
+		if err := json.Unmarshal(word.Conjugation.RawMessage, &conjugation); err == nil {
+			response.Conjugation = &conjugation
+		}
 	}
 
 	return response
@@ -70,10 +114,10 @@ type createWordRequest struct {
 	Level         int32            `json:"level" binding:"required"`
 	DescriptLevel string           `json:"descript_level" binding:"required"`
 	ShortMean     string           `json:"short_mean" binding:"required"`
-	Means         *json.RawMessage `json:"means,omitempty"`
-	Snym          *json.RawMessage `json:"snym,omitempty"`
+	Means         []MeaningData    `json:"means,omitempty"`
+	Snym          []SynonymData    `json:"snym,omitempty"`
 	Freq          float32          `json:"freq" binding:"required"`
-	Conjugation   *json.RawMessage `json:"conjugation,omitempty"`
+	Conjugation   *ConjugationData `json:"conjugation,omitempty"`
 }
 
 // @Summary Create a new word
@@ -99,10 +143,10 @@ func (server *Server) createWord(ctx *gin.Context) {
 		Level:         req.Level,
 		DescriptLevel: req.DescriptLevel,
 		ShortMean:     req.ShortMean,
-		Means:         toNullRawMessageFromPointer(req.Means),
-		Snym:          toNullRawMessageFromPointer(req.Snym),
+		Means:         toNullRawMessageFromMeaning(req.Means),
+		Snym:          toNullRawMessageFromSynonym(req.Snym),
 		Freq:          req.Freq,
-		Conjugation:   toNullRawMessageFromPointer(req.Conjugation),
+		Conjugation:   toNullRawMessageFromConjugation(req.Conjugation),
 	}
 
 	word, err := server.store.CreateWord(ctx, arg)
@@ -211,10 +255,8 @@ func (server *Server) listWords(ctx *gin.Context) {
 	}
 
 	var wordResponses []WordResponse
-	if words != nil {
-		for _, word := range words {
-			wordResponses = append(wordResponses, NewWordResponse(word))
-		}
+	for _, word := range words {
+		wordResponses = append(wordResponses, NewWordResponse(word))
 	}
 
 	// Ensure we return an empty array instead of null if no results
@@ -232,10 +274,10 @@ type updateWordRequest struct {
 	Level         int32            `json:"level"`
 	DescriptLevel string           `json:"descript_level"`
 	ShortMean     string           `json:"short_mean"`
-	Means         *json.RawMessage `json:"means,omitempty"`
-	Snym          *json.RawMessage `json:"snym,omitempty"`
+	Means         []MeaningData    `json:"means,omitempty"`
+	Snym          []SynonymData    `json:"snym,omitempty"`
 	Freq          float32          `json:"freq"`
-	Conjugation   *json.RawMessage `json:"conjugation,omitempty"`
+	Conjugation   *ConjugationData `json:"conjugation,omitempty"`
 }
 
 // @Summary Update a word
@@ -257,6 +299,7 @@ func (server *Server) updateWord(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
 		return
 	}
+
 	arg := db.UpdateWordParams{
 		ID:            req.ID,
 		Word:          req.Word,
@@ -264,10 +307,10 @@ func (server *Server) updateWord(ctx *gin.Context) {
 		Level:         req.Level,
 		DescriptLevel: req.DescriptLevel,
 		ShortMean:     req.ShortMean,
-		Means:         toNullRawMessageFromPointer(req.Means),
-		Snym:          toNullRawMessageFromPointer(req.Snym),
+		Means:         toNullRawMessageFromMeaning(req.Means),
+		Snym:          toNullRawMessageFromSynonym(req.Snym),
 		Freq:          req.Freq,
-		Conjugation:   toNullRawMessageFromPointer(req.Conjugation),
+		Conjugation:   toNullRawMessageFromConjugation(req.Conjugation),
 	}
 	word, err := server.store.UpdateWord(ctx, arg)
 	if err != nil {
@@ -298,29 +341,6 @@ func (server *Server) updateWord(ctx *gin.Context) {
 	SuccessResponse(ctx, http.StatusOK, "Word updated successfully", wordResponse)
 }
 
-// toNullRawMessageFromPointer converts a *json.RawMessage to pqtype.NullRawMessage
-func toNullRawMessageFromPointer(field *json.RawMessage) pqtype.NullRawMessage {
-	// If field is nil, return NullRawMessage with Valid=false
-	if field == nil {
-		return pqtype.NullRawMessage{Valid: false}
-	}
-	return pqtype.NullRawMessage{RawMessage: *field, Valid: true}
-}
-
-// toNullRawMessage converts a WordJSONField to pqtype.NullRawMessage (kept for backward compatibility)
-func toNullRawMessage(field WordJSONField) pqtype.NullRawMessage {
-	// If field.Raw is nil, return NullRawMessage with Valid=false
-	if field.Raw == nil {
-		return pqtype.NullRawMessage{Valid: false}
-	}
-	// Marshal the Raw value to JSON
-	b, err := json.Marshal(field.Raw)
-	if err != nil {
-		return pqtype.NullRawMessage{Valid: false}
-	}
-	return pqtype.NullRawMessage{RawMessage: b, Valid: true}
-}
-
 // @Summary Delete a word
 // @Description Delete a word by its ID
 // @Tags words
@@ -339,6 +359,7 @@ func (server *Server) deleteWord(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusBadRequest, "Invalid word ID", err)
 		return
 	}
+
 	err := server.store.DeleteWord(ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -367,22 +388,21 @@ func (server *Server) deleteWord(ctx *gin.Context) {
 	SuccessResponse(ctx, http.StatusOK, "Word deleted successfully", nil)
 }
 
-// searchWordsRequest defines the structure for searching words with pagination.
 type searchWordsRequest struct {
 	Query  string `form:"query" binding:"required"`
-	Limit  int32  `form:"limit" binding:"required,min=1,max=100"`
-	Offset int32  `form:"offset" binding:"min=0"`
+	Limit  int32  `form:"limit,default=10"`
+	Offset int32  `form:"offset,default=0"`
 }
 
 // @Summary Search words
-// @Description Search words by word, short meaning, or meanings with pagination
+// @Description Search words by query string
 // @Tags words
 // @Accept json
 // @Produce json
 // @Param query query string true "Search query"
-// @Param limit query int true "Limit" default(10)
+// @Param limit query int false "Limit" default(10)
 // @Param offset query int false "Offset" default(0)
-// @Success 200 {object} Response{data=[]WordResponse} "Words search completed successfully"
+// @Success 200 {object} Response{data=[]WordResponse} "Search results"
 // @Failure 400 {object} Response "Invalid query parameters"
 // @Failure 500 {object} Response "Failed to search words"
 // @Router /api/v1/words/search [get]
@@ -393,55 +413,66 @@ func (server *Server) searchWords(ctx *gin.Context) {
 		ErrorResponse(ctx, http.StatusBadRequest, "Invalid query parameters", err)
 		return
 	}
-	// Check for field selection optimization
-	_ = server.responseOptimizer.GetFieldsFromContext(ctx) // For future use
-
-	// Try cache first for frequent searches
-	cacheKey := fmt.Sprintf("search:words:%s:%d:%d", req.Query, req.Limit, req.Offset)
-	if server.config.CacheEnabled && server.serviceCache != nil {
-		var cachedWords interface{}
-		if err := server.serviceCache.Get(ctx, cacheKey, &cachedWords); err == nil {
-			logger.Debug("Word search results retrieved from cache for query: %s", req.Query)
-			SuccessResponse(ctx, http.StatusOK, "Word search completed successfully", cachedWords)
-			return
-		}
-	}
-
-	arg := db.SearchWordsParams{
+	words, err := server.store.SearchWords(ctx, db.SearchWordsParams{
 		Column1: sql.NullString{String: req.Query, Valid: true},
 		Limit:   req.Limit,
 		Offset:  req.Offset,
-	}
-	words, err := server.store.SearchWords(ctx, arg)
+	})
 	if err != nil {
 		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to search words", err)
 		return
 	}
 
-	// Use optimized response based on request type
-	responseData := server.responseOptimizer.OptimizeByResponseType(ctx, words)
+	var wordResponses []WordResponse
+	for _, word := range words {
+		wordResponses = append(wordResponses, NewWordResponse(word))
+	}
 
 	// Ensure we return an empty array instead of null if no results
-	if responseData == nil {
-		responseData = []interface{}{}
-	}
-	// Cache the results for 10 minutes using background processing
-	if server.config.CacheEnabled && server.serviceCache != nil && len(words) > 0 {
-		// Submit cache operation as background task
-		cacheTask := performance.BackgroundTask{
-			ID:       "cache_warmup_" + time.Now().Format("20060102_150405"),
-			Type:     "cache_warmup",
-			Priority: 1, // Normal priority
-			Timeout:  5 * time.Second,
-			Handler: func(ctx context.Context, data interface{}) error {
-				bgCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-				defer cancel()
-				return server.serviceCache.Set(bgCtx, cacheKey, responseData, 10*time.Minute)
-			},
-			Data: cacheKey,
-		}
-		server.backgroundProcessor.SubmitTask(cacheTask)
+	if wordResponses == nil {
+		wordResponses = []WordResponse{}
 	}
 
-	SuccessResponse(ctx, http.StatusOK, "Word search completed successfully", responseData)
+	SuccessResponse(ctx, http.StatusOK, "Words found successfully", wordResponses)
+}
+
+// Helper functions to convert structured types to pqtype.NullRawMessage
+
+// toNullRawMessageFromMeaning converts []MeaningData to pqtype.NullRawMessage
+func toNullRawMessageFromMeaning(meanings []MeaningData) pqtype.NullRawMessage {
+	if len(meanings) == 0 {
+		return pqtype.NullRawMessage{Valid: false}
+	}
+
+	data, err := json.Marshal(meanings)
+	if err != nil {
+		return pqtype.NullRawMessage{Valid: false}
+	}
+	return pqtype.NullRawMessage{RawMessage: json.RawMessage(data), Valid: true}
+}
+
+// toNullRawMessageFromSynonym converts []SynonymData to pqtype.NullRawMessage
+func toNullRawMessageFromSynonym(synonyms []SynonymData) pqtype.NullRawMessage {
+	if len(synonyms) == 0 {
+		return pqtype.NullRawMessage{Valid: false}
+	}
+
+	data, err := json.Marshal(synonyms)
+	if err != nil {
+		return pqtype.NullRawMessage{Valid: false}
+	}
+	return pqtype.NullRawMessage{RawMessage: json.RawMessage(data), Valid: true}
+}
+
+// toNullRawMessageFromConjugation converts *ConjugationData to pqtype.NullRawMessage
+func toNullRawMessageFromConjugation(conjugation *ConjugationData) pqtype.NullRawMessage {
+	if conjugation == nil {
+		return pqtype.NullRawMessage{Valid: false}
+	}
+
+	data, err := json.Marshal(conjugation)
+	if err != nil {
+		return pqtype.NullRawMessage{Valid: false}
+	}
+	return pqtype.NullRawMessage{RawMessage: json.RawMessage(data), Valid: true}
 }

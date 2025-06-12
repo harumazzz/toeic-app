@@ -111,10 +111,8 @@ func (server *Server) listExamples(ctx *gin.Context) {
 	}
 
 	var exampleResponses []ExampleResponse
-	if examples != nil {
-		for _, example := range examples {
-			exampleResponses = append(exampleResponses, NewExampleResponse(example))
-		}
+	for _, example := range examples {
+		exampleResponses = append(exampleResponses, NewExampleResponse(example))
 	}
 
 	// Ensure we return an empty array instead of null if no results
@@ -237,10 +235,8 @@ func (server *Server) batchGetExamples(ctx *gin.Context) {
 	}
 
 	var exampleResponses []ExampleResponse
-	if examples != nil {
-		for _, example := range examples {
-			exampleResponses = append(exampleResponses, NewExampleResponse(example))
-		}
+	for _, example := range examples {
+		exampleResponses = append(exampleResponses, NewExampleResponse(example))
 	}
 
 	// Ensure we return an empty array instead of null if no results

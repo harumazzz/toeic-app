@@ -75,6 +75,69 @@ func (q *Queries) DeleteUserWordProgress(ctx context.Context, arg DeleteUserWord
 	return err
 }
 
+const getAllUserSavedWords = `-- name: GetAllUserSavedWords :many
+SELECT words.id, words.word, words.pronounce, words.level, words.descript_level, words.short_mean, words.means, words.snym, words.freq, words.conjugation, user_word_progress.user_id, user_word_progress.word_id, user_word_progress.last_reviewed_at, user_word_progress.next_review_at, user_word_progress.interval_days, user_word_progress.ease_factor, user_word_progress.repetitions, user_word_progress.created_at, user_word_progress.updated_at
+FROM words
+JOIN user_word_progress ON words.id = user_word_progress.word_id
+WHERE user_word_progress.user_id = $1
+ORDER BY user_word_progress.created_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type GetAllUserSavedWordsParams struct {
+	UserID int32 `json:"user_id"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type GetAllUserSavedWordsRow struct {
+	Word             Word             `json:"word"`
+	UserWordProgress UserWordProgress `json:"user_word_progress"`
+}
+
+func (q *Queries) GetAllUserSavedWords(ctx context.Context, arg GetAllUserSavedWordsParams) ([]GetAllUserSavedWordsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllUserSavedWords, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllUserSavedWordsRow
+	for rows.Next() {
+		var i GetAllUserSavedWordsRow
+		if err := rows.Scan(
+			&i.Word.ID,
+			&i.Word.Word,
+			&i.Word.Pronounce,
+			&i.Word.Level,
+			&i.Word.DescriptLevel,
+			&i.Word.ShortMean,
+			&i.Word.Means,
+			&i.Word.Snym,
+			&i.Word.Freq,
+			&i.Word.Conjugation,
+			&i.UserWordProgress.UserID,
+			&i.UserWordProgress.WordID,
+			&i.UserWordProgress.LastReviewedAt,
+			&i.UserWordProgress.NextReviewAt,
+			&i.UserWordProgress.IntervalDays,
+			&i.UserWordProgress.EaseFactor,
+			&i.UserWordProgress.Repetitions,
+			&i.UserWordProgress.CreatedAt,
+			&i.UserWordProgress.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserWordProgress = `-- name: GetUserWordProgress :one
 SELECT user_id, word_id, last_reviewed_at, next_review_at, interval_days, ease_factor, repetitions, created_at, updated_at FROM user_word_progress
 WHERE user_id = $1 AND word_id = $2
