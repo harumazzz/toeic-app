@@ -8,9 +8,11 @@ part 'word_model.g.dart';
 @freezed
 sealed class WordModel with _$WordModel {
   const factory WordModel({
-    @JsonKey(name: 'conjugation') final ConjugationData? conjugation,
-    @JsonKey(name: 'descript_level') required final String descriptLevel,
-    @JsonKey(name: 'freq') required final int freq,
+    @Default(null)
+    @JsonKey(name: 'conjugation')
+    final ConjugationData? conjugation,
+    @Default(null) @JsonKey(name: 'descript_level') final String? descriptLevel,
+    @Default(null) @JsonKey(name: 'freq') final int? freq,
     @JsonKey(name: 'id') required final int id,
     @JsonKey(name: 'level') required final int level,
     @JsonKey(name: 'means') final List<MeaningData>? means,

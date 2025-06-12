@@ -124,4 +124,25 @@ class ProgressRepositoryImpl implements ProgressRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<WordProgress>>> getWordProgress({
+    required final int limit,
+    required final int offset,
+  }) async {
+    try {
+      final response = await _remoteDataSource.getWordProgress(
+        limit: limit,
+        offset: offset,
+      );
+      return Right([
+        ...response.map((final e) => e.toEntity()),
+      ]);
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: e.message.toString()));
+    } catch (e, s) {
+      debugPrintStack(stackTrace: s);
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }

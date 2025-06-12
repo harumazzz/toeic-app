@@ -12,6 +12,11 @@ abstract class ProgressRepository {
     required final int limit,
   });
 
+  Future<Either<Failure, List<WordProgress>>> getWordProgress({
+    required final int limit,
+    required final int offset,
+  });
+
   Future<Either<Failure, WordProgress>> getWordProgressById({
     required final int wordId,
   });

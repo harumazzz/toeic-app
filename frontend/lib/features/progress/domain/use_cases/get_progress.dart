@@ -65,6 +65,36 @@ class GetReviewsProgress
   );
 }
 
+@riverpod
+GetWordProgressForLearn getWordProgressForLearn(final Ref ref) {
+  final progressRepository = ref.watch(progressRepositoryProvider);
+  return GetWordProgressForLearn(progressRepository);
+}
+
+@freezed
+sealed class GetWordProgressForLearnParams
+    with _$GetWordProgressForLearnParams {
+  const factory GetWordProgressForLearnParams({
+    required final int limit,
+    required final int offset,
+  }) = _GetWordProgressForLearnParams;
+}
+
+class GetWordProgressForLearn
+    implements UseCase<List<WordProgress>, GetWordProgressForLearnParams> {
+  const GetWordProgressForLearn(this._progressRepository);
+
+  final ProgressRepository _progressRepository;
+
+  @override
+  Future<Either<Failure, List<WordProgress>>> call(
+    final GetWordProgressForLearnParams params,
+  ) => _progressRepository.getWordProgress(
+    limit: params.limit,
+    offset: params.offset,
+  );
+}
+
 class GetWorkProgress implements UseCase<WordProgress, GetWordProgressParams> {
   const GetWorkProgress(this._progressRepository);
 

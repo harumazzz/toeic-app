@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../domain/entities/grammar.dart' as grammar;
 
@@ -27,9 +28,11 @@ class GrammarContent extends StatelessWidget {
           content.content!.every(
             (final e) => e.content != null && e.content!.trim().isNotEmpty,
           )) {
-        // Render trực tiếp nội dung (không Card)
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -40,7 +43,6 @@ class GrammarContent extends StatelessWidget {
           ),
         );
       }
-      // Nếu có subTitle hoặc có content đặc biệt, render Card đồng bộ với list
       return Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         elevation: 2,
@@ -50,7 +52,6 @@ class GrammarContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Tiêu đề nhỏ hơn, đậm
               if (hasSubTitle)
                 Text(
                   content.subTitle!,
@@ -89,78 +90,12 @@ class _GrammarContentElement extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       if (element.content != null && element.content!.trim().isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Html(
-            data: element.content,
-            style: {
-              'body': Style(
-                margin: Margins.zero,
-                padding: HtmlPaddings.zero,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-                fontSize: FontSize(15),
-              ),
-              'span': Style(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            },
-          ),
-        ),
+        _ContentCard(content: element.content!),
       if (element.formulas != null && element.formulas!.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children:
-                element.formulas!
-                    .map(
-                      (final formula) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Html(
-                          data: formula,
-                          style: {
-                            'body': Style(
-                              margin: Margins.zero,
-                              padding: HtmlPaddings.zero,
-                              fontStyle: FontStyle.italic,
-                              color:
-                                  Theme.of(context).textTheme.bodyMedium?.color,
-                              fontSize: FontSize(15),
-                            ),
-                          },
-                        ),
-                      ),
-                    )
-                    .toList(),
-          ),
-        ),
+        _FormulaCard(formulas: element.formulas!),
       if (element.examples != null && element.examples!.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ...element.examples!.map(
-                (final example) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Html(
-                    data: example.example ?? '',
-                    style: {
-                      'body': Style(
-                        margin: Margins.zero,
-                        padding: HtmlPaddings.zero,
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: FontSize(15),
-                      ),
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      const SizedBox(height: 8),
+        _ExampleCard(examples: element.examples!),
+      const SizedBox(height: 16),
     ],
   );
 
@@ -170,5 +105,182 @@ class _GrammarContentElement extends StatelessWidget {
     properties.add(
       DiagnosticsProperty<grammar.ContentElement>('element', element),
     );
+  }
+}
+
+class _ContentCard extends StatelessWidget {
+  const _ContentCard({required this.content});
+  final String content;
+
+  @override
+  Widget build(final BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Html(
+      data: content,
+      style: {
+        'body': Style(
+          margin: Margins.zero,
+          padding: HtmlPaddings.zero,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
+          fontSize: FontSize(15),
+        ),
+        'span': Style(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
+      },
+    ),
+  );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('content', content));
+  }
+}
+
+class _FormulaCard extends StatelessWidget {
+  const _FormulaCard({required this.formulas});
+  final List<String> formulas;
+
+  @override
+  Widget build(final BuildContext context) => Container(
+    margin: const EdgeInsets.only(top: 12),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.primaryContainer,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Symbols.rule,
+              size: 20,
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Formula',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...formulas.map(
+          (final formula) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Html(
+              data: formula,
+              style: {
+                'body': Style(
+                  margin: Margins.zero,
+                  padding: HtmlPaddings.zero,
+                  fontStyle: FontStyle.italic,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  fontSize: FontSize(15),
+                ),
+              },
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IterableProperty<String>('formulas', formulas));
+  }
+}
+
+class _ExampleCard extends StatelessWidget {
+  const _ExampleCard({required this.examples});
+  final List<grammar.Example> examples;
+
+  @override
+  Widget build(final BuildContext context) => Container(
+    margin: const EdgeInsets.only(top: 12),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.secondaryContainer,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Symbols.lightbulb_outline,
+              size: 20,
+              color: Theme.of(context).colorScheme.onSecondaryContainer,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Examples',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...examples.map(
+          (final example) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Html(
+              data: example.example ?? '',
+              style: {
+                'body': Style(
+                  margin: Margins.zero,
+                  padding: HtmlPaddings.zero,
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  fontSize: FontSize(15),
+                ),
+              },
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IterableProperty<grammar.Example>('examples', examples));
   }
 }

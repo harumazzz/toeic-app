@@ -32,18 +32,6 @@ class CollapsibleActionButton extends HookConsumerWidget {
             message: next.message,
           );
         }
-        if (next is BookMarkWordBookmarked && previous is BookMarkWordNone) {
-          ToastService.success(
-            context: context,
-            message: context.t.wordDetail.addedToLearn,
-          );
-        }
-        if (next is BookMarkWordNone && previous is BookMarkWordBookmarked) {
-          ToastService.info(
-            context: context,
-            message: context.t.wordDetail.removedFromLearn,
-          );
-        }
       },
     );
     useEffect(() {
@@ -69,6 +57,12 @@ class CollapsibleActionButton extends HookConsumerWidget {
           isFetching.value = true;
           await ref.read(bookmarkWordProvider.notifier).addBookmark(word);
           isFetching.value = false;
+          if (context.mounted) {
+            ToastService.success(
+              context: context,
+              message: context.t.wordDetail.addedToLearn,
+            );
+          }
         },
         child: const Icon(Symbols.bookmark_add),
       ),
@@ -79,6 +73,12 @@ class CollapsibleActionButton extends HookConsumerWidget {
           isFetching.value = true;
           await ref.read(bookmarkWordProvider.notifier).removeBookmark(word);
           isFetching.value = false;
+          if (context.mounted) {
+            ToastService.info(
+              context: context,
+              message: context.t.wordDetail.removedFromLearn,
+            );
+          }
         },
         child: const Icon(Symbols.bookmark_remove),
       ),

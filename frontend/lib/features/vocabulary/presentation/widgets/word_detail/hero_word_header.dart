@@ -87,16 +87,21 @@ class HeroWordHeader extends StatelessWidget {
                       color: Colors.white,
                       size: 20,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        word.shortMean,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
+                    if (word.shortMean != null &&
+                        word.shortMean!.isNotEmpty) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          word.shortMean!,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),

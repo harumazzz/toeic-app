@@ -46,7 +46,7 @@ class AppRouter {
   path: '/${AppRouter.loginRoute}',
   name: AppRouter.loginRoute,
 )
-class LoginRoute extends GoRouteData {
+class LoginRoute extends GoRouteData with _$LoginRoute {
   const LoginRoute();
 
   @override
@@ -60,7 +60,7 @@ class LoginRoute extends GoRouteData {
   path: '/${AppRouter.registerRoute}',
   name: AppRouter.registerRoute,
 )
-class RegisterRoute extends GoRouteData {
+class RegisterRoute extends GoRouteData with _$RegisterRoute {
   const RegisterRoute();
 
   @override
@@ -74,7 +74,7 @@ class RegisterRoute extends GoRouteData {
   path: '/${AppRouter.forgotPasswordRoute}',
   name: AppRouter.forgotPasswordRoute,
 )
-class ForgotPasswordRoute extends GoRouteData {
+class ForgotPasswordRoute extends GoRouteData with _$ForgotPasswordRoute {
   const ForgotPasswordRoute();
 
   @override
@@ -88,7 +88,7 @@ class ForgotPasswordRoute extends GoRouteData {
   path: '/${AppRouter.homeRoute}',
   name: AppRouter.homeRoute,
 )
-class HomeRoute extends GoRouteData {
+class HomeRoute extends GoRouteData with _$HomeRoute {
   const HomeRoute();
 
   @override
@@ -102,7 +102,7 @@ class HomeRoute extends GoRouteData {
   path: '/${AppRouter.helpRoute}',
   name: AppRouter.helpRoute,
 )
-class HelpRoute extends GoRouteData {
+class HelpRoute extends GoRouteData with _$HelpRoute {
   const HelpRoute();
 
   @override
@@ -116,7 +116,7 @@ class HelpRoute extends GoRouteData {
   path: '/${AppRouter.vocabularyRoute}',
   name: AppRouter.vocabularyRoute,
 )
-class VocabularyRoute extends GoRouteData {
+class VocabularyRoute extends GoRouteData with _$VocabularyRoute {
   const VocabularyRoute();
 
   @override
@@ -130,7 +130,7 @@ class VocabularyRoute extends GoRouteData {
   path: '/${AppRouter.wordDetailRoute}/:wordId',
   name: AppRouter.wordDetailRoute,
 )
-class WordDetailRoute extends GoRouteData {
+class WordDetailRoute extends GoRouteData with _$WordDetailRoute {
   const WordDetailRoute({
     required this.wordId,
   });
@@ -148,7 +148,7 @@ class WordDetailRoute extends GoRouteData {
   path: '/${AppRouter.grammarRoute}',
   name: AppRouter.grammarRoute,
 )
-class GrammarRoute extends GoRouteData {
+class GrammarRoute extends GoRouteData with _$GrammarRoute {
   const GrammarRoute();
 
   @override
@@ -162,7 +162,7 @@ class GrammarRoute extends GoRouteData {
   path: '/${AppRouter.grammarDetailRoute}/:grammarId',
   name: AppRouter.grammarDetailRoute,
 )
-class GrammarDetailRoute extends GoRouteData {
+class GrammarDetailRoute extends GoRouteData with _$GrammarDetailRoute {
   const GrammarDetailRoute({required this.grammarId});
 
   final int grammarId;
@@ -178,7 +178,7 @@ class GrammarDetailRoute extends GoRouteData {
   path: '/${AppRouter.settingsRoute}',
   name: AppRouter.settingsRoute,
 )
-class SettingsRoute extends GoRouteData {
+class SettingsRoute extends GoRouteData with _$SettingsRoute {
   const SettingsRoute();
 
   @override

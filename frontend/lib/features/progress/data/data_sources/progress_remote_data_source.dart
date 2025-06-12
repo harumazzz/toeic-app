@@ -30,6 +30,12 @@ abstract class ProgressRemoteDataSource {
     @Query('limit') required final int limit,
   });
 
+  @GET('/api/v1/user-word-progress/saved')
+  Future<List<WordProgressModel>> getWordProgress({
+    @Query('limit') required final int limit,
+    @Query('offset') required final int offset,
+  });
+
   @GET('/api/v1/user-word-progress/word/{word_id}')
   Future<WordProgressModel> getWordProgressById({
     @Path('word_id') required final int wordId,

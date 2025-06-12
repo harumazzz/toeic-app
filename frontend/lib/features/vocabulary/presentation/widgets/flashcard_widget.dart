@@ -5,19 +5,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../../../i18n/strings.g.dart';
 import '../../domain/entities/word.dart';
 
 class FlashcardWidget extends HookWidget {
   const FlashcardWidget({
-    required this.word,
-    this.onNext,
-    this.onPrevious,
     super.key,
+    required this.word,
+    required this.frontBuilder,
+    required this.backBuilder,
   });
 
   final Word word;
-  final void Function()? onNext;
-  final void Function()? onPrevious;
+
+  final Widget Function(
+    BuildContext context,
+    Word word,
+  )
+  frontBuilder;
+
+  final Widget Function(
+    BuildContext context,
+    Word word,
+  )
+  backBuilder;
 
   @override
   Widget build(final BuildContext context) {
@@ -25,60 +36,45 @@ class FlashcardWidget extends HookWidget {
     final controller = useAnimationController(
       duration: const Duration(milliseconds: 500),
     );
-    void toggleCard() {
+    Future<void> toggleCard() async {
       if (isShowingFrontSide.value) {
-        controller.forward();
-        Future.delayed(const Duration(milliseconds: 250), () {
-          isShowingFrontSide.value = false;
-        });
+        await controller.forward();
+        isShowingFrontSide.value = false;
       } else {
-        controller.reverse();
-        Future.delayed(const Duration(milliseconds: 250), () {
-          isShowingFrontSide.value = true;
-        });
+        await controller.reverse();
+        isShowingFrontSide.value = true;
       }
     }
 
-    return Column(
-      children: [
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.8,
-          height: MediaQuery.of(context).size.height * 0.4,
-          child: GestureDetector(
-            onTap: toggleCard,
-            child: AnimatedBuilder(
-              animation: controller,
-              builder: (final context, final child) {
-                final angle = controller.value * pi;
-                final transform =
-                    Matrix4.identity()
-                      ..setEntry(3, 2, 0.001)
-                      ..rotateY(angle);
-                if (angle >= pi / 2) {
-                  return Transform(
-                    transform: transform,
-                    alignment: Alignment.center,
-                    child: BackSideCard(word: word),
-                  );
-                } else {
-                  return Transform(
-                    transform: transform,
-                    alignment: Alignment.center,
-                    child: FrontSideCard(word: word),
-                  );
-                }
-              },
-            ),
-          ),
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.8,
+      height: MediaQuery.of(context).size.height * 0.4,
+      child: GestureDetector(
+        onTap: toggleCard,
+        child: AnimatedBuilder(
+          animation: controller,
+          builder: (final context, final child) {
+            final angle = controller.value * pi;
+            final transform =
+                Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY(angle);
+            if (angle >= pi / 2) {
+              return Transform(
+                transform: transform,
+                alignment: Alignment.center,
+                child: backBuilder(context, word),
+              );
+            } else {
+              return Transform(
+                transform: transform,
+                alignment: Alignment.center,
+                child: frontBuilder(context, word),
+              );
+            }
+          },
         ),
-        const SizedBox(height: 24),
-        FlashcardControls(
-          onPrevious: onPrevious,
-          onNext: onNext,
-          onFlip: toggleCard,
-          showFrontSide: isShowingFrontSide.value,
-        ),
-      ],
+      ),
     );
   }
 
@@ -87,9 +83,21 @@ class FlashcardWidget extends HookWidget {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty<Word>('word', word))
-      ..add(ObjectFlagProperty<void Function()?>.has('onNext', onNext))
       ..add(
-        ObjectFlagProperty<void Function()?>.has('onPrevious', onPrevious),
+        ObjectFlagProperty<
+          Widget Function(BuildContext context, Word word)
+        >.has(
+          'frontBuilder',
+          frontBuilder,
+        ),
+      )
+      ..add(
+        ObjectFlagProperty<
+          Widget Function(BuildContext context, Word word)
+        >.has(
+          'backBuilder',
+          backBuilder,
+        ),
       );
   }
 }
@@ -123,10 +131,11 @@ class FrontSideCard extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
-          WordPronunciation(pronunciation: word.pronounce),
+          if (word.pronounce != null && word.pronounce!.isNotEmpty)
+            WordPronunciation(pronunciation: word.pronounce!),
           const SizedBox(height: 40),
           Text(
-            'Tap to flip',
+            context.t.flashcard.tapToFlip,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontStyle: FontStyle.italic,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -215,22 +224,25 @@ class BackSideCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Meaning:',
+                      context.t.flashcard.meaning,
                       style: Theme.of(
                         context,
                       ).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      word.shortMean,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
+                    if (word.shortMean != null &&
+                        word.shortMean!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        word.shortMean!,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ],
                     if (word.means != null && word.means!.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       Text(
-                        'Types:',
+                        context.t.flashcard.types,
                         style: Theme.of(
                           context,
                         ).textTheme.titleMedium?.copyWith(
@@ -249,7 +261,7 @@ class BackSideCard extends StatelessWidget {
             const SizedBox(height: 12),
             Center(
               child: Text(
-                'Tap to flip back',
+                context.t.flashcard.tapToFlipBack,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontStyle: FontStyle.italic,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -377,59 +389,5 @@ class MeaningText extends StatelessWidget {
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('text', text));
-  }
-}
-
-class FlashcardControls extends StatelessWidget {
-  const FlashcardControls({
-    required this.showFrontSide,
-    required this.onFlip,
-    this.onPrevious,
-    this.onNext,
-    super.key,
-  });
-
-  final bool showFrontSide;
-  final void Function() onFlip;
-  final void Function()? onPrevious;
-  final void Function()? onNext;
-
-  @override
-  Widget build(final BuildContext context) => Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      IconButton(
-        onPressed: onPrevious,
-        icon: const Icon(Symbols.arrow_back_rounded),
-        tooltip: 'Previous card',
-      ),
-      const SizedBox(width: 16),
-      ElevatedButton.icon(
-        onPressed: onFlip,
-        icon: const Icon(Symbols.flip),
-        label: Text(showFrontSide ? 'Show Meaning' : 'Show Word'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        ),
-      ),
-      const SizedBox(width: 16),
-      IconButton(
-        onPressed: onNext,
-        icon: const Icon(Symbols.arrow_forward_rounded),
-        tooltip: 'Next card',
-      ),
-    ],
-  );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(DiagnosticsProperty<bool>('showFrontSide', showFrontSide))
-      ..add(ObjectFlagProperty<void Function()>.has('onFlip', onFlip))
-      ..add(
-        ObjectFlagProperty<void Function()?>.has('onPrevious', onPrevious),
-      )
-      ..add(ObjectFlagProperty<void Function()?>.has('onNext', onNext));
   }
 }

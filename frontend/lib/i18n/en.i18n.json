@@ -116,7 +116,10 @@
     "vocabulary": "Vocabulary",
     "vocabularyDescription": "Expand your word knowledge",
     "grammar": "Grammar",
-    "grammarDescription": "Master grammar rules"
+    "grammarDescription": "Master grammar rules",
+    "learnWords": "Learn Words",
+    "noWordsToLearn": "No Words to Learn",
+    "addWordsToStartLearning": "Add some words to your learning list to get started"
   },
   "errors": {
     "failedToLoad": "Failed to load the data",
@@ -208,5 +211,11 @@
     "contactSupport": "Contact Support",
     "contactSupportContent": "Need more help? Contact our support team at support@toeiclearning.com",
     "version": "App Version"
+  },
+  "flashcard": {
+    "tapToFlip": "Tap to flip",
+    "tapToFlipBack": "Tap to flip back",
+    "meaning": "Meaning:",
+    "types": "Types:"
   }
 }

@@ -122,14 +122,16 @@ class _TagWrap extends StatelessWidget {
 }
 
 class _RelatedGrammarsSection extends StatelessWidget {
-  const _RelatedGrammarsSection({required this.grammars});
+  const _RelatedGrammarsSection({
+    required this.grammars,
+  });
   final List<Grammar> grammars;
   @override
   Widget build(final BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Text(
           context.t.grammar.relatedGrammars,
           style: const TextStyle(

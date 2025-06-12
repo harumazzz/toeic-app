@@ -116,7 +116,10 @@
     "vocabulary": "Từ vựng",
     "vocabularyDescription": "Mở rộng vốn từ vựng",
     "grammar": "Ngữ pháp",
-    "grammarDescription": "Thành thạo các quy tắc ngữ pháp"
+    "grammarDescription": "Thành thạo các quy tắc ngữ pháp",
+    "learnWords": "Học từ",
+    "noWordsToLearn": "Không có từ để học",
+    "addWordsToStartLearning": "Thêm một số từ vào danh sách học tập của bạn để bắt đầu"
   },
   "errors": {
     "failedToLoad": "Không thể tải dữ liệu",
@@ -208,5 +211,11 @@
     "contactSupport": "Liên hệ hỗ trợ",
     "contactSupportContent": "Cần thêm trợ giúp? Liên hệ đội ngũ hỗ trợ của chúng tôi tại support@toeiclearning.com",
     "version": "Phiên bản ứng dụng"
+  },
+  "flashcard": {
+    "tapToFlip": "Nhấn để lật",
+    "tapToFlipBack": "Nhấn để lật lại",
+    "meaning": "Ý nghĩa:",
+    "types": "Loại:"
   }
 }

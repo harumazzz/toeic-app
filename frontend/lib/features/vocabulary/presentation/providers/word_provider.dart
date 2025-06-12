@@ -31,7 +31,7 @@ sealed class WordState with _$WordState {
   }) = WordError;
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 class WordController extends _$WordController {
   @override
   WordState build() => const WordState.initial(words: []);

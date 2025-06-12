@@ -76,13 +76,14 @@ class WordCard extends StatelessWidget {
                         size: 20,
                       ),
                     ),
-                    Text(
-                      word.pronounce,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontStyle: FontStyle.italic,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    if (word.pronounce != null && word.pronounce!.isNotEmpty)
+                      Text(
+                        word.pronounce!,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontStyle: FontStyle.italic,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 IconButton(
@@ -98,19 +99,25 @@ class WordCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              word.shortMean,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 8),
-            if (word.descriptLevel.isNotEmpty)
+            if (word.shortMean != null && word.shortMean!.isNotEmpty) ...[
+              const SizedBox(height: 8),
               Text(
-                word.descriptLevel,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                word.shortMean!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
+            ],
+            if (word.descriptLevel != null &&
+                word.descriptLevel!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                word.descriptLevel!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ],
         ),
       ),
