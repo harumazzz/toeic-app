@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/toeic-app/internal/analyze"
 	"github.com/toeic-app/internal/cache"
 	"github.com/toeic-app/internal/config"
 	db "github.com/toeic-app/internal/db/sqlc"
@@ -53,6 +54,9 @@ type Server struct {
 	concurrencyManager *performance.ConcurrencyManager      // Advanced concurrency management
 	poolManager        *performance.ConnectionPoolManager   // Database connection pool management
 	concurrentHandler  *middleware.ConcurrentRequestHandler // Concurrent request handling
+
+	// Analyze service
+	analyzeService *analyze.Service // Text analysis service for writing enhancement
 
 	// Real-time upgrade notifications
 	wsManager      *websocket.Manager // WebSocket manager for real-time connections
@@ -175,6 +179,15 @@ func NewServer(config config.Config, store db.Querier, dbConn *sql.DB) (*Server,
 	wsManager := websocket.NewManager()
 	upgradeService := upgrade.NewService(wsManager)
 
+	// Initialize analyze service if enabled
+	var analyzeService *analyze.Service
+	if config.AnalyzeServiceEnabled {
+		logger.Info("Initializing analyze service...")
+		analyzeService = analyze.NewService(config)
+		logger.Info("Analyze service initialized with URL: %s", config.AnalyzeServiceURL)
+	} else {
+		logger.Info("Analyze service disabled")
+	}
 	// Initialize the server
 	server := &Server{
 		config:              config,
@@ -187,6 +200,7 @@ func NewServer(config config.Config, store db.Querier, dbConn *sql.DB) (*Server,
 		objectPool:          performance.NewObjectPool(),
 		responseOptimizer:   performance.NewResponseOptimizer(),
 		backgroundProcessor: performance.NewBackgroundProcessor(config.BackgroundWorkerCount, config.BackgroundQueueSize),
+		analyzeService:      analyzeService,
 		wsManager:           wsManager,
 		upgradeService:      upgradeService,
 		cacheManager:        cacheManager,     // Add cache manager
@@ -532,6 +546,7 @@ func (server *Server) setupRouter() {
 				exams.GET("", server.listExams)
 				exams.PUT("/:id", server.updateExam)
 				exams.DELETE("/:id", server.deleteExam)
+				exams.GET("/:id/questions", server.getExamQuestions)
 			}
 
 			// Exam Parts route (separate to avoid wildcard conflict)
@@ -624,6 +639,19 @@ func (server *Server) setupRouter() {
 					turns.GET("/:id", server.getSpeakingTurn)
 					turns.PUT("/:id", server.updateSpeakingTurn)
 					turns.DELETE("/:id", server.deleteSpeakingTurn)
+				}
+			}
+
+			// Text analysis routes
+			if server.config.AnalyzeServiceEnabled && server.analyzeService != nil {
+				analyze := authRoutes.Group("/analyze")
+				{
+					analyze.POST("/text", server.analyzeText)
+					analyze.POST("/texts", server.analyzeMultipleTexts)
+					analyze.GET("/health", server.getAnalyzeServiceHealth)
+					analyze.GET("/stats", server.getAnalyzeServiceStats)
+					analyze.POST("/cache/clear", server.clearAnalyzeServiceCache)
+					analyze.GET("/cache", server.getCachedAnalysis)
 				}
 			}
 		}

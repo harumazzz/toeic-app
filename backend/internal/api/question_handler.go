@@ -310,3 +310,121 @@ func (server *Server) deleteQuestion(ctx *gin.Context) {
 
 	SuccessResponse(ctx, http.StatusOK, "Question deleted successfully", nil)
 }
+
+// @Summary     Get all questions for an exam
+// @Description Retrieves all questions for an exam organized by parts and contents
+// @Tags        exams
+// @Accept      json
+// @Produce     json
+// @Param       id path int true "Exam ID"
+// @Success     200 {object} Response{data=ExamQuestionsResponse} "Questions retrieved successfully"
+// @Failure     400 {object} Response "Invalid exam ID"
+// @Failure     404 {object} Response "Exam not found"
+// @Failure     500 {object} Response "Failed to retrieve questions"
+// @Security    ApiKeyAuth
+// @Router      /api/v1/exams/{id}/questions [get]
+func (server *Server) getExamQuestions(ctx *gin.Context) {
+	examID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ErrorResponse(ctx, http.StatusBadRequest, "Invalid exam ID", err)
+		return
+	}
+
+	// First, get the exam details
+	exam, err := server.store.GetExam(ctx, int32(examID))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ErrorResponse(ctx, http.StatusNotFound, "Exam not found", err)
+			return
+		}
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve exam", err)
+		return
+	}
+
+	// Get all parts for this exam
+	parts, err := server.store.ListPartsByExam(ctx, int32(examID))
+	if err != nil {
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve parts", err)
+		return
+	}
+
+	var examParts []ExamPartWithQuestions
+	totalQuestions := 0
+
+	// For each part, get its contents and questions
+	for _, part := range parts {
+		// Get all contents for this part
+		contents, err := server.store.ListContentsByPart(ctx, part.PartID)
+		if err != nil {
+			ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve contents", err)
+			return
+		}
+
+		var examContents []ExamContentWithQuestions
+
+		// For each content, get its questions
+		for _, content := range contents {
+			questions, err := server.store.ListQuestionsByContent(ctx, content.ContentID)
+			if err != nil {
+				ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve questions", err)
+				return
+			}
+
+			// Convert questions to response format
+			var questionResponses []QuestionResponse
+			for _, question := range questions {
+				questionResponses = append(questionResponses, NewQuestionResponse(question))
+			}
+
+			totalQuestions += len(questionResponses)
+
+			// Add content with its questions
+			examContents = append(examContents, ExamContentWithQuestions{
+				ContentID:   content.ContentID,
+				Type:        content.Type,
+				Description: content.Description,
+				Questions:   questionResponses,
+			})
+		}
+
+		// Add part with its contents
+		examParts = append(examParts, ExamPartWithQuestions{
+			PartID:   part.PartID,
+			Title:    part.Title,
+			Contents: examContents,
+		})
+	}
+
+	// Create the response
+	response := ExamQuestionsResponse{
+		ExamID:         exam.ExamID,
+		ExamTitle:      exam.Title,
+		TotalQuestions: totalQuestions,
+		Parts:          examParts,
+	}
+
+	SuccessResponse(ctx, http.StatusOK, "Exam questions retrieved successfully", response)
+}
+
+// ExamQuestionsResponse defines the structure for all questions in an exam
+type ExamQuestionsResponse struct {
+	ExamID         int32                   `json:"exam_id"`
+	ExamTitle      string                  `json:"exam_title"`
+	TotalQuestions int                     `json:"total_questions"`
+	Parts          []ExamPartWithQuestions `json:"parts"`
+}
+
+// ExamPartWithQuestions defines a part with its contents and questions
+type ExamPartWithQuestions struct {
+	PartID   int32                      `json:"part_id"`
+	Title    string                     `json:"title"`
+	Contents []ExamContentWithQuestions `json:"contents"`
+}
+
+// ExamContentWithQuestions defines content with its questions
+type ExamContentWithQuestions struct {
+	ContentID   int32              `json:"content_id"`
+	Type        string             `json:"type"`
+	Description string             `json:"description"`
+	Questions   []QuestionResponse `json:"questions"`
+}

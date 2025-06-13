@@ -82,6 +82,13 @@ type Config struct {
 	CircuitBreakerThreshold int  `mapstructure:"CIRCUIT_BREAKER_THRESHOLD"` // Circuit breaker failure threshold
 	RequestTimeoutSeconds   int  `mapstructure:"REQUEST_TIMEOUT_SECONDS"`   // Request timeout in seconds
 	HealthCheckInterval     int  `mapstructure:"HEALTH_CHECK_INTERVAL"`     // Health check interval in seconds
+
+	// Analyze service configuration
+	AnalyzeServiceEnabled bool          `mapstructure:"ANALYZE_SERVICE_ENABLED"`
+	AnalyzeServiceURL     string        `mapstructure:"ANALYZE_SERVICE_URL"`
+	AnalyzeServiceTimeout time.Duration `mapstructure:"ANALYZE_SERVICE_TIMEOUT"`
+
+	// Performance settings
 }
 
 // LoadEnv loads environment variables from .env file
@@ -200,7 +207,6 @@ func DefaultConfig() Config {
 	cacheMaxMemoryUsage := GetEnvAsInt("CACHE_MAX_MEMORY_USAGE", 256*1024*1024) // 256MB default
 	cacheEvictionPolicy := GetEnv("CACHE_EVICTION_POLICY", "lru")
 	cacheMetricsEnabled := GetEnv("CACHE_METRICS_ENABLED", "true") == "true"
-
 	// Get concurrency management configuration
 	concurrencyEnabled := GetEnv("CONCURRENCY_ENABLED", "true") == "true"
 	maxConcurrentDBOps := int(GetEnvAsInt("MAX_CONCURRENT_DB_OPS", 100))
@@ -214,6 +220,12 @@ func DefaultConfig() Config {
 	circuitBreakerThreshold := int(GetEnvAsInt("CIRCUIT_BREAKER_THRESHOLD", 10))
 	requestTimeoutSeconds := int(GetEnvAsInt("REQUEST_TIMEOUT_SECONDS", 30))
 	healthCheckInterval := int(GetEnvAsInt("HEALTH_CHECK_INTERVAL", 30))
+
+	// Get analyze service configuration
+	analyzeServiceEnabled := GetEnv("ANALYZE_SERVICE_ENABLED", "true") == "true"
+	analyzeServiceURL := GetEnv("ANALYZE_SERVICE_URL", "http://localhost:9000")
+	analyzeServiceTimeout := time.Duration(GetEnvAsInt("ANALYZE_SERVICE_TIMEOUT", 30)) * time.Second
+
 	return Config{
 		// Database configuration
 		DBDriver:   dbDriver,
@@ -283,5 +295,10 @@ func DefaultConfig() Config {
 		CircuitBreakerThreshold: circuitBreakerThreshold,
 		RequestTimeoutSeconds:   requestTimeoutSeconds,
 		HealthCheckInterval:     healthCheckInterval,
+
+		// Analyze service configuration
+		AnalyzeServiceEnabled: analyzeServiceEnabled,
+		AnalyzeServiceURL:     analyzeServiceURL,
+		AnalyzeServiceTimeout: analyzeServiceTimeout,
 	}
 }

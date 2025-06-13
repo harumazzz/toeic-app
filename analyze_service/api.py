@@ -65,16 +65,12 @@ async def health_check():
 def run():
     # Get port from environment variable or use default
     port = int(os.getenv("PORT", 9000))
+    print(f"Starting analysis service on port {port}")
     
-    # Try different ports if the default is in use
-    while port < 9010:
-        try:
-            uvicorn.run(app, host="127.0.0.1", port=port)
-            break
-        except OSError as e:
-            if "address already in use" in str(e).lower():
-                print(f"Port {port} is in use, trying port {port + 1}")
-                port += 1
-            else:
-                raise e 
+    try:
+        uvicorn.run(app, host="0.0.0.0", port=port)
+    except OSError as e:
+        if "address already in use" in str(e).lower():
+            print(f"Error: Port {port} is already in use")
+        raise e
     

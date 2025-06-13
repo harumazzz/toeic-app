@@ -79,10 +79,11 @@ func (server *Server) createBackupWithTransaction(filename, description string) 
 	dbHost := server.config.DBHost
 	dbPort := server.config.DBPort
 	dbName := server.config.DBName
-	logger.Debug("Using database: host=%s, port=%s, name=%s, user=%s", dbHost, dbPort, dbName, dbUser)
-	// Set environment variable for PostgreSQL password
+	logger.Debug("Using database: host=%s, port=%s, name=%s, user=%s", dbHost, dbPort, dbName, dbUser) // Set environment variables for PostgreSQL
 	env := os.Environ()
 	env = append(env, fmt.Sprintf("PGPASSWORD=%s", dbPassword))
+	// Force UTF-8 client encoding to prevent encoding issues
+	env = append(env, "PGCLIENTENCODING=UTF8")
 
 	// Get pg_dump command with appropriate path
 	pgDumpCmd, cmdErr := util.GetPgDumpCommand()
@@ -92,13 +93,14 @@ func (server *Server) createBackupWithTransaction(filename, description string) 
 	}
 	logger.Debug("Using pg_dump command: %s", pgDumpCmd)
 
-	// Create pg_dump command
+	// Create pg_dump command with UTF-8 encoding
 	cmd := exec.Command(
 		pgDumpCmd,
 		"--host="+dbHost,
 		"--port="+dbPort,
 		"--username="+dbUser,
 		"--format=plain",
+		"--encoding=UTF8",
 		"--clean",
 		"--if-exists",
 		"--no-owner",
@@ -444,10 +446,11 @@ func (server *Server) restoreBackup(ctx *gin.Context) {
 	dbName := server.config.DBName
 	logger.Debug("Database restore target: host=%s, port=%s, name=%s, user=%s",
 		dbHost, dbPort, dbName, dbUser)
-
-	// Set environment variable for PostgreSQL password
+	// Set environment variables for PostgreSQL
 	env := os.Environ()
 	env = append(env, fmt.Sprintf("PGPASSWORD=%s", dbPassword))
+	// Force UTF-8 client encoding to prevent encoding issues
+	env = append(env, "PGCLIENTENCODING=UTF8")
 
 	// Get psql command with appropriate path
 	psqlCmd, cmdErr := util.GetPsqlCommand()
@@ -458,13 +461,14 @@ func (server *Server) restoreBackup(ctx *gin.Context) {
 	}
 	logger.Debug("Using psql command: %s", psqlCmd)
 
-	// Create psql command to restore from the backup
+	// Create psql command to restore from the backup with UTF-8 encoding
 	cmd := exec.Command(
 		psqlCmd,
 		"--host="+dbHost,
 		"--port="+dbPort,
 		"--username="+dbUser,
 		"--dbname="+dbName,
+		"--set=client_encoding=UTF8",
 		"--file="+backupPath,
 	)
 

@@ -1,4 +1,33 @@
 definitions:
+  analyze.Suggestion:
+    properties:
+      definition:
+        type: string
+      level:
+        type: string
+      word:
+        type: string
+    type: object
+  analyze.TextAnalysisResponse:
+    properties:
+      words:
+        items:
+          $ref: '#/definitions/analyze.WordAnalysis'
+        type: array
+    type: object
+  analyze.WordAnalysis:
+    properties:
+      count:
+        type: integer
+      level:
+        type: string
+      suggestions:
+        items:
+          $ref: '#/definitions/analyze.Suggestion'
+        type: array
+      word:
+        type: string
+    type: object
   api.CacheStats:
     properties:
       basic_stats:
@@ -71,6 +100,43 @@ definitions:
       wait_duration:
         description: Duration as string for Swagger compatibility
         type: string
+    type: object
+  api.ExamContentWithQuestions:
+    properties:
+      content_id:
+        type: integer
+      description:
+        type: string
+      questions:
+        items:
+          $ref: '#/definitions/api.QuestionResponse'
+        type: array
+      type:
+        type: string
+    type: object
+  api.ExamPartWithQuestions:
+    properties:
+      contents:
+        items:
+          $ref: '#/definitions/api.ExamContentWithQuestions'
+        type: array
+      part_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  api.ExamQuestionsResponse:
+    properties:
+      exam_id:
+        type: integer
+      exam_title:
+        type: string
+      parts:
+        items:
+          $ref: '#/definitions/api.ExamPartWithQuestions'
+        type: array
+      total_questions:
+        type: integer
     type: object
   api.ExamResponse:
     properties:
@@ -593,6 +659,43 @@ definitions:
     - description
     - title
     - version
+    type: object
+  api.analyzeMultipleTextsRequest:
+    properties:
+      min_synonym_level:
+        type: string
+      texts:
+        items:
+          type: string
+        type: array
+    required:
+    - texts
+    type: object
+  api.analyzeTextRequest:
+    properties:
+      async:
+        type: boolean
+      min_synonym_level:
+        type: string
+      text:
+        type: string
+    required:
+    - text
+    type: object
+  api.analyzeTextResponse:
+    properties:
+      cached:
+        type: boolean
+      error:
+        type: string
+      result:
+        $ref: '#/definitions/analyze.TextAnalysisResponse'
+      text:
+        type: string
+      timestamp:
+        type: string
+      user_id:
+        type: integer
     type: object
   api.backupListItem:
     properties:
@@ -1970,6 +2073,218 @@ paths:
       summary: Reset concurrency metrics
       tags:
       - Performance
+  /api/v1/analyze/cache:
+    get:
+      consumes:
+      - application/json
+      description: Get cached word analysis result by user and text
+      parameters:
+      - description: Text to search for
+        in: query
+        name: text
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cached analysis found
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.analyzeTextResponse'
+              type: object
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Analysis not found in cache
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get word analysis by ID
+      tags:
+      - text-analysis
+  /api/v1/analyze/cache/clear:
+    post:
+      consumes:
+      - application/json
+      description: Clear the analyze service cache (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cache cleared successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Admin access required
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Clear analyze service cache
+      tags:
+      - text-analysis
+  /api/v1/analyze/health:
+    get:
+      consumes:
+      - application/json
+      description: Check the health status of the analyze service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service health status
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get analyze service health
+      tags:
+      - text-analysis
+  /api/v1/analyze/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed statistics about the analyze service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service statistics
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get analyze service statistics
+      tags:
+      - text-analysis
+  /api/v1/analyze/text:
+    post:
+      consumes:
+      - application/json
+      description: Analyze English text to get word levels and synonym suggestions
+      parameters:
+      - description: Text analysis request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.analyzeTextRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Text analyzed successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.analyzeTextResponse'
+              type: object
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+        "503":
+          description: Analyze service unavailable
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Analyze text
+      tags:
+      - text-analysis
+  /api/v1/analyze/texts:
+    post:
+      consumes:
+      - application/json
+      description: Analyze multiple English texts concurrently to get word levels
+        and synonym suggestions
+      parameters:
+      - description: Multiple texts analysis request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.analyzeMultipleTextsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Texts analyzed successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.analyzeTextResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+        "503":
+          description: Analyze service unavailable
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Analyze multiple texts
+      tags:
+      - text-analysis
   /api/v1/content-questions/{content_id}:
     get:
       consumes:
@@ -2612,6 +2927,46 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update an exam
+      tags:
+      - exams
+  /api/v1/exams/{id}/questions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all questions for an exam organized by parts and contents
+      parameters:
+      - description: Exam ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Questions retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExamQuestionsResponse'
+              type: object
+        "400":
+          description: Invalid exam ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Exam not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve questions
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all questions for an exam
       tags:
       - exams
   /api/v1/grammars:
