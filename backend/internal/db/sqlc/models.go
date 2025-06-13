@@ -6,11 +6,57 @@ package db
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/sqlc-dev/pqtype"
 )
+
+// Status of an exam attempt
+type ExamStatusEnum string
+
+const (
+	ExamStatusEnumInProgress ExamStatusEnum = "in_progress"
+	ExamStatusEnumCompleted  ExamStatusEnum = "completed"
+	ExamStatusEnumAbandoned  ExamStatusEnum = "abandoned"
+)
+
+func (e *ExamStatusEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ExamStatusEnum(s)
+	case string:
+		*e = ExamStatusEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ExamStatusEnum: %T", src)
+	}
+	return nil
+}
+
+type NullExamStatusEnum struct {
+	ExamStatusEnum ExamStatusEnum `json:"exam_status_enum"`
+	Valid          bool           `json:"valid"` // Valid is true if ExamStatusEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullExamStatusEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.ExamStatusEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ExamStatusEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullExamStatusEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ExamStatusEnum), nil
+}
 
 type Content struct {
 	ContentID   int32  `json:"content_id"`
@@ -24,6 +70,20 @@ type Exam struct {
 	Title            string `json:"title"`
 	TimeLimitMinutes int32  `json:"time_limit_minutes"`
 	IsUnlocked       bool   `json:"is_unlocked"`
+}
+
+// Track user exam attempts with timing and scoring
+type ExamAttempt struct {
+	AttemptID int32        `json:"attempt_id"`
+	UserID    int32        `json:"user_id"`
+	ExamID    int32        `json:"exam_id"`
+	StartTime time.Time    `json:"start_time"`
+	EndTime   sql.NullTime `json:"end_time"`
+	// TOEIC score (0-990), NULL if not completed
+	Score     sql.NullString `json:"score"`
+	Status    ExamStatusEnum `json:"status"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
 }
 
 type Example struct {
@@ -87,6 +147,19 @@ type User struct {
 	PasswordHash string    `json:"password_hash"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+// Store user answers for each question in an exam attempt
+type UserAnswer struct {
+	UserAnswerID int32 `json:"user_answer_id"`
+	AttemptID    int32 `json:"attempt_id"`
+	QuestionID   int32 `json:"question_id"`
+	// User selected answer text
+	SelectedAnswer string `json:"selected_answer"`
+	// Whether the answer is correct
+	IsCorrect  bool         `json:"is_correct"`
+	AnswerTime sql.NullTime `json:"answer_time"`
+	CreatedAt  time.Time    `json:"created_at"`
 }
 
 type UserProfile struct {

@@ -28,6 +28,30 @@ definitions:
       word:
         type: string
     type: object
+  api.AttemptAnswersResponse:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/api.UserAnswerWithQuestionResponse'
+        type: array
+      attempt_id:
+        type: integer
+      correct_count:
+        type: integer
+      total_answered:
+        type: integer
+    type: object
+  api.AttemptScoreResponse:
+    properties:
+      attempt_id:
+        type: integer
+      calculated_score:
+        type: number
+      correct_answers:
+        type: integer
+      total_questions:
+        type: integer
+    type: object
   api.CacheStats:
     properties:
       basic_stats:
@@ -100,6 +124,45 @@ definitions:
       wait_duration:
         description: Duration as string for Swagger compatibility
         type: string
+    type: object
+  api.ExamAttemptResponse:
+    properties:
+      attempt_id:
+        type: integer
+      created_at:
+        type: string
+      end_time:
+        type: string
+      exam_id:
+        type: integer
+      score:
+        description: Using string for NUMERIC precision
+        type: string
+      start_time:
+        type: string
+      status:
+        $ref: '#/definitions/db.ExamStatusEnum'
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  api.ExamAttemptStatsResponse:
+    properties:
+      abandoned_attempts:
+        type: integer
+      average_score:
+        type: string
+      completed_attempts:
+        type: integer
+      highest_score:
+        type: string
+      in_progress_attempts:
+        type: integer
+      lowest_score:
+        type: string
+      total_attempts:
+        type: integer
     type: object
   api.ExamContentWithQuestions:
     properties:
@@ -261,6 +324,19 @@ definitions:
       name:
         type: string
       native_name:
+        type: string
+    type: object
+  api.LeaderboardEntry:
+    properties:
+      end_time:
+        type: string
+      rank:
+        type: integer
+      score:
+        type: string
+      user_id:
+        type: integer
+      username:
         type: string
     type: object
   api.MeanModel:
@@ -482,6 +558,50 @@ definitions:
         type: array
       kind:
         type: string
+    type: object
+  api.UserAnswerResponse:
+    properties:
+      answer_time:
+        type: string
+      attempt_id:
+        type: integer
+      created_at:
+        type: string
+      is_correct:
+        type: boolean
+      question_id:
+        type: integer
+      selected_answer:
+        type: string
+      user_answer_id:
+        type: integer
+    type: object
+  api.UserAnswerWithQuestionResponse:
+    properties:
+      answer_time:
+        type: string
+      attempt_id:
+        type: integer
+      created_at:
+        type: string
+      explanation:
+        type: string
+      is_correct:
+        type: boolean
+      possible_answers:
+        items:
+          type: string
+        type: array
+      question_id:
+        type: integer
+      question_title:
+        type: string
+      selected_answer:
+        type: string
+      true_answer:
+        type: string
+      user_answer_id:
+        type: integer
     type: object
   api.UserResponse:
     properties:
@@ -762,6 +882,14 @@ definitions:
     - part_id
     - type
     type: object
+  api.createExamAttemptRequest:
+    properties:
+      exam_id:
+        minimum: 1
+        type: integer
+    required:
+    - exam_id
+    type: object
   api.createExamRequest:
     properties:
       is_unlocked:
@@ -887,6 +1015,21 @@ definitions:
     required:
     - session_id
     - speaker_type
+    type: object
+  api.createUserAnswerRequest:
+    properties:
+      attempt_id:
+        minimum: 1
+        type: integer
+      question_id:
+        minimum: 1
+        type: integer
+      selected_answer:
+        type: string
+    required:
+    - attempt_id
+    - question_id
+    - selected_answer
     type: object
   api.createUserRequest:
     properties:
@@ -1102,6 +1245,13 @@ definitions:
       type:
         type: string
     type: object
+  api.updateExamAttemptRequest:
+    properties:
+      score:
+        type: string
+      status:
+        type: string
+    type: object
   api.updateExamRequest:
     properties:
       is_unlocked:
@@ -1293,6 +1443,16 @@ definitions:
     required:
     - current_version
     type: object
+  db.ExamStatusEnum:
+    enum:
+    - in_progress
+    - completed
+    - abandoned
+    type: string
+    x-enum-varnames:
+    - ExamStatusEnumInProgress
+    - ExamStatusEnumCompleted
+    - ExamStatusEnumAbandoned
   upgrade.AppVersion:
     properties:
       changes:
@@ -2475,6 +2635,459 @@ paths:
       summary: Update content
       tags:
       - contents
+  /api/v1/exam-attempts:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of exam attempts for the authenticated user
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Exam attempts retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.ExamAttemptResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve exam attempts
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List user's exam attempts
+      tags:
+      - exam-attempts
+    post:
+      consumes:
+      - application/json
+      description: Create a new exam attempt for the authenticated user
+      parameters:
+      - description: Exam attempt to create
+        in: body
+        name: attempt
+        required: true
+        schema:
+          $ref: '#/definitions/api.createExamAttemptRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Exam attempt started successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExamAttemptResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Exam not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "409":
+          description: User already has an active attempt for this exam
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create exam attempt
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Start a new exam attempt
+      tags:
+      - exam-attempts
+  /api/v1/exam-attempts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an exam attempt (admin only or own incomplete attempts)
+      parameters:
+      - description: Exam Attempt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Exam attempt deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid attempt ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Exam attempt not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete exam attempt
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete an exam attempt
+      tags:
+      - exam-attempts
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific exam attempt by its ID (user can only access
+        their own attempts)
+      parameters:
+      - description: Exam Attempt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Exam attempt retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExamAttemptResponse'
+              type: object
+        "400":
+          description: Invalid attempt ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Access denied - not your exam attempt
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Exam attempt not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve exam attempt
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get an exam attempt by ID
+      tags:
+      - exam-attempts
+    put:
+      consumes:
+      - application/json
+      description: Update the status or score of an exam attempt
+      parameters:
+      - description: Exam Attempt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update data
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateExamAttemptRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Exam attempt updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExamAttemptResponse'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Access denied - not your exam attempt
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Exam attempt not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update exam attempt
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update exam attempt status
+      tags:
+      - exam-attempts
+  /api/v1/exam-attempts/{id}/abandon:
+    post:
+      consumes:
+      - application/json
+      description: Abandon an active exam attempt
+      parameters:
+      - description: Exam Attempt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Exam attempt abandoned successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExamAttemptResponse'
+              type: object
+        "400":
+          description: Invalid attempt ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Exam attempt not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to abandon exam attempt
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Abandon exam attempt
+      tags:
+      - exam-attempts
+  /api/v1/exam-attempts/{id}/answers:
+    get:
+      consumes:
+      - application/json
+      description: Get all answers for a specific exam attempt
+      parameters:
+      - description: Attempt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Answers retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.AttemptAnswersResponse'
+              type: object
+        "400":
+          description: Invalid attempt ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Attempt not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve answers
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get answers by attempt
+      tags:
+      - user-answers
+  /api/v1/exam-attempts/{id}/complete:
+    post:
+      consumes:
+      - application/json
+      description: Complete an exam attempt with final score
+      parameters:
+      - description: Exam Attempt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Final score
+        in: body
+        name: score
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Exam attempt completed successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExamAttemptResponse'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Exam attempt not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to complete exam attempt
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Complete exam attempt
+      tags:
+      - exam-attempts
+  /api/v1/exam-attempts/{id}/score:
+    get:
+      consumes:
+      - application/json
+      description: Get scoring information for an exam attempt
+      parameters:
+      - description: Attempt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Score retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.AttemptScoreResponse'
+              type: object
+        "400":
+          description: Invalid attempt ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Attempt not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve score
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get attempt score
+      tags:
+      - user-answers
+  /api/v1/exam-attempts/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get statistics about user's exam attempts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Statistics retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.ExamAttemptStatsResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve statistics
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get exam attempt statistics
+      tags:
+      - exam-attempts
   /api/v1/exam-parts/{exam_id}:
     get:
       consumes:
@@ -2929,6 +3542,58 @@ paths:
       summary: Update an exam
       tags:
       - exams
+  /api/v1/exams/{id}/leaderboard:
+    get:
+      consumes:
+      - application/json
+      description: Get the leaderboard for a specific exam
+      parameters:
+      - description: Exam ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Leaderboard retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.LeaderboardEntry'
+                  type: array
+              type: object
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Exam not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve leaderboard
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get exam leaderboard
+      tags:
+      - exam-attempts
   /api/v1/exams/{id}/questions:
     get:
       consumes:
@@ -4605,6 +5270,192 @@ paths:
       summary: Get WebSocket connection status
       tags:
       - upgrade
+  /api/v1/user-answers:
+    post:
+      consumes:
+      - application/json
+      description: Submit an answer for a question in an exam attempt
+      parameters:
+      - description: User answer to submit
+        in: body
+        name: answer
+        required: true
+        schema:
+          $ref: '#/definitions/api.createUserAnswerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Answer submitted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserAnswerResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Attempt or question not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "409":
+          description: Answer already exists for this question
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to submit answer
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Submit a user answer
+      tags:
+      - user-answers
+  /api/v1/user-answers/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user's answer (admin only or own incomplete attempts)
+      parameters:
+      - description: User Answer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Answer deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid answer ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Answer not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete answer
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a user answer
+      tags:
+      - user-answers
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific user answer by its ID
+      parameters:
+      - description: User Answer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User answer retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserAnswerResponse'
+              type: object
+        "400":
+          description: Invalid answer ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User answer not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve user answer
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a user answer by ID
+      tags:
+      - user-answers
+    put:
+      consumes:
+      - application/json
+      description: Update a user's answer for a question
+      parameters:
+      - description: User Answer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated answer data
+        in: body
+        name: answer
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Answer updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserAnswerResponse'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Answer not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update answer
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a user answer
+      tags:
+      - user-answers
   /api/v1/user-word-progress:
     post:
       consumes:

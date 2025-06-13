@@ -640,7 +640,33 @@ func (server *Server) setupRouter() {
 					turns.PUT("/:id", server.updateSpeakingTurn)
 					turns.DELETE("/:id", server.deleteSpeakingTurn)
 				}
+			} // Exam Attempt routes
+			examAttempts := authRoutes.Group("/exam-attempts")
+			{
+				examAttempts.POST("", server.createExamAttempt)
+				examAttempts.GET("/:id", server.getExamAttempt)
+				examAttempts.GET("", server.listUserExamAttempts)
+				examAttempts.PUT("/:id", server.updateExamAttempt)
+				examAttempts.DELETE("/:id", server.deleteExamAttempt)
+				examAttempts.POST("/:id/complete", server.completeExamAttempt)
+				examAttempts.POST("/:id/abandon", server.abandonExamAttempt)
+				examAttempts.GET("/stats", server.getExamAttemptStats)
+				// Nested routes for specific exam attempts
+				examAttempts.GET("/:id/answers", server.getUserAnswersByAttempt)
+				examAttempts.GET("/:id/score", server.getAttemptScore)
 			}
+
+			// User Answer routes
+			userAnswers := authRoutes.Group("/user-answers")
+			{
+				userAnswers.POST("", server.createUserAnswer)
+				userAnswers.GET("/:id", server.getUserAnswer)
+				userAnswers.PUT("/:id", server.updateUserAnswer)
+				userAnswers.DELETE("/:id", server.deleteUserAnswer)
+			}
+
+			// Exam leaderboard route
+			authRoutes.GET("/exams/:id/leaderboard", server.getExamLeaderboard)
 
 			// Text analysis routes
 			if server.config.AnalyzeServiceEnabled && server.analyzeService != nil {
