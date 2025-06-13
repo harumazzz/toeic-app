@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
 import '../../../i18n/strings.g.dart';
@@ -70,7 +71,7 @@ class LoadingSettings extends StatelessWidget {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            Icons.settings,
+                            Symbols.settings,
                             size: 32,
                             color: Colors.blue.shade700,
                           ),

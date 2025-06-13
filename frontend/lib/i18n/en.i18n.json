@@ -34,7 +34,13 @@
     "error": "Error",
     "success": "Success",
     "warning": "Warning",
-    "info": "Info"
+    "info": "Info",
+    "minutes": "minutes",
+    "unlocked": "Unlocked",
+    "locked": "Locked",
+    "audio": "Audio",
+    "pronunciation": "Pronunciation",
+    "viewDetails": "View Details"
   },
   "hint": {
     "email": "Enter your email",
@@ -217,5 +223,9 @@
     "tapToFlipBack": "Tap to flip back",
     "meaning": "Meaning:",
     "types": "Types:"
+  },
+  "practice": {
+    "completePreviousExamsToUnlock": "Complete previous exams to unlock",
+    "takeTheTest": "Would you like to take the test?"
   }
 }

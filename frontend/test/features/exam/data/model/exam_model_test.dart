@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:learn/features/exam/data/model/content_model.dart';
-import 'package:learn/features/exam/data/model/part_model.dart';
-import 'package:learn/features/exam/data/model/question_model.dart';
-import 'package:learn/features/exam/domain/entities/content.dart';
-import 'package:learn/features/exam/domain/entities/part.dart';
-import 'package:learn/features/exam/domain/entities/question.dart';
+import 'package:learn/features/practice/data/model/content_model.dart';
+import 'package:learn/features/practice/data/model/part_model.dart';
+import 'package:learn/features/practice/data/model/question_model.dart';
+import 'package:learn/features/practice/domain/entities/content.dart';
+import 'package:learn/features/practice/domain/entities/part.dart';
+import 'package:learn/features/practice/domain/entities/question.dart';
 
 void main() {
   group('PartModel Tests', () {

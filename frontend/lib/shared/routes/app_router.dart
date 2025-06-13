@@ -9,9 +9,13 @@ import '../../features/grammars/presentation/screens/grammar_detail_screen.dart'
 import '../../features/grammars/presentation/screens/grammar_list_screen.dart';
 import '../../features/help/presentation/screens/help_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/practice/presentation/screens/practice_screen.dart';
+import '../../features/progress/presentation/screens/progress_screen.dart';
 import '../../features/settings/presentation/screens/setting_screen.dart';
+import '../../features/speaking/presentation/screens/speaking_screen.dart';
 import '../../features/vocabulary/presentation/screens/vocabulary_screen.dart';
 import '../../features/vocabulary/presentation/screens/word_detail_screen.dart';
+import '../../features/writing/presentation/screens/writing_screen.dart';
 import '../../injection_container.dart';
 
 part 'app_router.g.dart';
@@ -38,6 +42,16 @@ class AppRouter {
   static const String grammarDetailRoute = 'grammar-detail';
 
   static const String settingsRoute = 'settings';
+
+  static const String practiceRoute = 'practice';
+
+  static const String progressRoute = 'progress';
+
+  static const String speakingRoute = 'speaking';
+
+  static const String writingRoute = 'writing';
+
+  static const String examsRoute = 'exams';
 
   static GoRouter get router => _router;
 }
@@ -186,6 +200,62 @@ class SettingsRoute extends GoRouteData with _$SettingsRoute {
     final BuildContext context,
     final GoRouterState state,
   ) => const SettingScreen();
+}
+
+@TypedGoRoute<PracticeRoute>(
+  path: '/${AppRouter.practiceRoute}',
+  name: AppRouter.practiceRoute,
+)
+class PracticeRoute extends GoRouteData with _$PracticeRoute {
+  const PracticeRoute();
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const PracticeScreen();
+}
+
+@TypedGoRoute<ProgressRoute>(
+  path: '/${AppRouter.progressRoute}',
+  name: AppRouter.progressRoute,
+)
+class ProgressRoute extends GoRouteData with _$ProgressRoute {
+  const ProgressRoute();
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const ProgressScreen();
+}
+
+@TypedGoRoute<SpeakingRoute>(
+  path: '/${AppRouter.speakingRoute}',
+  name: AppRouter.speakingRoute,
+)
+class SpeakingRoute extends GoRouteData with _$SpeakingRoute {
+  const SpeakingRoute();
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const SpeakingScreen();
+}
+
+@TypedGoRoute<WritingRoute>(
+  path: '/${AppRouter.writingRoute}',
+  name: AppRouter.writingRoute,
+)
+class WritingRoute extends GoRouteData with _$WritingRoute {
+  const WritingRoute();
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const WritingScreen();
 }
 
 final GoRouter _router = GoRouter(

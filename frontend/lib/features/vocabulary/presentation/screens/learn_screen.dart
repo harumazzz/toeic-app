@@ -18,7 +18,7 @@ class LearnScreen extends HookConsumerWidget {
   Widget build(final BuildContext context, final WidgetRef ref) {
     final reviewProgressState = ref.watch(reviewProgressNotifierProvider);
     final currentIndex = useState(0);
-    final currentPage = useState(0);
+    final offset = useState(0);
 
     useEffect(() {
       Future.microtask(() async {
@@ -26,10 +26,10 @@ class LearnScreen extends HookConsumerWidget {
             .read(reviewProgressNotifierProvider.notifier)
             .loadReviewProgress(
               limit: 10,
-              offset: currentPage.value,
+              offset: offset.value,
             );
+        offset.value += 10;
       });
-      currentPage.value++;
       return null;
     }, const []);
 
@@ -39,44 +39,56 @@ class LearnScreen extends HookConsumerWidget {
         elevation: 0,
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: switch (reviewProgressState) {
-            ReviewProgressInitial() => const SizedBox.shrink(),
-            ReviewProgressLoading() => const _ReviewProgressLoadingView(),
-            final ReviewProgressLoaded state =>
-              state.progress.isEmpty
-                  ? const _EmptyStateView()
-                  : Column(
-                    children: [
-                      _ProgressHeader(
+        child: Column(
+          children: [
+            // Header section
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: switch (reviewProgressState) {
+                ReviewProgressInitial() => const SizedBox.shrink(),
+                ReviewProgressLoading() => const _ReviewProgressLoadingView(),
+                final ReviewProgressLoaded state =>
+                  state.progress.isEmpty
+                      ? const SizedBox.shrink()
+                      : _ProgressHeader(
                         currentIndex: currentIndex.value,
                         totalCards: state.progress.length,
                       ),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: _FlashcardSwiper(
+                ReviewProgressError() => const SizedBox.shrink(),
+              },
+            ),
+            // Main content area
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                child: switch (reviewProgressState) {
+                  ReviewProgressInitial() => const SizedBox.shrink(),
+                  ReviewProgressLoading() => const _ReviewProgressLoadingView(),
+                  final ReviewProgressLoaded state =>
+                    state.progress.isEmpty
+                        ? const _EmptyStateView()
+                        : _FlashcardSwiper(
                           progress: state.progress,
                           onIndexChanged: (final index) {
                             currentIndex.value = index;
                           },
                         ),
-                      ),
-                    ],
+                  final ReviewProgressError state => _ReviewProgressErrorView(
+                    message: state.message,
+                    onRetry: () async {
+                      await ref
+                          .read(reviewProgressNotifierProvider.notifier)
+                          .loadReviewProgress(
+                            limit: 10,
+                            offset: offset.value,
+                          );
+                      offset.value += 10;
+                    },
                   ),
-            final ReviewProgressError state => _ReviewProgressErrorView(
-              message: state.message,
-              onRetry: () async {
-                await ref
-                    .read(reviewProgressNotifierProvider.notifier)
-                    .loadReviewProgress(
-                      limit: 10,
-                      offset: currentPage.value,
-                    );
-                currentPage.value++;
-              },
+                },
+              ),
             ),
-          },
+          ],
         ),
       ),
     );
@@ -91,18 +103,16 @@ class _ProgressHeader extends StatelessWidget {
 
   final int currentIndex;
   final int totalCards;
-
   @override
   Widget build(final BuildContext context) => Container(
-    padding: const EdgeInsets.all(16),
-    margin: const EdgeInsets.only(top: 8),
+    padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.surface,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       boxShadow: [
         BoxShadow(
-          color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
-          blurRadius: 8,
+          color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.08),
+          blurRadius: 6,
           offset: const Offset(0, 2),
         ),
       ],
@@ -115,18 +125,16 @@ class _ProgressHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
                 value: (currentIndex + 1) / totalCards,
-                backgroundColor:
-                    Theme.of(context).colorScheme.surfaceContainerHighest,
                 valueColor: AlwaysStoppedAnimation<Color>(
                   Theme.of(context).colorScheme.primary,
                 ),
-                minHeight: 8,
+                minHeight: 6,
               ),
             ),
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(6),
                   gradient: LinearGradient(
                     colors: [
                       Theme.of(
@@ -144,22 +152,22 @@ class _ProgressHeader extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
+                horizontal: 10,
+                vertical: 4,
               ),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 '${currentIndex + 1}/$totalCards',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                   fontWeight: FontWeight.bold,
                 ),
@@ -167,16 +175,16 @@ class _ProgressHeader extends StatelessWidget {
             ),
             Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
+                horizontal: 10,
+                vertical: 4,
               ),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.secondaryContainer,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 '${((currentIndex + 1) / totalCards * 100).toInt()}%',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSecondaryContainer,
                   fontWeight: FontWeight.bold,
                 ),
@@ -206,7 +214,6 @@ class _FlashcardSwiper extends StatelessWidget {
   final List<WordProgress> progress;
 
   final void Function(int) onIndexChanged;
-
   @override
   Widget build(final BuildContext context) => Swiper(
     onIndexChanged: onIndexChanged,
@@ -223,19 +230,28 @@ class _FlashcardSwiper extends StatelessWidget {
                 word: word,
               ),
         ),
-    itemHeight: MediaQuery.of(context).size.height * 0.7,
+    itemHeight: MediaQuery.of(context).size.height * 0.55,
+    viewportFraction: 0.85,
+    scale: 0.85,
     pagination: SwiperPagination(
+      margin: const EdgeInsets.only(bottom: 8),
       builder: DotSwiperPaginationBuilder(
         activeColor: Theme.of(context).colorScheme.primary,
-        color: Theme.of(context).colorScheme.outline,
-        size: 8,
-        activeSize: 12,
+        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+        size: 6,
+        activeSize: 8,
+        space: 4,
       ),
     ),
     control: SwiperControl(
+      iconPrevious: Symbols.chevron_left,
+      iconNext: Symbols.chevron_right,
       color: Theme.of(context).colorScheme.primary,
-      disableColor: Theme.of(context).colorScheme.outline,
-      size: 24,
+      disableColor: Theme.of(
+        context,
+      ).colorScheme.outline.withValues(alpha: 0.3),
+      size: 20,
+      padding: const EdgeInsets.all(8),
     ),
   );
 
@@ -255,15 +271,14 @@ class _FlashcardSwiper extends StatelessWidget {
 
 class _EmptyStateView extends StatelessWidget {
   const _EmptyStateView();
-
   @override
   Widget build(final BuildContext context) => Center(
     child: Container(
-      padding: const EdgeInsets.all(24),
-      margin: const EdgeInsets.all(24),
+      width: MediaQuery.of(context).size.width * 0.85,
+      padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
@@ -274,12 +289,18 @@ class _EmptyStateView extends StatelessWidget {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primaryContainer,
+                  Theme.of(context).colorScheme.secondaryContainer,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -293,6 +314,7 @@ class _EmptyStateView extends StatelessWidget {
             context.t.modules.noWordsToLearn,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             textAlign: TextAlign.center,
           ),
@@ -301,6 +323,7 @@ class _EmptyStateView extends StatelessWidget {
             context.t.modules.addWordsToStartLearning,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
+              height: 1.4,
             ),
             textAlign: TextAlign.center,
           ),
@@ -318,37 +341,56 @@ class _ReviewProgressErrorView extends StatelessWidget {
 
   final String message;
   final void Function() onRetry;
-
   @override
   Widget build(final BuildContext context) => Center(
     child: Container(
-      padding: const EdgeInsets.all(24),
-      margin: const EdgeInsets.all(24),
+      width: MediaQuery.of(context).size.width * 0.85,
+      padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Symbols.error_outline,
-            size: 48,
-            color: Theme.of(context).colorScheme.error,
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Symbols.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Text(
             message,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Theme.of(context).colorScheme.error,
+              fontWeight: FontWeight.w600,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(Symbols.refresh),
+            icon: const Icon(Symbols.refresh, size: 18),
             label: Text(context.t.common.retry),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
           ),
         ],
       ),
@@ -368,54 +410,133 @@ class _ReviewProgressLoadingView extends StatelessWidget {
   const _ReviewProgressLoadingView();
 
   @override
-  Widget build(final BuildContext context) => ListView.builder(
-    padding: const EdgeInsets.all(16),
-    itemCount: 5,
-    itemBuilder:
-        (final context, final index) => Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Shimmer(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.shadow.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+  Widget build(final BuildContext context) => Center(
+    child: Container(
+      width: MediaQuery.of(context).size.width * 0.85,
+      height: MediaQuery.of(context).size.height * 0.5,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(
+              context,
+            ).colorScheme.shadow.withValues(alpha: 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _ShimmerContainer(
+                child: Container(
+                  width: double.infinity,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 24),
+              _ShimmerContainer(
+                interval: const Duration(milliseconds: 1000),
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _ShimmerContainer(
+                interval: const Duration(milliseconds: 1200),
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.4,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Container(
-                    height: 24,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(8),
+                  _ShimmerContainer(
+                    interval: const Duration(milliseconds: 900),
+                    child: Container(
+                      width: 60,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Container(
-                    height: 16,
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(8),
+                  _ShimmerContainer(
+                    interval: const Duration(milliseconds: 1100),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  _ShimmerContainer(
+                    interval: const Duration(milliseconds: 1300),
+                    child: Container(
+                      width: 60,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
         ),
+      ),
+    ),
   );
+}
+
+class _ShimmerContainer extends StatelessWidget {
+  const _ShimmerContainer({
+    required this.child,
+    this.interval = const Duration(milliseconds: 800),
+  });
+
+  final Widget child;
+  final Duration interval;
+
+  @override
+  Widget build(final BuildContext context) => Shimmer(
+    interval: interval,
+    color: Theme.of(
+      context,
+    ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+    child: child,
+  );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty<Widget>('child', child))
+      ..add(DiagnosticsProperty<Duration>('interval', interval));
+  }
 }

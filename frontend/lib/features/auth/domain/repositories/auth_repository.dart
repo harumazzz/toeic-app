@@ -2,7 +2,7 @@ import 'package:dart_either/dart_either.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/user.dart';
 
-abstract class AuthRepository {
+abstract interface class AuthRepository {
   Future<Either<Failure, User>> login(
     final String email,
     final String password,

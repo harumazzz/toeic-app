@@ -3,7 +3,7 @@ import 'package:dart_either/dart_either.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/word.dart';
 
-abstract class WordRepository {
+abstract interface class WordRepository {
   Future<Either<Failure, List<Word>>> getAllWords({
     required final int offset,
     required final int limit,

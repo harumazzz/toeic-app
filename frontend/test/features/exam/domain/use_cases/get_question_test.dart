@@ -1,9 +1,9 @@
 import 'package:dart_either/dart_either.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learn/core/error/failures.dart';
-import 'package:learn/features/exam/domain/entities/question.dart';
-import 'package:learn/features/exam/domain/repositories/question_repository.dart';
-import 'package:learn/features/exam/domain/use_cases/get_question.dart';
+import 'package:learn/features/practice/domain/entities/question.dart';
+import 'package:learn/features/practice/domain/repositories/question_repository.dart';
+import 'package:learn/features/practice/domain/use_cases/get_question.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockQuestionRepository extends Mock implements QuestionRepository {}

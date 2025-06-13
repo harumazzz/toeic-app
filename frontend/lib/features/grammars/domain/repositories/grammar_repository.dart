@@ -3,7 +3,7 @@ import 'package:dart_either/dart_either.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/grammar.dart';
 
-abstract class GrammarRepository {
+abstract interface class GrammarRepository {
   Future<Either<Failure, List<Grammar>>> getAllGrammars({
     required final int limit,
     required final int offset,

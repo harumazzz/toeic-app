@@ -21,16 +21,16 @@ class SynonymsSection extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
     ),
     child: Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SynonymHeader(),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           if (word.snym != null && word.snym!.isNotEmpty) ...[
             for (final synonymGroup in word.snym!)
               SynonymGroupItem(synonym: synonymGroup),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
           ] else
             Text(
               context.t.wordDetail.noSynonyms,
@@ -57,7 +57,7 @@ class SynonymHeader extends StatelessWidget {
   Widget build(final BuildContext context) => Row(
     children: [
       Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.secondary.withValues(
             alpha: 0.1,
@@ -66,11 +66,11 @@ class SynonymHeader extends StatelessWidget {
         ),
         child: Icon(
           Symbols.swap_horiz,
-          size: 18,
+          size: 16,
           color: Theme.of(context).colorScheme.secondary,
         ),
       ),
-      const SizedBox(width: 12),
+      const SizedBox(width: 10),
       Text(
         context.t.wordDetail.synonymsAndAntonyms,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -102,7 +102,7 @@ class SynonymGroupItem extends StatelessWidget {
           contentIndex++
         ) ...[
           SynonymContentItem(content: synonym.content![contentIndex]),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
         ],
       ],
     ],
@@ -122,14 +122,13 @@ class SynonymKindBadge extends StatelessWidget {
   });
 
   final String kind;
-
   @override
   Widget build(final BuildContext context) => Column(
     children: [
       Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 6,
+          horizontal: 10,
+          vertical: 4,
         ),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.secondaryContainer,
@@ -137,13 +136,13 @@ class SynonymKindBadge extends StatelessWidget {
         ),
         child: Text(
           kind,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
             fontWeight: FontWeight.w600,
             color: Theme.of(context).colorScheme.onSecondaryContainer,
           ),
         ),
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 12),
     ],
   );
 
@@ -175,7 +174,7 @@ class SynonymContentItem extends StatelessWidget {
           content.synonym!.isNotEmpty &&
           content.antonym != null &&
           content.antonym!.isNotEmpty)
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
       if (content.antonym != null && content.antonym!.isNotEmpty)
         WordListContainer(
           words: content.antonym!,
@@ -212,9 +211,8 @@ class WordListContainer extends StatelessWidget {
         isAntonym
             ? context.t.wordDetail.antonyms
             : context.t.wordDetail.synonyms;
-
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
@@ -229,23 +227,23 @@ class WordListContainer extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                size: 16,
+                size: 14,
                 color: color.shade600,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 4),
               Text(
                 title,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: color.shade700,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 6,
+            runSpacing: 6,
             children: [
               for (final word in words)
                 WordChip(
@@ -277,12 +275,11 @@ class WordChip extends StatelessWidget {
 
   final String word;
   final MaterialColor color;
-
   @override
   Widget build(final BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(
-      horizontal: 12,
-      vertical: 6,
+      horizontal: 10,
+      vertical: 4,
     ),
     decoration: BoxDecoration(
       color: color.withValues(alpha: 0.1),
@@ -296,6 +293,7 @@ class WordChip extends StatelessWidget {
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
         color: color.shade700,
         fontWeight: FontWeight.w500,
+        fontSize: 12,
       ),
     ),
   );
@@ -311,14 +309,13 @@ class WordChip extends StatelessWidget {
 
 class SynonymDivider extends StatelessWidget {
   const SynonymDivider({super.key});
-
   @override
   Widget build(final BuildContext context) => Column(
     children: [
-      const SizedBox(height: 24),
+      const SizedBox(height: 20),
       Container(
         height: 1,
-        margin: const EdgeInsets.symmetric(horizontal: 16),
+        margin: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -329,7 +326,7 @@ class SynonymDivider extends StatelessWidget {
           ),
         ),
       ),
-      const SizedBox(height: 24),
+      const SizedBox(height: 20),
     ],
   );
 }

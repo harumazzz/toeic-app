@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,7 +20,7 @@ class SettingLocalDataSource {
     final SettingModel model,
   ) async {
     final prefs = await SharedPreferences.getInstance();
-    final jsonStr = await compute(_encodeSetting, model);
+    final jsonStr = _encodeSetting(model);
     await prefs.setString(_key, jsonStr);
   }
 
@@ -31,7 +30,7 @@ class SettingLocalDataSource {
     if (str == null) {
       return null;
     }
-    final result = await compute(_decodeSetting, str);
+    final result = _decodeSetting(str);
     return result;
   }
 }

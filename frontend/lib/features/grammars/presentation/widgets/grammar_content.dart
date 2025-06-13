@@ -57,7 +57,6 @@ class GrammarContent extends StatelessWidget {
                   content.subTitle!,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    fontSize: 16,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

@@ -74,7 +74,7 @@ class WordController extends _$WordController {
 
   Future<void> searchWords({
     required final String query,
-    final int offset = 0,
+    required final int offset,
     final int limit = 20,
   }) async {
     if (state is WordLoading) {

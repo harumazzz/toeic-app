@@ -3,8 +3,7 @@ import 'package:dart_either/dart_either.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/content.dart';
 
-abstract class ContentRepository {
-
+abstract interface class ContentRepository {
   Future<Either<Failure, Content>> getContentById({
     required final int contentId,
   });
@@ -12,5 +11,4 @@ abstract class ContentRepository {
   Future<Either<Failure, List<Content>>> getContentByParts({
     required final int partId,
   });
-
 }

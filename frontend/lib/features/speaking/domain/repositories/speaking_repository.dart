@@ -3,8 +3,7 @@ import 'package:dart_either/dart_either.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/speaking.dart';
 
-abstract class SpeakingRepository {
-
+abstract interface class SpeakingRepository {
   Future<Either<Failure, Speaking>> createSession({
     required final SpeakingRequest speakingRequest,
   });
@@ -46,5 +45,4 @@ abstract class SpeakingRepository {
   Future<Either<Failure, List<Speaking>>> getSpeakingSessions({
     required final int userId,
   });
-
 }

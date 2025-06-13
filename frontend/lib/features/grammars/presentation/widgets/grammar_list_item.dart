@@ -85,7 +85,6 @@ class _TitleText extends StatelessWidget {
     title,
     style: Theme.of(context).textTheme.titleMedium?.copyWith(
       fontWeight: FontWeight.w600,
-      fontSize: 16,
     ),
     maxLines: 2,
     overflow: TextOverflow.ellipsis,

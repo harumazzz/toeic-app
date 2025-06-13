@@ -46,7 +46,7 @@ class WordScreen extends HookConsumerWidget {
                     .loadWords(
                       offset: offset.value,
                     );
-                offset.value++;
+                offset.value += 20;
               } else {
                 await ref
                     .read(wordControllerProvider.notifier)
@@ -54,7 +54,7 @@ class WordScreen extends HookConsumerWidget {
                       query: searchQuery.value,
                       offset: offset.value,
                     );
-                offset.value++;
+                offset.value += 20;
               }
             }
           }
@@ -85,6 +85,7 @@ class WordScreen extends HookConsumerWidget {
             await ref
                 .read(wordControllerProvider.notifier)
                 .searchWords(
+                  offset: 0,
                   query: searchQuery.value,
                 );
           }
@@ -104,6 +105,7 @@ class WordScreen extends HookConsumerWidget {
         await ref
             .read(wordControllerProvider.notifier)
             .searchWords(
+              offset: offset.value,
               query: searchQuery.value,
             );
       }
@@ -242,10 +244,9 @@ class _WordListWidget extends StatelessWidget {
   final WordState wordState;
   final WidgetRef ref;
   final ValueNotifier<int> offset;
-
   @override
   Widget build(final BuildContext context) => SliverPadding(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(12),
     sliver: SliverList(
       delegate: SliverChildBuilderDelegate(
         (final BuildContext context, final int index) {
@@ -287,10 +288,9 @@ class _WordCardItem extends StatelessWidget {
     required this.word,
   });
   final entity.Word word;
-
   @override
   Widget build(final BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.only(bottom: 2),
     child: WordCard(word: word),
   );
 
@@ -335,7 +335,7 @@ class _ErrorStateWidget extends StatelessWidget {
                   .loadWords(
                     offset: offset.value,
                   );
-              offset.value++;
+              offset.value += 20;
             },
             child: Text(context.t.common.retry),
           ),

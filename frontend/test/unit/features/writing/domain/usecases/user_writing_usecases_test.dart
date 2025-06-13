@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learn/core/error/failures.dart';
 import 'package:learn/features/writing/domain/entities/user_writing.dart';
 import 'package:learn/features/writing/domain/repositories/writing_repository.dart';
-import 'package:learn/features/writing/domain/usecases/user_writing_usecases.dart';
+import 'package:learn/features/writing/domain/use_cases/user_writing_usecases.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockWritingRepository extends Mock implements WritingRepository {}

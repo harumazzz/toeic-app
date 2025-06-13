@@ -1,15 +1,15 @@
 import 'package:dart_either/dart_either.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learn/core/error/failures.dart';
-import 'package:learn/features/exam/domain/entities/content.dart';
-import 'package:learn/features/exam/domain/entities/part.dart';
-import 'package:learn/features/exam/domain/entities/question.dart';
-import 'package:learn/features/exam/domain/repositories/content_repository.dart';
-import 'package:learn/features/exam/domain/repositories/part_repository.dart';
-import 'package:learn/features/exam/domain/repositories/question_repository.dart';
-import 'package:learn/features/exam/domain/use_cases/get_content.dart';
-import 'package:learn/features/exam/domain/use_cases/get_part.dart';
-import 'package:learn/features/exam/domain/use_cases/get_question.dart';
+import 'package:learn/features/practice/domain/entities/content.dart';
+import 'package:learn/features/practice/domain/entities/part.dart';
+import 'package:learn/features/practice/domain/entities/question.dart';
+import 'package:learn/features/practice/domain/repositories/content_repository.dart';
+import 'package:learn/features/practice/domain/repositories/part_repository.dart';
+import 'package:learn/features/practice/domain/repositories/question_repository.dart';
+import 'package:learn/features/practice/domain/use_cases/get_content.dart';
+import 'package:learn/features/practice/domain/use_cases/get_part.dart';
+import 'package:learn/features/practice/domain/use_cases/get_question.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockPartRepository extends Mock implements PartRepository {}

@@ -3,7 +3,7 @@ import 'package:dart_either/dart_either.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/question.dart';
 
-abstract class QuestionRepository {
+abstract interface class QuestionRepository {
   Future<Either<Failure, List<Question>>> getQuestionsByContentId({
     required final int contentId,
   });

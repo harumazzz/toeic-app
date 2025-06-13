@@ -72,7 +72,6 @@ class WordDetailContent extends StatelessWidget {
   });
 
   final Word word;
-
   @override
   Widget build(final BuildContext context) => SingleChildScrollView(
     child: Column(
@@ -81,29 +80,29 @@ class WordDetailContent extends StatelessWidget {
         HeroWordHeader(word: word),
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 8,
+            horizontal: 16,
+            vertical: 6,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               PronunciationCard(word: word),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               QuickStatsRow(word: word),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               if (word.means != null && word.means!.isNotEmpty) ...[
                 DetailedMeanings(word: word),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
               ],
               if (word.snym != null && word.snym!.isNotEmpty) ...[
                 SynonymsSection(word: word),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
               ],
               if (word.conjugation != null) ...[
                 ConjugationSection(word: word),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
               ],
-              const SizedBox(height: 100),
+              const SizedBox(height: 80),
             ],
           ),
         ),

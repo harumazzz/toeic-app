@@ -21,14 +21,14 @@ class ConjugationSection extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
     ),
     child: Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: Theme.of(
                     context,
@@ -37,11 +37,11 @@ class ConjugationSection extends StatelessWidget {
                 ),
                 child: Icon(
                   Symbols.timeline,
-                  size: 18,
+                  size: 16,
                   color: Theme.of(context).colorScheme.tertiary,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Text(
                 context.t.tooltip.conjugation,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -51,7 +51,7 @@ class ConjugationSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           if (word.conjugation != null) ...[
             ConjugationRow(
               label: context.t.wordDetail.simplePresent,
@@ -71,7 +71,7 @@ class ConjugationSection extends StatelessWidget {
             ),
           ] else ...[
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
@@ -85,10 +85,10 @@ class ConjugationSection extends StatelessWidget {
                 children: [
                   Icon(
                     Symbols.info,
-                    size: 20,
+                    size: 18,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       context.t.wordDetail.noConjugationInfo,
@@ -129,23 +129,22 @@ class ConjugationRow extends StatelessWidget {
     if (wordState == null) {
       return const SizedBox.shrink();
     }
-
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 140,
+            width: 120,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,17 +152,18 @@ class ConjugationRow extends StatelessWidget {
                 if (wordState!.w != null) ...[
                   Text(
                     wordState!.w!,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
                 if (wordState!.p != null) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 1),
                   Text(
                     '/${wordState!.p!}/',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontStyle: FontStyle.italic,
+                      fontSize: 11,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),

@@ -61,7 +61,7 @@ class AppDrawer extends StatelessWidget {
                 title: context.t.drawer.practice,
                 onTap: () async {
                   Navigator.pop(context);
-                  // Navigate to practice page
+                  await const PracticeRoute().push(context);
                 },
               ),
               _DrawerItem(
@@ -77,6 +77,7 @@ class AppDrawer extends StatelessWidget {
                 title: context.t.drawer.speaking,
                 onTap: () async {
                   Navigator.pop(context);
+                  await const SpeakingRoute().push(context);
                 },
               ),
               _DrawerItem(
@@ -84,6 +85,7 @@ class AppDrawer extends StatelessWidget {
                 title: context.t.drawer.writing,
                 onTap: () async {
                   Navigator.pop(context);
+                  await const WritingRoute().push(context);
                 },
               ),
               _DrawerItem(
@@ -91,6 +93,7 @@ class AppDrawer extends StatelessWidget {
                 title: context.t.drawer.progress,
                 onTap: () async {
                   Navigator.pop(context);
+                  await const ProgressRoute().push(context);
                 },
               ),
               _DrawerItem(

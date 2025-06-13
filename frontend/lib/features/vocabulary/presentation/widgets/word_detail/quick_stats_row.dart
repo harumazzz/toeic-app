@@ -12,12 +12,11 @@ class QuickStatsRow extends StatelessWidget {
   });
 
   final Word word;
-
   @override
   Widget build(final BuildContext context) => Card(
     color: Theme.of(context).colorScheme.surfaceContainerHigh,
     child: Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(6),
       child: Row(
         children: [
           Expanded(
@@ -28,7 +27,7 @@ class QuickStatsRow extends StatelessWidget {
               color: Colors.blue,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(
             child: StatCard(
               icon: Symbols.list_alt,
@@ -37,7 +36,7 @@ class QuickStatsRow extends StatelessWidget {
               color: Colors.green,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(
             child: StatCard(
               icon: Symbols.swap_horiz,
@@ -71,40 +70,40 @@ class StatCard extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
-
   @override
   Widget build(final BuildContext context) => Card(
     elevation: 0,
     color: color.withValues(alpha: 0.1),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(10),
       side: BorderSide(
         color: color.withValues(alpha: 0.2),
       ),
     ),
     child: Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       child: Column(
         children: [
           Icon(
             icon,
             color: color,
-            size: 20,
+            size: 18,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: color,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
+              fontSize: 10,
             ),
             textAlign: TextAlign.center,
             maxLines: 1,

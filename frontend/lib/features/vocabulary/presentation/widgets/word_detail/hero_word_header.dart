@@ -12,32 +12,31 @@ class HeroWordHeader extends StatelessWidget {
   });
 
   final Word word;
-
   @override
   Widget build(final BuildContext context) => Container(
     width: double.infinity,
     margin: const EdgeInsets.only(
-      left: 20,
-      right: 20,
-      top: 8,
+      left: 16,
+      right: 16,
+      top: 6,
     ),
     child: SafeArea(
       bottom: false,
       child: Card(
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                  horizontal: 12,
+                  vertical: 6,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.3),
                   ),
@@ -47,13 +46,13 @@ class HeroWordHeader extends StatelessWidget {
                   children: [
                     const Icon(
                       Symbols.school,
-                      size: 16,
+                      size: 14,
                       color: Colors.white,
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 4),
                     Text(
                       '${context.t.common.level} ${word.level}',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
@@ -61,21 +60,21 @@ class HeroWordHeader extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               Text(
                 word.word,
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.2),
                   ),
@@ -85,17 +84,17 @@ class HeroWordHeader extends StatelessWidget {
                     const Icon(
                       Symbols.translate,
                       color: Colors.white,
-                      size: 20,
+                      size: 18,
                     ),
                     if (word.shortMean != null &&
                         word.shortMean!.isNotEmpty) ...[
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           word.shortMean!,
                           style: Theme.of(
                             context,
-                          ).textTheme.bodyLarge?.copyWith(
+                          ).textTheme.bodyMedium?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
                           ),

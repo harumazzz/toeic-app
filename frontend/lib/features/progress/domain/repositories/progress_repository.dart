@@ -3,7 +3,7 @@ import 'package:dart_either/dart_either.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/progress.dart';
 
-abstract class ProgressRepository {
+abstract interface class ProgressRepository {
   Future<Either<Failure, WordProgress>> addNewProgress({
     required final WordProgressRequest request,
   });

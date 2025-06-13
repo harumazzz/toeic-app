@@ -2,6 +2,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/services/notification_service.dart';
 import 'features/loading/presentation/error_settings.dart';
 import 'features/loading/presentation/loading_settings.dart';
 import 'features/settings/domain/entities/setting.dart';
@@ -18,6 +19,7 @@ Future<void> main(
 ) async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
+  await NotificationService.initialize();
   runApp(
     ProviderScope(
       child: TranslationProvider(

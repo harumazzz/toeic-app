@@ -34,7 +34,13 @@
     "error": "Lỗi",
     "success": "Thành công",
     "warning": "Cảnh báo",
-    "info": "Thông tin"
+    "info": "Thông tin",
+    "minutes": "phút",
+    "unlocked": "Đã mở khóa",
+    "locked": "Đã khóa",
+    "audio": "Âm thanh",
+    "pronunciation": "Phát âm",
+    "viewDetails": "Xem chi tiết"
   },
   "hint": {
     "email": "Nhập email của bạn",
@@ -217,5 +223,9 @@
     "tapToFlipBack": "Nhấn để lật lại",
     "meaning": "Ý nghĩa:",
     "types": "Loại:"
+  },
+  "practice": {
+    "completePreviousExamsToUnlock": "Hoàn thành các bài thi trước để mở khóa",
+    "takeTheTest": "Bạn có muốn làm bài thi không?"
   }
 }

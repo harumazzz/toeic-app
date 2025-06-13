@@ -2,7 +2,7 @@ import 'package:dart_either/dart_either.dart';
 import 'package:equatable/equatable.dart';
 import '../error/failures.dart';
 
-abstract class UseCase<Type, Params> {
+abstract interface class UseCase<Type, Params> {
   Future<Either<Failure, Type>> call(
     final Params params,
   );
