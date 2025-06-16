@@ -13,10 +13,30 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/toeic-app/internal/db/sqlc"
+	apperrors "github.com/toeic-app/internal/errors"
 	"github.com/toeic-app/internal/logger"
 	"github.com/toeic-app/internal/token"
 	"github.com/toeic-app/internal/util"
 )
+
+// UserResponse defines the structure for user information returned to clients.
+// It excludes sensitive data like the password hash.
+type UserResponse struct {
+	ID        int32  `json:"id"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	CreatedAt string `json:"created_at" example:"2025-05-01T13:45:00Z" format:"date-time"`
+}
+
+// NewUserResponse creates a UserResponse from a user model
+func NewUserResponse(user db.User) UserResponse {
+	return UserResponse{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt.Format(time.RFC3339),
+	}
+}
 
 // loginUserRequest defines the structure for user login requests.
 // It includes email and password, both of which are required.
@@ -58,23 +78,45 @@ type SecurityConfig struct {
 func (server *Server) loginUser(ctx *gin.Context) {
 	var req loginUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request parameters", err)
+		// Use improved error handling for validation errors
+		appErr := apperrors.NewValidationError("Invalid request parameters")
+		appErr.AddFieldError("request_body", "Invalid JSON format or missing required fields")
+		appErr.WithRequestPath(ctx.Request.URL.Path)
+		if traceID := ctx.GetHeader("X-Trace-ID"); traceID != "" {
+			appErr.WithTraceID(traceID)
+		}
+		ctx.Error(appErr) // Add to Gin's error context for middleware processing
+		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request parameters", appErr)
 		return
 	}
 
 	user, err := server.store.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ErrorResponse(ctx, http.StatusUnauthorized, "Invalid email or password", nil)
+			// Use specific error code for authentication failures
+			appErr := apperrors.FromGinContext(ctx, apperrors.ErrCodeInvalidCredentials, "Invalid email or password")
+			appErr.WithMetadata("attempted_email", req.Email)
+			ctx.Error(appErr)
+			ErrorResponse(ctx, http.StatusUnauthorized, "Invalid email or password", appErr)
 			return
 		}
-		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to find user", err)
+		// Handle database errors properly
+		appErr := apperrors.HandleDatabaseError(err)
+		appErr.WithRequestPath(ctx.Request.URL.Path)
+		appErr.WithMetadata("operation", "get_user_by_email")
+		ctx.Error(appErr)
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to find user", appErr)
 		return
 	}
 
 	err = util.CheckPassword(req.Password, user.PasswordHash)
 	if err != nil {
-		ErrorResponse(ctx, http.StatusUnauthorized, "Invalid email or password", nil)
+		// Use specific error code for authentication failures
+		appErr := apperrors.FromGinContext(ctx, apperrors.ErrCodeInvalidCredentials, "Invalid email or password")
+		appErr.WithUserID(user.ID)
+		appErr.WithMetadata("user_email", user.Email)
+		ctx.Error(appErr)
+		ErrorResponse(ctx, http.StatusUnauthorized, "Invalid email or password", appErr)
 		return
 	}
 
@@ -84,7 +126,12 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		time.Duration(server.config.AccessTokenDuration)*time.Second,
 	)
 	if err != nil {
-		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to create access token", err)
+		appErr := apperrors.Wrap(err, apperrors.ErrCodeInternalServer, "Failed to create access token")
+		appErr.WithUserID(user.ID)
+		appErr.WithRequestPath(ctx.Request.URL.Path)
+		appErr.WithMetadata("token_type", "access_token")
+		ctx.Error(appErr)
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to create access token", appErr)
 		return
 	}
 
@@ -94,7 +141,12 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		time.Duration(server.config.RefreshTokenDuration)*time.Second,
 	)
 	if err != nil {
-		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to create refresh token", err)
+		appErr := apperrors.Wrap(err, apperrors.ErrCodeInternalServer, "Failed to create refresh token")
+		appErr.WithUserID(user.ID)
+		appErr.WithRequestPath(ctx.Request.URL.Path)
+		appErr.WithMetadata("token_type", "refresh_token")
+		ctx.Error(appErr)
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to create refresh token", appErr)
 		return
 	}
 	userResp := NewUserResponse(user)
@@ -398,46 +450,71 @@ func (server *Server) authMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		path := ctx.Request.URL.Path
 		method := ctx.Request.Method
-		logger.Debug("Auth middleware checking: %s %s", method, path)
+
+		// Create base log fields
+		fields := logger.Fields{
+			"component":  "auth_middleware",
+			"method":     method,
+			"path":       path,
+			"client_ip":  ctx.ClientIP(),
+			"user_agent": ctx.GetHeader("User-Agent"),
+			"request_id": ctx.GetHeader("X-Request-ID"),
+		}
+
+		logger.DebugWithFields(fields, "Auth middleware checking request")
 
 		authorizationHeader := ctx.GetHeader(AuthorizationHeaderKey)
 
 		if len(authorizationHeader) == 0 {
 			err := errors.New("authorization header is not provided")
-			logger.Warn("Auth failed - no header: %s %s", method, path)
+			fields["error"] = "missing_auth_header"
+			logger.WarnWithFields(fields, "Auth failed - no header")
 			ErrorResponse(ctx, http.StatusUnauthorized, "Unauthorized", err)
 			ctx.Abort()
 			return
 		}
 
-		fields := strings.Fields(authorizationHeader)
-		if len(fields) < 2 {
+		fields["has_auth_header"] = true
+		fieldsArray := strings.Fields(authorizationHeader)
+		if len(fieldsArray) < 2 {
 			err := errors.New("invalid authorization header format")
-			logger.Warn("Auth failed - invalid format: %s %s", method, path)
+			fields["error"] = "invalid_auth_format"
+			fields["header_parts"] = len(fieldsArray)
+			logger.WarnWithFields(fields, "Auth failed - invalid format")
 			ErrorResponse(ctx, http.StatusUnauthorized, "Unauthorized", err)
 			ctx.Abort()
 			return
 		}
 
-		authorizationType := strings.ToLower(fields[0])
+		authorizationType := strings.ToLower(fieldsArray[0])
+		fields["auth_type"] = authorizationType
+
 		if authorizationType != AuthorizationTypeBearer {
 			err := errors.New("unsupported authorization type")
-			logger.Warn("Auth failed - unsupported type: %s %s - got %s", method, path, authorizationType)
+			fields["error"] = "unsupported_auth_type"
+			logger.WarnWithFields(fields, "Auth failed - unsupported type")
 			ErrorResponse(ctx, http.StatusUnauthorized, "Unauthorized", err)
 			ctx.Abort()
 			return
 		}
 
-		accessToken := fields[1]
+		accessToken := fieldsArray[1]
+		fields["token_length"] = len(accessToken)
+
 		payload, err := server.tokenMaker.VerifyToken(accessToken)
 		if err != nil {
-			logger.Warn("Auth failed - invalid token: %s %s - %v", method, path, err)
+			fields["error"] = "invalid_token"
+			fields["token_error"] = err.Error()
+			logger.WarnWithFields(fields, "Auth failed - invalid token")
 			ErrorResponse(ctx, http.StatusUnauthorized, "Unauthorized", err)
 			ctx.Abort()
 			return
 		}
+
 		ctx.Set(AuthorizationPayloadKey, payload)
-		logger.Debug("Auth successful - user ID: %d - %s %s", payload.ID, method, path)
+		fields["user_id"] = payload.ID
+		fields["token_valid"] = true
+		logger.DebugWithFields(fields, "Auth successful")
 		ctx.Next()
 	}
 }

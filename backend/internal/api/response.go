@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/toeic-app/internal/i18n"
 	"github.com/toeic-app/internal/logger"
@@ -31,8 +33,31 @@ func SuccessResponse(c *gin.Context, statusCode int, messageKey string, data int
 		Language: string(lang),
 	}
 
+	// Create structured log fields
+	fields := logger.Fields{
+		"component":          "api_response",
+		"method":             method,
+		"path":               path,
+		"status_code":        statusCode,
+		"message_key":        messageKey,
+		"translated_message": translatedMessage,
+		"language":           string(lang),
+		"client_ip":          c.ClientIP(),
+		"user_agent":         c.GetHeader("User-Agent"),
+		"request_id":         c.GetHeader("X-Request-ID"),
+		"has_data":           data != nil,
+	}
+
+	// Add user information if available
+	if payload, exists := c.Get("authorization_payload"); exists && payload != nil {
+		if userPayload, ok := payload.(interface{ GetID() int32 }); ok {
+			fields["user_id"] = userPayload.GetID()
+		}
+	}
+
 	// Log successful response
-	logger.Debug("[%s] %s - Success (%d): %s (key: %s, lang: %s)", method, path, statusCode, translatedMessage, messageKey, lang)
+	message := fmt.Sprintf("API Success Response: %s", translatedMessage)
+	logger.InfoWithFields(fields, "%s", message)
 
 	c.JSON(statusCode, resp)
 }
@@ -50,79 +75,29 @@ func SuccessResponseWithMessage(c *gin.Context, statusCode int, message string, 
 		Language: string(lang),
 	}
 
+	// Create structured log fields
+	fields := logger.Fields{
+		"component":      "api_response",
+		"method":         method,
+		"path":           path,
+		"status_code":    statusCode,
+		"custom_message": message,
+		"language":       string(lang),
+		"client_ip":      c.ClientIP(),
+		"user_agent":     c.GetHeader("User-Agent"),
+		"request_id":     c.GetHeader("X-Request-ID"),
+		"has_data":       data != nil,
+	}
+
+	// Add user information if available
+	if payload, exists := c.Get("authorization_payload"); exists && payload != nil {
+		if userPayload, ok := payload.(interface{ GetID() int32 }); ok {
+			fields["user_id"] = userPayload.GetID()
+		}
+	}
+
 	// Log successful response
-	logger.Debug("[%s] %s - Success (%d): %s (custom message, lang: %s)", method, path, statusCode, message, lang)
-
+	logMessage := fmt.Sprintf("API Success Response: %s", message)
+	logger.InfoWithFields(fields, "%s", logMessage)
 	c.JSON(statusCode, resp)
 }
-
-// ErrorResponse returns a standard error response with i18n support
-func ErrorResponse(c *gin.Context, statusCode int, messageKey string, err error) {
-	path := c.Request.URL.Path
-	method := c.Request.Method
-	lang := i18n.GetLanguageFromContext(c)
-
-	// Translate the message
-	translatedMessage := i18n.T(lang, "%s", messageKey)
-
-	errMsg := ""
-	if err != nil {
-		errMsg = err.Error()
-	}
-
-	resp := Response{
-		Status:   "error",
-		Message:  translatedMessage,
-		Error:    errMsg,
-		Language: string(lang),
-	}
-
-	// Log error response with appropriate level based on status code
-	switch {
-	case statusCode >= 500:
-		logger.Error("[%s] %s - Error (%d): %s (key: %s, lang: %s) - %s", method, path, statusCode, translatedMessage, messageKey, lang, errMsg)
-	case statusCode >= 400:
-		logger.Warn("[%s] %s - Error (%d): %s (key: %s, lang: %s) - %s", method, path, statusCode, translatedMessage, messageKey, lang, errMsg)
-	default:
-		logger.Info("[%s] %s - Error (%d): %s (key: %s, lang: %s) - %s", method, path, statusCode, translatedMessage, messageKey, lang, errMsg)
-	}
-
-	c.JSON(statusCode, resp)
-}
-
-// ErrorResponseWithMessage returns a standard error response with custom message (no translation)
-func ErrorResponseWithMessage(c *gin.Context, statusCode int, message string, err error) {
-	path := c.Request.URL.Path
-	method := c.Request.Method
-	lang := i18n.GetLanguageFromContext(c)
-
-	errMsg := ""
-	if err != nil {
-		errMsg = err.Error()
-	}
-
-	resp := Response{
-		Status:   "error",
-		Message:  message,
-		Error:    errMsg,
-		Language: string(lang),
-	}
-
-	// Log error response with appropriate level based on status code
-	switch {
-	case statusCode >= 500:
-		logger.Error("[%s] %s - Error (%d): %s (custom message, lang: %s) - %s", method, path, statusCode, message, lang, errMsg)
-	case statusCode >= 400:
-		logger.Warn("[%s] %s - Error (%d): %s (custom message, lang: %s) - %s", method, path, statusCode, message, lang, errMsg)
-	default:
-		logger.Info("[%s] %s - Error (%d): %s (custom message, lang: %s) - %s", method, path, statusCode, message, lang, errMsg)
-	}
-
-	c.JSON(statusCode, resp)
-}
-
-// I18nSuccessResponse is an alias for SuccessResponse for backward compatibility
-var I18nSuccessResponse = SuccessResponse
-
-// I18nErrorResponse is an alias for ErrorResponse for backward compatibility
-var I18nErrorResponse = ErrorResponse

@@ -11,8 +11,13 @@ import (
 
 type Querier interface {
 	AbandonExamAttempt(ctx context.Context, attemptID int32) (ExamAttempt, error)
+	AssignPermissionToRole(ctx context.Context, arg AssignPermissionToRoleParams) error
+	AssignRoleToUser(ctx context.Context, arg AssignRoleToUserParams) error
 	BatchGetExamples(ctx context.Context, dollar_1 []int32) ([]Example, error)
 	BatchGetGrammars(ctx context.Context, dollar_1 []int32) ([]Grammar, error)
+	CheckUserPermission(ctx context.Context, arg CheckUserPermissionParams) (bool, error)
+	CheckUserPermissionByResourceAction(ctx context.Context, arg CheckUserPermissionByResourceActionParams) (bool, error)
+	CleanupExpiredRoles(ctx context.Context) error
 	CompleteExamAttempt(ctx context.Context, arg CompleteExamAttemptParams) (ExamAttempt, error)
 	CountCorrectAnswersByAttempt(ctx context.Context, attemptID int32) (int64, error)
 	CountExamAttemptsByExam(ctx context.Context, examID int32) (int64, error)
@@ -24,7 +29,9 @@ type Querier interface {
 	CreateExample(ctx context.Context, arg CreateExampleParams) (Example, error)
 	CreateGrammar(ctx context.Context, arg CreateGrammarParams) (Grammar, error)
 	CreatePart(ctx context.Context, arg CreatePartParams) (Part, error)
+	CreatePermission(ctx context.Context, arg CreatePermissionParams) (Permission, error)
 	CreateQuestion(ctx context.Context, arg CreateQuestionParams) (Question, error)
+	CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error)
 	CreateSpeakingSession(ctx context.Context, arg CreateSpeakingSessionParams) (SpeakingSession, error)
 	CreateSpeakingTurn(ctx context.Context, arg CreateSpeakingTurnParams) (SpeakingTurn, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
@@ -39,7 +46,9 @@ type Querier interface {
 	DeleteExample(ctx context.Context, id int32) error
 	DeleteGrammar(ctx context.Context, id int32) error
 	DeletePart(ctx context.Context, partID int32) error
+	DeletePermission(ctx context.Context, id int32) error
 	DeleteQuestion(ctx context.Context, questionID int32) error
+	DeleteRole(ctx context.Context, id int32) error
 	DeleteSpeakingSession(ctx context.Context, id int32) error
 	DeleteSpeakingTurn(ctx context.Context, id int32) error
 	DeleteUser(ctx context.Context, id int32) error
@@ -61,10 +70,15 @@ type Querier interface {
 	GetExample(ctx context.Context, id int32) (Example, error)
 	GetGrammar(ctx context.Context, id int32) (Grammar, error)
 	GetPart(ctx context.Context, partID int32) (Part, error)
+	GetPermission(ctx context.Context, id int32) (Permission, error)
+	GetPermissionByName(ctx context.Context, name string) (Permission, error)
 	GetPopularWords(ctx context.Context, arg GetPopularWordsParams) ([]Word, error)
 	GetQuestion(ctx context.Context, questionID int32) (Question, error)
 	GetQuestionAnalytics(ctx context.Context, examID int32) ([]GetQuestionAnalyticsRow, error)
 	GetRandomGrammar(ctx context.Context) (Grammar, error)
+	GetRole(ctx context.Context, id int32) (Role, error)
+	GetRoleByName(ctx context.Context, name string) (Role, error)
+	GetRolePermissions(ctx context.Context, roleID int32) ([]Permission, error)
 	GetSpeakingSession(ctx context.Context, id int32) (SpeakingSession, error)
 	GetSpeakingTurn(ctx context.Context, id int32) (SpeakingTurn, error)
 	GetUser(ctx context.Context, id int32) (User, error)
@@ -72,8 +86,12 @@ type Querier interface {
 	GetUserAnswerByAttemptAndQuestion(ctx context.Context, arg GetUserAnswerByAttemptAndQuestionParams) (UserAnswer, error)
 	GetUserAnswerHistory(ctx context.Context, arg GetUserAnswerHistoryParams) ([]GetUserAnswerHistoryRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserPermissions(ctx context.Context, userID int32) ([]Permission, error)
+	GetUserRoleAssignments(ctx context.Context, userID int32) ([]GetUserRoleAssignmentsRow, error)
+	GetUserRoles(ctx context.Context, userID int32) ([]Role, error)
 	GetUserWordProgress(ctx context.Context, arg GetUserWordProgressParams) (UserWordProgress, error)
 	GetUserWriting(ctx context.Context, id int32) (UserWriting, error)
+	GetUsersByRole(ctx context.Context, name string) ([]int32, error)
 	GetWord(ctx context.Context, id int32) (Word, error)
 	GetWordWithProgress(ctx context.Context, arg GetWordWithProgressParams) (GetWordWithProgressRow, error)
 	GetWordsByLevel(ctx context.Context, arg GetWordsByLevelParams) ([]Word, error)
@@ -88,7 +106,10 @@ type Querier interface {
 	ListGrammarsByLevel(ctx context.Context, arg ListGrammarsByLevelParams) ([]Grammar, error)
 	ListGrammarsByTag(ctx context.Context, arg ListGrammarsByTagParams) ([]Grammar, error)
 	ListPartsByExam(ctx context.Context, examID int32) ([]Part, error)
+	ListPermissions(ctx context.Context) ([]Permission, error)
+	ListPermissionsByResource(ctx context.Context, resource string) ([]Permission, error)
 	ListQuestionsByContent(ctx context.Context, contentID int32) ([]Question, error)
+	ListRoles(ctx context.Context) ([]Role, error)
 	ListSpeakingSessionsByUserID(ctx context.Context, userID int32) ([]SpeakingSession, error)
 	ListSpeakingTurnsBySessionID(ctx context.Context, sessionID int32) ([]SpeakingTurn, error)
 	ListUserAnswersByAttempt(ctx context.Context, attemptID int32) ([]UserAnswer, error)
@@ -97,8 +118,11 @@ type Querier interface {
 	ListUserWritingsByPromptID(ctx context.Context, promptID sql.NullInt32) ([]UserWriting, error)
 	ListUserWritingsByUserID(ctx context.Context, userID int32) ([]UserWriting, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
+	ListUsersWithRole(ctx context.Context, roleID int32) ([]User, error)
 	ListWords(ctx context.Context, arg ListWordsParams) ([]Word, error)
 	ListWritingPrompts(ctx context.Context) ([]WritingPrompt, error)
+	RemovePermissionFromRole(ctx context.Context, arg RemovePermissionFromRoleParams) error
+	RemoveRoleFromUser(ctx context.Context, arg RemoveRoleFromUserParams) error
 	SearchGrammars(ctx context.Context, arg SearchGrammarsParams) ([]Grammar, error)
 	SearchWords(ctx context.Context, arg SearchWordsParams) ([]Word, error)
 	SearchWordsFast(ctx context.Context, arg SearchWordsFastParams) ([]Word, error)
@@ -110,7 +134,9 @@ type Querier interface {
 	UpdateExample(ctx context.Context, arg UpdateExampleParams) (Example, error)
 	UpdateGrammar(ctx context.Context, arg UpdateGrammarParams) (Grammar, error)
 	UpdatePart(ctx context.Context, arg UpdatePartParams) (Part, error)
+	UpdatePermission(ctx context.Context, arg UpdatePermissionParams) (Permission, error)
 	UpdateQuestion(ctx context.Context, arg UpdateQuestionParams) (Question, error)
+	UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error)
 	UpdateSpeakingSession(ctx context.Context, arg UpdateSpeakingSessionParams) (SpeakingSession, error)
 	UpdateSpeakingTurn(ctx context.Context, arg UpdateSpeakingTurnParams) (SpeakingTurn, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)

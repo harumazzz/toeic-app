@@ -1,0 +1,218 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: toeic-backend
+  namespace: toeic-app
+  labels:
+    app: toeic-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: toeic-backend
+  template:
+    metadata:
+      labels:
+        app: toeic-backend
+    spec:
+      containers:
+      - name: toeic-backend
+        image: toeic-backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DB_DRIVER
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: DB_DRIVER
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: toeic-backend-secrets
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: toeic-backend-secrets
+              key: DB_PASSWORD
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: REDIS_PORT
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: toeic-backend-secrets
+              key: REDIS_PASSWORD
+        - name: SERVER_ADDRESS
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: SERVER_ADDRESS
+        - name: GIN_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: GIN_MODE
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: JWT_SECRET_KEY
+        - name: RATE_LIMIT_REQUESTS
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: RATE_LIMIT_REQUESTS
+        - name: RATE_LIMIT_DURATION
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: RATE_LIMIT_DURATION
+        - name: CACHE_TTL
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: CACHE_TTL
+        - name: WORKER_POOL_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: WORKER_POOL_SIZE
+        - name: MAX_DB_CONNECTIONS
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: MAX_DB_CONNECTIONS
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: toeic-backend-config
+              key: LOG_LEVEL
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:14-alpine
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres-service -p 5432 -U $DB_USER; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: toeic-backend-secrets
+              key: DB_USER
+      - name: wait-for-redis
+        image: redis:7-alpine
+        command:
+        - sh
+        - -c
+        - |
+          until redis-cli -h redis-service -p 6379 -a $REDIS_PASSWORD ping; do
+            echo "Waiting for Redis..."
+            sleep 2
+          done
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: toeic-backend-secrets
+              key: REDIS_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: toeic-backend-service
+  namespace: toeic-app
+  labels:
+    app: toeic-backend
+spec:
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: toeic-backend
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: toeic-backend-ingress
+  namespace: toeic-app
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Origin, Content-Type, Accept, Authorization"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: toeic-api.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: toeic-backend-service
+            port:
+              number: 8000

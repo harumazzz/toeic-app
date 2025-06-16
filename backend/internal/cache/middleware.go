@@ -186,7 +186,13 @@ func (h *HTTPCacheMiddleware) Middleware() gin.HandlerFunc {
 					defer cancel()
 
 					if err := h.cache.Set(ctx, cacheKey, data, h.config.DefaultTTL); err != nil {
-						logger.Warn("Failed to cache response: %v", err)
+						fields := logger.Fields{
+							"component": "http_cache",
+							"cache_key": cacheKey,
+							"error":     err.Error(),
+							"operation": "set",
+						}
+						logger.WarnWithFields(fields, "Failed to cache response")
 					}
 				}()
 			}

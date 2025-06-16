@@ -1,0 +1,172 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "TOEIC Business Intelligence",
+    "tags": ["toeic", "business", "intelligence"],
+    "style": "dark",
+    "timezone": "UTC",
+    "refresh": "5m",
+    "time": {
+      "from": "now-30d",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Daily Active Users",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "increase(user_registrations_total{job=\"toeic-app\"}[24h])",
+            "legendFormat": "New Users"
+          },
+          {
+            "expr": "active_users{job=\"toeic-app\", time_window=\"24h\"}",
+            "legendFormat": "Active Users"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Exam Completion Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(exams_completed_total{job=\"toeic-app\", status=\"completed\"}[24h]) / rate(exams_completed_total{job=\"toeic-app\"}[24h]) * 100",
+            "legendFormat": "Completion Rate %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 60
+                },
+                {
+                  "color": "green",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Revenue Metrics",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(business_operations_total{job=\"toeic-app\", operation=\"payment\", status=\"success\"})",
+            "legendFormat": "Total Payments"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 18,
+          "y": 0
+        }
+      },
+      {
+        "id": 4,
+        "title": "Exam Types Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (exam_type) (increase(exams_completed_total{job=\"toeic-app\"}[7d]))",
+            "legendFormat": "{{exam_type}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "User Engagement Score",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "(rate(business_operations_total{job=\"toeic-app\", operation=\"exam_start\"}[24h]) * 0.3 + rate(exams_completed_total{job=\"toeic-app\", status=\"completed\"}[24h]) * 0.5 + rate(audio_uploads_total{job=\"toeic-app\", status=\"success\"}[24h]) * 0.2) * 100",
+            "legendFormat": "Engagement Score"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 50
+                },
+                {
+                  "color": "green",
+                  "value": 80
+                }
+              ]
+            },
+            "min": 0,
+            "max": 100,
+            "unit": "percent"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 6,
+        "title": "Feature Usage Heatmap",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "sum by (operation) (rate(business_operations_total{job=\"toeic-app\"}[1h]))",
+            "legendFormat": "{{operation}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 16
+        }
+      }
+    ]
+  }
+}

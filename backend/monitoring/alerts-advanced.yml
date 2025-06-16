@@ -1,0 +1,242 @@
+groups:
+  - name: toeic-app-alerts
+    rules:
+      # Critical alerts
+      - alert: ApplicationDown
+        expr: up{job="toeic-app"} == 0
+        for: 0m
+        labels:
+          severity: critical
+          component: application
+        annotations:
+          summary: "TOEIC Application is down"
+          description: "The TOEIC application has been down for more than 0 minutes."
+
+      - alert: DatabaseDown
+        expr: up{job="postgres-exporter"} == 0
+        for: 0m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Database is down"
+          description: "PostgreSQL database is not responding."
+
+      - alert: CacheDown
+        expr: up{job="redis-exporter"} == 0
+        for: 0m
+        labels:
+          severity: critical
+          component: cache
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis cache is not responding."
+
+      # High priority alerts
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{job="toeic-app", status_code!~"2.."}[5m]) / rate(http_requests_total{job="toeic-app"}[5m]) * 100 > 10
+        for: 2m
+        labels:
+          severity: high
+          component: application
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }}% for more than 2 minutes."
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="toeic-app"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: high
+          component: application
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s for more than 5 minutes."
+
+      - alert: HighMemoryUsage
+        expr: memory_usage_bytes{job="toeic-app", type="heap"} > 1073741824
+        for: 5m
+        labels:
+          severity: high
+          component: application
+        annotations:
+          summary: "High memory usage"
+          description: "Application memory usage is {{ $value | humanize1024 }}B for more than 5 minutes."
+
+      # Advanced Week 4 alerts
+      - alert: SLAViolation
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="toeic-app"}[5m])) > 2
+        for: 1m
+        labels:
+          severity: critical
+          component: sla
+          alert_type: advanced
+        annotations:
+          summary: "SLA violation detected"
+          description: "95th percentile response time {{ $value }}s exceeds SLA threshold of 2s."
+
+      - alert: AbnormalTrafficPattern
+        expr: |
+          (
+            rate(http_requests_total{job="toeic-app"}[5m]) 
+            > 
+            (
+              avg_over_time(rate(http_requests_total{job="toeic-app"}[5m])[1h:1m]) * 3
+            )
+          ) 
+          or 
+          (
+            rate(http_requests_total{job="toeic-app"}[5m]) 
+            < 
+            (
+              avg_over_time(rate(http_requests_total{job="toeic-app"}[5m])[1h:1m]) * 0.1
+            )
+          )
+        for: 3m
+        labels:
+          severity: warning
+          component: anomaly_detection
+          alert_type: advanced
+        annotations:
+          summary: "Abnormal traffic pattern detected"
+          description: "Request rate {{ $value }} requests/sec is significantly different from historical average."
+
+      - alert: DatabasePerformanceDegradation
+        expr: histogram_quantile(0.95, rate(db_query_duration_seconds_bucket{job="toeic-app"}[5m])) > 1
+        for: 3m
+        labels:
+          severity: warning
+          component: database
+          alert_type: advanced
+        annotations:
+          summary: "Database performance degradation"
+          description: "Database query P95 latency is {{ $value }}s, exceeding 1s threshold."
+
+      - alert: CacheEfficiencyDrop
+        expr: |
+          (
+            rate(cache_hits_total{job="toeic-app"}[5m]) 
+            / 
+            (rate(cache_hits_total{job="toeic-app"}[5m]) + rate(cache_misses_total{job="toeic-app"}[5m]))
+          ) * 100 < 70
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+          alert_type: advanced
+        annotations:
+          summary: "Cache efficiency drop"
+          description: "Cache hit rate is {{ $value }}%, below 70% threshold."
+
+      - alert: BusinessMetricAnomaly
+        expr: |
+          (
+            rate(exams_completed_total{job="toeic-app"}[5m]) 
+            < 
+            (avg_over_time(rate(exams_completed_total{job="toeic-app"}[5m])[24h:1h]) * 0.2)
+          )
+          and
+          (
+            rate(http_requests_total{job="toeic-app"}[5m]) > 0.1
+          )
+        for: 10m
+        labels:
+          severity: warning
+          component: business
+          alert_type: advanced
+        annotations:
+          summary: "Exam completion rate anomaly"
+          description: "Exam completion rate has dropped significantly below normal levels."
+
+      - alert: SecurityThreatDetected
+        expr: rate(errors_total{job="toeic-app", type="auth_failure"}[5m]) > 5
+        for: 1m
+        labels:
+          severity: high
+          component: security
+          alert_type: advanced
+        annotations:
+          summary: "Potential security threat"
+          description: "High rate of authentication failures: {{ $value }} failures/sec."
+
+      - alert: ResourceExhaustion
+        expr: |
+          (
+            goroutines_count{job="toeic-app"} > 10000
+          )
+          or
+          (
+            db_connections{job="toeic-app", state="open"} / db_connections{job="toeic-app", state="max_open"} > 0.9
+          )
+        for: 2m
+        labels:
+          severity: high
+          component: resources
+          alert_type: advanced
+        annotations:
+          summary: "Resource exhaustion detected"
+          description: "System resources are nearly exhausted (goroutines or DB connections)."
+
+  - name: toeic-infrastructure-alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% for more than 5 minutes."
+
+      - alert: HighSystemMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High system memory usage"
+          description: "System memory usage is {{ $value }}% for more than 5 minutes."
+
+      - alert: LowDiskSpace
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: high
+          component: infrastructure
+        annotations:
+          summary: "Low disk space"
+          description: "Disk usage is {{ $value }}% for more than 5 minutes."
+
+  - name: toeic-advanced-business-alerts
+    rules:
+      - alert: LowUserEngagement
+        expr: |
+          (
+            rate(business_operations_total{job="toeic-app", operation="exam_start"}[1h]) * 0.3 
+            + rate(exams_completed_total{job="toeic-app", status="completed"}[1h]) * 0.5 
+            + rate(audio_uploads_total{job="toeic-app", status="success"}[1h]) * 0.2
+          ) < 0.1
+        for: 30m
+        labels:
+          severity: warning
+          component: business
+          alert_type: advanced
+        annotations:
+          summary: "Low user engagement detected"
+          description: "User engagement score has been low for 30 minutes."
+
+      - alert: RevenueAnomalyDetected
+        expr: |
+          rate(business_operations_total{job="toeic-app", operation="payment", status="success"}[1h])
+          < 
+          (avg_over_time(rate(business_operations_total{job="toeic-app", operation="payment", status="success"}[1h])[7d:1h]) * 0.3)
+        for: 2h
+        labels:
+          severity: warning
+          component: business
+          alert_type: advanced
+        annotations:
+          summary: "Revenue anomaly detected"
+          description: "Payment rate is significantly below weekly average."

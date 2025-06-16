@@ -12,11 +12,16 @@ func LanguageMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		lang := detectLanguage(c)
 		SetLanguageInContext(c, lang)
-
 		// Add language to response headers for client awareness
 		c.Header("Content-Language", string(lang))
 
-		logger.Debug("Language set to: %s for request: %s %s", lang, c.Request.Method, c.Request.URL.Path)
+		fields := logger.Fields{
+			"component": "i18n_middleware",
+			"language":  string(lang),
+			"method":    c.Request.Method,
+			"path":      c.Request.URL.Path,
+		}
+		logger.DebugWithFields(fields, "Language set for request")
 
 		c.Next()
 	}

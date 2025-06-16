@@ -30,23 +30,42 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger.Info("Starting TOEIC application...")
-
-	// Load configuration
+	logger.InfoWithFields(logger.Fields{
+		"component": "startup",
+		"version":   "1.0.0",
+		"env":       "development",
+	}, "Starting TOEIC application") // Load configuration
 	cfg := config.DefaultConfig()
-	logger.Info("Configuration loaded successfully")
-
+	logger.InfoWithFields(logger.Fields{
+		"component":   "config",
+		"db_driver":   cfg.DBDriver,
+		"server_addr": cfg.ServerAddress,
+	}, "Configuration loaded successfully")
 	// Register custom validators
 	middleware.RegisterValidators()
-	logger.Debug("Custom validators registered")
-
+	logger.DebugWithFields(logger.Fields{
+		"component": "middleware",
+		"feature":   "validators",
+	}, "Custom validators registered")
 	// Check if database tools (pg_dump, psql) are available
 	// This is optional - if tools are not available, the backup/restore features won't work
 	if err := util.CheckDatabaseTools(); err != nil {
-		logger.Warn("Database backup/restore tools not available: %v", err)
-		logger.Warn("Backup/restore functionality will be limited")
+		logger.WarnWithFields(logger.Fields{
+			"component": "database",
+			"feature":   "backup_tools",
+			"error":     err.Error(),
+		}, "Database backup/restore tools not available")
+		logger.WarnWithFields(logger.Fields{
+			"component": "database",
+			"feature":   "backup_tools",
+			"impact":    "limited_functionality",
+		}, "Backup/restore functionality will be limited")
 	} // Open a connection to the database
-	logger.Info("Connecting to database: %s", cfg.DBDriver)
+	logger.InfoWithFields(logger.Fields{
+		"component": "database",
+		"driver":    cfg.DBDriver,
+		"operation": "connect",
+	}, "Connecting to database")
 	conn, err := sql.Open(cfg.DBDriver, cfg.DBSource)
 	if err != nil {
 		logger.Fatal("Could not connect to database: %v", err)

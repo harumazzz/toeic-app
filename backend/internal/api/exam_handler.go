@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/toeic-app/internal/db/sqlc"
+	apperrors "github.com/toeic-app/internal/errors"
 )
 
 // ExamResponse defines the structure for exam information returned to clients.
@@ -48,7 +49,24 @@ type createExamRequest struct {
 func (server *Server) createExam(ctx *gin.Context) {
 	var req createExamRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request body", err)
+		// Create structured validation error
+		validationErr := apperrors.NewValidationError("Invalid request body")
+
+		// Add specific field errors based on the binding error
+		if req.Title == "" {
+			validationErr.AddFieldError("title", "Title is required")
+		}
+		if req.TimeLimitMinutes <= 0 {
+			validationErr.AddFieldError("time_limit_minutes", "Time limit must be greater than 0")
+		}
+
+		validationErr.WithRequestPath(ctx.Request.URL.Path)
+		if traceID := ctx.GetHeader("X-Trace-ID"); traceID != "" {
+			validationErr.WithTraceID(traceID)
+		}
+
+		ctx.Error(validationErr)
+		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request body", validationErr)
 		return
 	}
 
@@ -60,7 +78,21 @@ func (server *Server) createExam(ctx *gin.Context) {
 
 	exam, err := server.store.CreateExam(ctx, arg)
 	if err != nil {
-		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to create exam", err)
+		// Handle database errors with proper categorization
+		appErr := apperrors.HandleDatabaseError(err)
+		appErr.WithRequestPath(ctx.Request.URL.Path)
+		appErr.WithMetadata("operation", "create_exam")
+		appErr.WithMetadata("title", req.Title)
+
+		// Add user context if available
+		if payload, exists := ctx.Get("authorization_payload"); exists && payload != nil {
+			if userPayload, ok := payload.(interface{ GetID() int32 }); ok {
+				appErr.WithUserID(userPayload.GetID())
+			}
+		}
+
+		ctx.Error(appErr)
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to create exam", appErr)
 		return
 	}
 

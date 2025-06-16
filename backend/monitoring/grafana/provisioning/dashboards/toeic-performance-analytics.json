@@ -1,0 +1,175 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "TOEIC Performance Analytics",
+    "tags": ["toeic", "performance", "analytics"],
+    "style": "dark",
+    "timezone": "UTC",
+    "refresh": "30s",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "SLA Compliance",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg_over_time((histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"toeic-app\"}[5m])) < 2)[24h:1h]) * 100",
+            "legendFormat": "SLA Compliance %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 95
+                },
+                {
+                  "color": "green",
+                  "value": 99
+                }
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Response Time Percentiles",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"toeic-app\"}[5m]))",
+            "legendFormat": "P50"
+          },
+          {
+            "expr": "histogram_quantile(0.90, rate(http_request_duration_seconds_bucket{job=\"toeic-app\"}[5m]))",
+            "legendFormat": "P90"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"toeic-app\"}[5m]))",
+            "legendFormat": "P95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"toeic-app\"}[5m]))",
+            "legendFormat": "P99"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Response Time (s)",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 18,
+          "x": 6,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Request Rate by Endpoint",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "topk(10, rate(http_requests_total{job=\"toeic-app\"}[5m]))",
+            "legendFormat": "{{method}} {{endpoint}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Error Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (status_code) (rate(http_requests_total{job=\"toeic-app\", status_code!~\"2..\"}[5m]))",
+            "legendFormat": "{{status_code}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Database Query Performance",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, avg by (operation, table) (rate(db_query_duration_seconds_sum{job=\"toeic-app\"}[5m]) / rate(db_query_duration_seconds_count{job=\"toeic-app\"}[5m])))",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "operation": "Operation",
+                "table": "Table",
+                "Value": "Avg Duration (s)"
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 6,
+        "title": "User Activity Patterns",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "sum by (hour) (increase(user_registrations_total{job=\"toeic-app\"}[1h]))",
+            "legendFormat": "{{hour}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        }
+      }
+    ]
+  }
+}

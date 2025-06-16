@@ -28,6 +28,21 @@ definitions:
       word:
         type: string
     type: object
+  api.AssignRoleRequest:
+    properties:
+      expires_at:
+        description: Unix timestamp
+        type: integer
+      role_id:
+        minimum: 1
+        type: integer
+      user_id:
+        minimum: 1
+        type: integer
+    required:
+    - role_id
+    - user_id
+    type: object
   api.AttemptAnswersResponse:
     properties:
       answers:
@@ -64,6 +79,17 @@ definitions:
         type: object
       type:
         type: string
+    type: object
+  api.CheckPermissionRequest:
+    properties:
+      permission:
+        type: string
+      user_id:
+        minimum: 1
+        type: integer
+    required:
+    - permission
+    - user_id
     type: object
   api.ConjugationData:
     properties:
@@ -105,6 +131,18 @@ definitions:
         type: integer
       type:
         type: string
+    type: object
+  api.CreateRoleRequest:
+    properties:
+      description:
+        maxLength: 500
+        type: string
+      name:
+        maxLength: 50
+        minLength: 2
+        type: string
+    required:
+    - name
     type: object
   api.DatabaseStats:
     properties:
@@ -446,6 +484,32 @@ definitions:
       server:
         $ref: '#/definitions/api.ServerStats'
     type: object
+  api.PermissionCheckResponse:
+    properties:
+      action:
+        type: string
+      has_permission:
+        type: boolean
+      permission:
+        type: string
+      resource:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  api.PermissionResponse:
+    properties:
+      action:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      resource:
+        type: string
+    type: object
   api.QuestionResponse:
     properties:
       content_id:
@@ -479,6 +543,23 @@ definitions:
       message:
         type: string
       status:
+        type: string
+    type: object
+  api.RoleResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/api.PermissionResponse'
+        type: array
+      updated_at:
         type: string
     type: object
   api.SecurityConfig:
@@ -559,6 +640,18 @@ definitions:
       kind:
         type: string
     type: object
+  api.UpdateRoleRequest:
+    properties:
+      description:
+        maxLength: 500
+        type: string
+      name:
+        maxLength: 50
+        minLength: 2
+        type: string
+    required:
+    - name
+    type: object
   api.UserAnswerResponse:
     properties:
       answer_time:
@@ -615,6 +708,21 @@ definitions:
         type: integer
       username:
         type: string
+    type: object
+  api.UserRoleAssignmentResponse:
+    properties:
+      assigned_at:
+        type: string
+      assigned_by:
+        type: integer
+      expires_at:
+        type: string
+      role_id:
+        type: integer
+      role_name:
+        type: string
+      user_id:
+        type: integer
     type: object
   api.UserWordProgressResponse:
     properties:
@@ -747,6 +855,21 @@ definitions:
       user_id:
         type: integer
     type: object
+  api.addScheduleRequest:
+    properties:
+      backup_type:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      schedule:
+        type: string
+    required:
+    - description
+    - id
+    - schedule
+    type: object
   api.addVersionRequest:
     properties:
       changes:
@@ -817,6 +940,80 @@ definitions:
       user_id:
         type: integer
     type: object
+  api.backupActivityItem:
+    properties:
+      action:
+        description: backup, restore, cleanup
+        type: string
+      description:
+        type: string
+      duration:
+        type: string
+      filename:
+        type: string
+      size:
+        type: integer
+      status:
+        description: success, failure, warning
+        type: string
+      timestamp:
+        type: string
+    type: object
+  api.backupConfigSummary:
+    properties:
+      compress_backups:
+        type: boolean
+      encrypt_backups:
+        type: boolean
+      max_backup_count:
+        type: integer
+      retention_days:
+        type: integer
+      storage_type:
+        type: string
+      validate_backups:
+        type: boolean
+    type: object
+  api.backupHealthStatus:
+    properties:
+      issues:
+        items:
+          type: string
+        type: array
+      last_check:
+        type: string
+      overall:
+        description: healthy, warning, critical
+        type: string
+    type: object
+  api.backupHistoryItem:
+    properties:
+      description:
+        type: string
+      duration:
+        type: string
+      error:
+        type: string
+      filename:
+        type: string
+      operation:
+        type: string
+      size:
+        type: integer
+      success:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
+  api.backupHistoryResponse:
+    properties:
+      history:
+        items:
+          $ref: '#/definitions/api.backupHistoryItem'
+        type: array
+      total:
+        type: integer
+    type: object
   api.backupListItem:
     properties:
       created_at:
@@ -850,6 +1047,58 @@ definitions:
       size:
         type: integer
     type: object
+  api.backupStatusResponse:
+    properties:
+      auto_backup:
+        type: boolean
+      configuration:
+        $ref: '#/definitions/api.backupConfigSummary'
+      enabled:
+        type: boolean
+      health:
+        $ref: '#/definitions/api.backupHealthStatus'
+      last_backup:
+        type: string
+      next_backup:
+        type: string
+      oldest_backup:
+        type: string
+      recent_activity:
+        items:
+          $ref: '#/definitions/api.backupActivityItem'
+        type: array
+      total_backups:
+        type: integer
+      total_size:
+        type: integer
+    type: object
+  api.backupValidationResponse:
+    properties:
+      checksum_match:
+        type: boolean
+      file_exists:
+        type: boolean
+      filename:
+        type: string
+      issues:
+        items:
+          type: string
+        type: array
+      last_modified:
+        type: string
+      readable_file:
+        type: boolean
+      size:
+        type: integer
+      valid:
+        type: boolean
+      valid_structure:
+        type: boolean
+      warnings:
+        items:
+          type: string
+        type: array
+    type: object
   api.batchGetExamplesRequest:
     properties:
       ids:
@@ -867,6 +1116,12 @@ definitions:
         type: array
     required:
     - ids
+    type: object
+  api.cleanupRequest:
+    properties:
+      max_age:
+        description: Duration string like "720h" for 30 days
+        type: string
     type: object
   api.createContentRequest:
     properties:
@@ -1131,6 +1386,64 @@ definitions:
     required:
     - prompt_text
     type: object
+  api.enhancedBackupRequest:
+    properties:
+      description:
+        type: string
+      type:
+        description: manual, automatic, migration, etc.
+        type: string
+    required:
+    - description
+    - type
+    type: object
+  api.enhancedBackupResponse:
+    properties:
+      checksum:
+        type: string
+      compressed:
+        type: boolean
+      download_url:
+        type: string
+      duration:
+        type: string
+      encrypted:
+        type: boolean
+      filename:
+        type: string
+      size:
+        type: integer
+      success:
+        type: boolean
+      validated:
+        type: boolean
+      warnings:
+        items:
+          type: string
+        type: array
+    type: object
+  api.enhancedRestoreRequest:
+    properties:
+      filename:
+        type: string
+    required:
+    - filename
+    type: object
+  api.enhancedRestoreResponse:
+    properties:
+      duration:
+        type: string
+      records_count:
+        type: integer
+      success:
+        type: boolean
+      tables_count:
+        type: integer
+      warnings:
+        items:
+          type: string
+        type: array
+    type: object
   api.loginUserRequest:
     properties:
       email:
@@ -1219,6 +1532,21 @@ definitions:
         type: string
     required:
     - filename
+    type: object
+  api.scheduleInfo:
+    properties:
+      description:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        type: string
+      last_run:
+        type: string
+      next_run:
+        type: string
+      schedule:
+        type: string
     type: object
   api.subscriptionRequest:
     properties:
@@ -1453,6 +1781,279 @@ definitions:
     - ExamStatusEnumInProgress
     - ExamStatusEnumCompleted
     - ExamStatusEnumAbandoned
+  errors.ErrorCategory:
+    enum:
+    - CLIENT
+    - SERVER
+    - DATABASE
+    - EXTERNAL
+    - VALIDATION
+    - AUTH
+    - BUSINESS
+    type: string
+    x-enum-varnames:
+    - CategoryClient
+    - CategoryServer
+    - CategoryDatabase
+    - CategoryExternal
+    - CategoryValidation
+    - CategoryAuth
+    - CategoryBusiness
+  errors.ErrorCode:
+    enum:
+    - UNAUTHORIZED
+    - FORBIDDEN
+    - INVALID_CREDENTIALS
+    - TOKEN_EXPIRED
+    - TOKEN_INVALID
+    - VALIDATION_FAILED
+    - INVALID_INPUT
+    - MISSING_FIELD
+    - INVALID_FORMAT
+    - NOT_FOUND
+    - ALREADY_EXISTS
+    - CONFLICT
+    - DATABASE_ERROR
+    - CONNECTION_FAILED
+    - TRANSACTION_FAILED
+    - CONSTRAINT_VIOLATION
+    - EXTERNAL_SERVICE_ERROR
+    - SERVICE_UNAVAILABLE
+    - TIMEOUT
+    - BUSINESS_LOGIC_ERROR
+    - INSUFFICIENT_DATA
+    - INVALID_OPERATION
+    - INTERNAL_SERVER_ERROR
+    - FILE_SYSTEM_ERROR
+    - MEMORY_LIMIT_EXCEEDED
+    - RATE_LIMITED
+    type: string
+    x-enum-varnames:
+    - ErrCodeUnauthorized
+    - ErrCodeForbidden
+    - ErrCodeInvalidCredentials
+    - ErrCodeTokenExpired
+    - ErrCodeTokenInvalid
+    - ErrCodeValidationFailed
+    - ErrCodeInvalidInput
+    - ErrCodeMissingField
+    - ErrCodeInvalidFormat
+    - ErrCodeNotFound
+    - ErrCodeAlreadyExists
+    - ErrCodeConflict
+    - ErrCodeDatabaseError
+    - ErrCodeConnectionFailed
+    - ErrCodeTransactionFailed
+    - ErrCodeConstraintViolation
+    - ErrCodeExternalService
+    - ErrCodeServiceUnavailable
+    - ErrCodeTimeout
+    - ErrCodeBusinessLogic
+    - ErrCodeInsufficientData
+    - ErrCodeInvalidOperation
+    - ErrCodeInternalServer
+    - ErrCodeFileSystem
+    - ErrCodeMemoryLimit
+    - ErrCodeRateLimited
+  errors.ErrorSeverity:
+    enum:
+    - LOW
+    - MEDIUM
+    - HIGH
+    - CRITICAL
+    type: string
+    x-enum-varnames:
+    - SeverityLow
+    - SeverityMedium
+    - SeverityHigh
+    - SeverityCritical
+  errors.ErrorSummary:
+    properties:
+      category_counts:
+        additionalProperties:
+          type: integer
+        type: object
+      error_rate_per_minute:
+        type: number
+      http_status_counts:
+        additionalProperties:
+          type: integer
+        type: object
+      severity_counts:
+        additionalProperties:
+          type: integer
+        type: object
+      since_reset:
+        example: 5m30s
+        type: string
+      top_errors:
+        items:
+          $ref: '#/definitions/errors.TopErrorStat'
+        type: array
+      total_errors:
+        type: integer
+    type: object
+  errors.TopErrorStat:
+    properties:
+      category:
+        $ref: '#/definitions/errors.ErrorCategory'
+      code:
+        $ref: '#/definitions/errors.ErrorCode'
+      count:
+        type: integer
+      percentage:
+        type: number
+      severity:
+        $ref: '#/definitions/errors.ErrorSeverity'
+    type: object
+  monitoring.Alert:
+    properties:
+      count:
+        description: Number of times this alert fired
+        type: integer
+      details:
+        additionalProperties: true
+        type: object
+      id:
+        type: string
+      last_fired:
+        type: string
+      level:
+        $ref: '#/definitions/monitoring.AlertLevel'
+      message:
+        type: string
+      name:
+        type: string
+      resolved:
+        type: boolean
+      resolved_at:
+        type: string
+      source:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  monitoring.AlertLevel:
+    enum:
+    - INFO
+    - WARNING
+    - CRITICAL
+    type: string
+    x-enum-varnames:
+    - AlertLevelInfo
+    - AlertLevelWarning
+    - AlertLevelCritical
+  performance.CacheStats:
+    properties:
+      buffer_cache_hit_ratio:
+        type: number
+      index_cache_hit_ratio:
+        type: number
+    type: object
+  performance.DatabaseSizeStats:
+    properties:
+      index_ratio:
+        type: number
+      index_size:
+        type: string
+      table_size:
+        type: string
+      total_size:
+        type: string
+    type: object
+  performance.IndexUsageStats:
+    properties:
+      index_name:
+        type: string
+      index_size:
+        type: string
+      scans:
+        type: integer
+      schema_name:
+        type: string
+      table_name:
+        type: string
+      tuples_fetch:
+        type: integer
+      tuples_read:
+        type: integer
+      usage_level:
+        type: string
+    type: object
+  performance.OptimizationRecommendation:
+    properties:
+      column_names:
+        type: string
+      estimated_benefit:
+        type: string
+      rationale:
+        type: string
+      sql_command:
+        type: string
+      table_name:
+        type: string
+      type:
+        type: string
+    type: object
+  performance.PerformanceMetrics:
+    properties:
+      cache_hit_ratio:
+        $ref: '#/definitions/performance.CacheStats'
+      database_size:
+        $ref: '#/definitions/performance.DatabaseSizeStats'
+      index_usage:
+        items:
+          $ref: '#/definitions/performance.IndexUsageStats'
+        type: array
+      query_performance:
+        items:
+          $ref: '#/definitions/performance.QueryPerformanceStats'
+        type: array
+      table_stats:
+        items:
+          $ref: '#/definitions/performance.TableStats'
+        type: array
+    type: object
+  performance.QueryPerformanceStats:
+    properties:
+      calls:
+        type: integer
+      hit_percent:
+        type: number
+      mean_time:
+        type: number
+      query:
+        type: string
+      rows:
+        type: integer
+      total_time:
+        type: number
+    type: object
+  performance.TableStats:
+    properties:
+      deletes:
+        type: integer
+      idx_tuples_fetch:
+        type: integer
+      index_scans:
+        type: integer
+      inserts:
+        type: integer
+      schema_name:
+        type: string
+      seq_scan_percentage:
+        type: number
+      seq_tuples_read:
+        type: integer
+      sequential_scans:
+        type: integer
+      table_name:
+        type: string
+      total_size:
+        type: string
+      updates:
+        type: integer
+    type: object
   upgrade.AppVersion:
     properties:
       changes:
@@ -1523,6 +2124,56 @@ definitions:
 info:
   contact: {}
 paths:
+  /alerts:
+    get:
+      consumes:
+      - application/json
+      description: Get all currently active monitoring alerts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Active alerts retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/monitoring.Alert'
+                  type: array
+              type: object
+      summary: Get active alerts
+      tags:
+      - monitoring
+  /alerts/history:
+    get:
+      consumes:
+      - application/json
+      description: Get recent alert history
+      parameters:
+      - default: 50
+        description: Maximum number of alerts to return
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Alert history retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/monitoring.Alert'
+                  type: array
+              type: object
+      summary: Get alert history
+      tags:
+      - monitoring
   /api/auth/login:
     post:
       consumes:
@@ -1766,6 +2417,73 @@ paths:
       summary: Delete database backup
       tags:
       - admin
+  /api/v1/admin/backups/{filename}/validate:
+    post:
+      consumes:
+      - application/json
+      description: Validates the integrity and structure of a backup file
+      parameters:
+      - description: Backup filename
+        in: path
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backup validation completed
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.backupValidationResponse'
+              type: object
+        "400":
+          description: Invalid filename
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Backup file not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Validation failed
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Validate backup file
+      tags:
+      - admin
+  /api/v1/admin/backups/cleanup:
+    post:
+      consumes:
+      - application/json
+      description: Manually trigger cleanup of old backup files
+      parameters:
+      - description: Cleanup parameters
+        in: body
+        name: cleanup
+        schema:
+          $ref: '#/definitions/api.cleanupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cleanup completed successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to cleanup backups
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Manual cleanup of old backups
+      tags:
+      - admin
   /api/v1/admin/backups/download/{filename}:
     get:
       description: Downloads a specific database backup file
@@ -1797,6 +2515,115 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Download database backup
+      tags:
+      - admin
+  /api/v1/admin/backups/enhanced:
+    post:
+      consumes:
+      - application/json
+      description: Creates a backup with advanced features like compression, encryption,
+        and validation
+      parameters:
+      - description: Enhanced backup details
+        in: body
+        name: backup
+        required: true
+        schema:
+          $ref: '#/definitions/api.enhancedBackupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backup created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.enhancedBackupResponse'
+              type: object
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create backup
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create enhanced database backup
+      tags:
+      - admin
+  /api/v1/admin/backups/enhanced/restore:
+    post:
+      consumes:
+      - application/json
+      description: Restores database with advanced validation and safety measures
+      parameters:
+      - description: Enhanced restore details
+        in: body
+        name: restore
+        required: true
+        schema:
+          $ref: '#/definitions/api.enhancedRestoreRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Database restored successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.enhancedRestoreResponse'
+              type: object
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Backup file not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to restore database
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Restore database from enhanced backup
+      tags:
+      - admin
+  /api/v1/admin/backups/history:
+    get:
+      description: Get backup history and statistics
+      parameters:
+      - default: 50
+        description: Limit number of results
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backup history retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.backupHistoryResponse'
+              type: object
+        "500":
+          description: Failed to get backup history
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get backup history
       tags:
       - admin
   /api/v1/admin/backups/restore:
@@ -1833,6 +2660,114 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Restore database from backup
+      tags:
+      - admin
+  /api/v1/admin/backups/schedules:
+    get:
+      description: Get all active backup schedules
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backup schedules retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.scheduleInfo'
+                  type: array
+              type: object
+        "500":
+          description: Failed to get schedules
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get backup schedules
+      tags:
+      - admin
+    post:
+      consumes:
+      - application/json
+      description: Add a new backup schedule
+      parameters:
+      - description: Schedule details
+        in: body
+        name: schedule
+        required: true
+        schema:
+          $ref: '#/definitions/api.addScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Schedule added successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to add schedule
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Add backup schedule
+      tags:
+      - admin
+  /api/v1/admin/backups/schedules/{id}:
+    delete:
+      description: Remove a backup schedule
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Schedule removed successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to remove schedule
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove backup schedule
+      tags:
+      - admin
+  /api/v1/admin/backups/status:
+    get:
+      consumes:
+      - application/json
+      description: Returns backup system status, recent activity, and health metrics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backup status retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.backupStatusResponse'
+              type: object
+        "500":
+          description: Failed to retrieve backup status
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get backup status and health
       tags:
       - admin
   /api/v1/admin/backups/upload:
@@ -2078,6 +3013,47 @@ paths:
       summary: Trigger manual cache warming
       tags:
       - Admin
+  /api/v1/admin/check-permission:
+    post:
+      consumes:
+      - application/json
+      description: Check if a user has a specific permission (admin only)
+      parameters:
+      - description: Permission check information
+        in: body
+        name: check
+        required: true
+        schema:
+          $ref: '#/definitions/api.CheckPermissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Permission check completed
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.PermissionCheckResponse'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Check user permission
+      tags:
+      - rbac
   /api/v1/admin/i18n/languages/{language}/export:
     get:
       consumes:
@@ -2206,6 +3182,234 @@ paths:
       summary: Add or update multiple messages (Admin only)
       tags:
       - i18n
+  /api/v1/admin/metrics/errors/categories:
+    get:
+      consumes:
+      - application/json
+      description: Get error counts grouped by category (CLIENT, SERVER, DATABASE,
+        etc.)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Category counts retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: integer
+                  type: object
+              type: object
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get error counts by category
+      tags:
+      - monitoring
+  /api/v1/admin/metrics/errors/counts:
+    get:
+      consumes:
+      - application/json
+      description: Get error counts grouped by error code
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Error counts retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: integer
+                  type: object
+              type: object
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get error counts by code
+      tags:
+      - monitoring
+  /api/v1/admin/metrics/errors/rate:
+    get:
+      consumes:
+      - application/json
+      description: Get the current error rate per minute
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Error rate retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get error rate
+      tags:
+      - monitoring
+  /api/v1/admin/metrics/errors/reset:
+    post:
+      consumes:
+      - application/json
+      description: Reset all error metrics counters to zero
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Error metrics reset successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Reset error metrics
+      tags:
+      - monitoring
+  /api/v1/admin/metrics/errors/severity:
+    get:
+      consumes:
+      - application/json
+      description: Get error counts grouped by severity level (LOW, MEDIUM, HIGH,
+        CRITICAL)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Severity counts retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: integer
+                  type: object
+              type: object
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get error counts by severity
+      tags:
+      - monitoring
+  /api/v1/admin/metrics/errors/status:
+    get:
+      consumes:
+      - application/json
+      description: Get error counts grouped by HTTP status code
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: HTTP status counts retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: integer
+                  type: object
+              type: object
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get error counts by HTTP status
+      tags:
+      - monitoring
+  /api/v1/admin/metrics/errors/summary:
+    get:
+      consumes:
+      - application/json
+      description: Get a comprehensive summary of error metrics including counts,
+        rates, and top errors
+      parameters:
+      - default: 10
+        description: Number of top errors to include
+        in: query
+        name: top_errors
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Error metrics retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/errors.ErrorSummary'
+              type: object
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get error metrics summary
+      tags:
+      - monitoring
+  /api/v1/admin/metrics/errors/top:
+    get:
+      consumes:
+      - application/json
+      description: Get the most frequently occurring errors
+      parameters:
+      - default: 10
+        description: Number of top errors to return
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Top errors retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    type: object
+                  type: array
+              type: object
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get top errors
+      tags:
+      - monitoring
   /api/v1/admin/performance/concurrency/reset:
     post:
       description: Resets all concurrency metrics and statistics (admin only)
@@ -2233,6 +3437,454 @@ paths:
       summary: Reset concurrency metrics
       tags:
       - Performance
+  /api/v1/admin/permissions:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all permissions in the system (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Permissions retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.PermissionResponse'
+                  type: array
+              type: object
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List permissions
+      tags:
+      - rbac
+  /api/v1/admin/roles:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all roles in the system (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Roles retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.RoleResponse'
+                  type: array
+              type: object
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List all roles
+      tags:
+      - rbac
+    post:
+      consumes:
+      - application/json
+      description: Create a new role in the system (admin only)
+      parameters:
+      - description: Role information
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Role created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.RoleResponse'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new role
+      tags:
+      - rbac
+  /api/v1/admin/roles/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a role from the system (admin only)
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid role ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Role not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a role
+      tags:
+      - rbac
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a role by its ID (admin only)
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.RoleResponse'
+              type: object
+        "400":
+          description: Invalid role ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Role not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get role by ID
+      tags:
+      - rbac
+    put:
+      consumes:
+      - application/json
+      description: Update an existing role (admin only)
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated role information
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.RoleResponse'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Role not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a role
+      tags:
+      - rbac
+  /api/v1/admin/roles/{role_id}/permissions/{permission_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a permission from a role (admin only)
+      parameters:
+      - description: Role ID
+        in: path
+        name: role_id
+        required: true
+        type: integer
+      - description: Permission ID
+        in: path
+        name: permission_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Permission removed successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Role or permission not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove permission from role
+      tags:
+      - rbac
+    post:
+      consumes:
+      - application/json
+      description: Assign a permission to a role (admin only)
+      parameters:
+      - description: Role ID
+        in: path
+        name: role_id
+        required: true
+        type: integer
+      - description: Permission ID
+        in: path
+        name: permission_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Permission assigned successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Role or permission not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Assign permission to role
+      tags:
+      - rbac
+  /api/v1/admin/roles/users/{roleName}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all users assigned to a specific role (admin only)
+      parameters:
+      - description: Role name
+        in: path
+        name: roleName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.UserRoleAssignmentResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid role name
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Role not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get users by role
+      tags:
+      - rbac
+  /api/v1/admin/user-roles:
+    post:
+      consumes:
+      - application/json
+      description: Assign a role to a user (admin only)
+      parameters:
+      - description: Role assignment information
+        in: body
+        name: assignment
+        required: true
+        schema:
+          $ref: '#/definitions/api.AssignRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role assigned successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User or role not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Assign role to user
+      tags:
+      - rbac
+  /api/v1/admin/users/{user_id}/roles/{role_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a role from a user (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: Role ID
+        in: path
+        name: role_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role removed successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid user or role ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove role from user
+      tags:
+      - rbac
   /api/v1/analyze/cache:
     get:
       consumes:
@@ -4326,6 +5978,25 @@ paths:
       summary: Update a part
       tags:
       - parts
+  /api/v1/performance/cache:
+    get:
+      description: Retrieves cache hit ratio statistics for buffer and index caches
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/performance.CacheStats'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get cache hit ratio
+      tags:
+      - performance
   /api/v1/performance/concurrency:
     get:
       description: Returns detailed concurrency metrics including active operations,
@@ -4373,6 +6044,110 @@ paths:
       summary: Get concurrency health status
       tags:
       - Performance
+  /api/v1/performance/dashboard:
+    get:
+      description: Provides a comprehensive performance dashboard with key metrics
+        and alerts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get performance dashboard
+      tags:
+      - performance
+  /api/v1/performance/indexes:
+    get:
+      description: Retrieves detailed index usage statistics for performance analysis
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/performance.IndexUsageStats'
+            type: array
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get index usage statistics
+      tags:
+      - performance
+  /api/v1/performance/metrics:
+    get:
+      description: Retrieves comprehensive database performance metrics including
+        index usage, table stats, and cache hit ratios
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/performance.PerformanceMetrics'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get database performance metrics
+      tags:
+      - performance
+  /api/v1/performance/optimize:
+    post:
+      description: Executes automated database optimization procedures
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Run database optimization
+      tags:
+      - performance
+  /api/v1/performance/recommendations:
+    get:
+      description: Retrieves automated recommendations for database optimization
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/performance.OptimizationRecommendation'
+            type: array
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get optimization recommendations
+      tags:
+      - performance
   /api/v1/performance/search-test:
     get:
       consumes:
@@ -4427,6 +6202,28 @@ paths:
       summary: Get performance statistics
       tags:
       - Performance
+  /api/v1/performance/tables:
+    get:
+      description: Retrieves detailed table statistics including sequential scans
+        and size information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/performance.TableStats'
+            type: array
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get table statistics
+      tags:
+      - performance
   /api/v1/questions:
     post:
       consumes:
@@ -5949,6 +7746,90 @@ paths:
       summary: Update a user
       tags:
       - users
+  /api/v1/users/{user_id}/permissions:
+    get:
+      consumes:
+      - application/json
+      description: Get all permissions granted to a user through their roles
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User permissions retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.PermissionResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user permissions
+      tags:
+      - rbac
+  /api/v1/users/{user_id}/roles:
+    get:
+      consumes:
+      - application/json
+      description: Get all roles assigned to a user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User roles retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.RoleResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user roles
+      tags:
+      - rbac
   /api/v1/users/me:
     get:
       consumes:
@@ -6670,6 +8551,26 @@ paths:
                   $ref: '#/definitions/api.MetricsResponse'
               type: object
       summary: Get system metrics
+      tags:
+      - monitoring
+  /monitoring/status:
+    get:
+      consumes:
+      - application/json
+      description: Get the overall monitoring system status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Monitoring status retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      summary: Get monitoring status
       tags:
       - monitoring
   /upload:

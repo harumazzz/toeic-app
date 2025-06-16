@@ -123,19 +123,33 @@ func (asm *AdvancedSecurityMiddleware) Middleware() gin.HandlerFunc {
 		if c.Request.Method == "OPTIONS" {
 			c.Next()
 			return
-		}
-		// Debug: Log all headers received
-		logger.Debug("Request headers for %s %s:", c.Request.Method, c.Request.URL.Path)
-		for name, values := range c.Request.Header {
-			if strings.HasPrefix(name, "X-") || name == "Origin" || name == "Referer" {
-				logger.Debug("  %s: %s", name, strings.Join(values, ", "))
-			}
+		} // Debug: Log all headers received
+		fields := logger.Fields{
+			"component":  "advanced_security",
+			"method":     c.Request.Method,
+			"path":       c.Request.URL.Path,
+			"client_ip":  c.ClientIP(),
+			"user_agent": c.GetHeader("User-Agent"),
+			"request_id": c.GetHeader("X-Request-ID"),
 		}
 
+		logger.DebugWithFields(fields, "Advanced security middleware processing request")
+
+		// Log relevant headers for debugging
+		headerFields := make(logger.Fields)
+		for name, values := range c.Request.Header {
+			if strings.HasPrefix(name, "X-") || name == "Origin" || name == "Referer" {
+				headerFields[fmt.Sprintf("header_%s", strings.ToLower(name))] = strings.Join(values, ", ")
+			}
+		}
+		if len(headerFields) > 0 {
+			logger.DebugWithFields(headerFields, "Request headers for security validation")
+		}
 		// Perform enhanced security validation
 		if err := asm.validateAdvancedSecurity(c); err != nil {
-			logger.Warn("Advanced security validation failed: %v - %s %s from %s",
-				err, c.Request.Method, c.Request.URL.Path, c.ClientIP())
+			fields["error"] = err.Error()
+			fields["security_validation_failed"] = true
+			logger.WarnWithFields(fields, "Advanced security validation failed")
 
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status":  "error",

@@ -108,6 +108,15 @@ type Part struct {
 	Title  string `json:"title"`
 }
 
+type Permission struct {
+	ID          int32          `json:"id"`
+	Name        string         `json:"name"`
+	Resource    string         `json:"resource"`
+	Action      string         `json:"action"`
+	Description sql.NullString `json:"description"`
+	CreatedAt   time.Time      `json:"created_at"`
+}
+
 type Question struct {
 	QuestionID      int32          `json:"question_id"`
 	ContentID       int32          `json:"content_id"`
@@ -118,6 +127,20 @@ type Question struct {
 	TrueAnswer      string         `json:"true_answer"`
 	Explanation     string         `json:"explanation"`
 	Keywords        sql.NullString `json:"keywords"`
+}
+
+type Role struct {
+	ID          int32          `json:"id"`
+	Name        string         `json:"name"`
+	Description sql.NullString `json:"description"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+}
+
+type RolePermission struct {
+	RoleID       int32     `json:"role_id"`
+	PermissionID int32     `json:"permission_id"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type SpeakingSession struct {
@@ -170,6 +193,14 @@ type UserProfile struct {
 	AvatarUrl sql.NullString `json:"avatar_url"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
+}
+
+type UserRole struct {
+	UserID     int32         `json:"user_id"`
+	RoleID     int32         `json:"role_id"`
+	AssignedAt time.Time     `json:"assigned_at"`
+	AssignedBy sql.NullInt32 `json:"assigned_by"`
+	ExpiresAt  sql.NullTime  `json:"expires_at"`
 }
 
 type UserWordProgress struct {

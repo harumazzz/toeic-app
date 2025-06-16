@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup-pvc
+  namespace: toeic-app
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: toeic-app
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: postgres-backup
+            image: postgres:14-alpine
+            command:
+            - sh
+            - -c
+            - |
+              BACKUP_FILE="/backups/backup_$(date +%Y%m%d_%H%M%S).sql"
+              echo "Creating backup: $BACKUP_FILE"
+              pg_dump -h postgres-service -U $DB_USER -d $DB_NAME > $BACKUP_FILE
+              echo "Backup completed: $BACKUP_FILE"
+              
+              # Clean old backups (keep last 7 days)
+              find /backups -name "backup_*.sql" -mtime +7 -delete
+              echo "Old backups cleaned"
+            env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: toeic-backend-secrets
+                  key: DB_PASSWORD
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: toeic-backend-secrets
+                  key: DB_USER
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: toeic-backend-config
+                  key: DB_NAME
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backups
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: backup-pvc

@@ -89,6 +89,30 @@ type Config struct {
 	AnalyzeServiceTimeout time.Duration `mapstructure:"ANALYZE_SERVICE_TIMEOUT"`
 
 	// Performance settings
+
+	// Security configuration
+	TLSEnabled             bool   `mapstructure:"TLS_ENABLED"`
+	TLSCertFile            string `mapstructure:"TLS_CERT_FILE"`
+	TLSKeyFile             string `mapstructure:"TLS_KEY_FILE"`
+	SecurityHeadersEnabled bool   `mapstructure:"SECURITY_HEADERS_ENABLED"`
+	InputValidationEnabled bool   `mapstructure:"INPUT_VALIDATION_ENABLED"`
+
+	// Database security
+	DBSSLMode         string `mapstructure:"DB_SSL_MODE"`
+	DBSSLCert         string `mapstructure:"DB_SSL_CERT"`
+	DBSSLKey          string `mapstructure:"DB_SSL_KEY"`
+	DBSSLRootCert     string `mapstructure:"DB_SSL_ROOT_CERT"`
+	DBAuditLogEnabled bool   `mapstructure:"DB_AUDIT_LOG_ENABLED"`
+
+	// Secrets management
+	MasterEncryptionKey    string `mapstructure:"MASTER_ENCRYPTION_KEY"`
+	EncryptionSalt         string `mapstructure:"ENCRYPTION_SALT"`
+	SecretsRotationEnabled bool   `mapstructure:"SECRETS_ROTATION_ENABLED"`
+
+	// Security monitoring
+	SecurityMonitoringEnabled bool   `mapstructure:"SECURITY_MONITORING_ENABLED"`
+	SecurityAlertsEnabled     bool   `mapstructure:"SECURITY_ALERTS_ENABLED"`
+	SecurityLogLevel          string `mapstructure:"SECURITY_LOG_LEVEL"`
 }
 
 // LoadEnv loads environment variables from .env file
@@ -226,6 +250,30 @@ func DefaultConfig() Config {
 	analyzeServiceURL := GetEnv("ANALYZE_SERVICE_URL", "http://localhost:9000")
 	analyzeServiceTimeout := time.Duration(GetEnvAsInt("ANALYZE_SERVICE_TIMEOUT", 30)) * time.Second
 
+	// Get security configuration
+	tlsEnabled := GetEnv("TLS_ENABLED", "false") == "true"
+	tlsCertFile := GetEnv("TLS_CERT_FILE", "")
+	tlsKeyFile := GetEnv("TLS_KEY_FILE", "")
+	securityHeadersEnabled := GetEnv("SECURITY_HEADERS_ENABLED", "true") == "true"
+	inputValidationEnabled := GetEnv("INPUT_VALIDATION_ENABLED", "true") == "true"
+
+	// Get database security configuration
+	dbSSLMode := GetEnv("DB_SSL_MODE", "prefer")
+	dbSSLCert := GetEnv("DB_SSL_CERT", "")
+	dbSSLKey := GetEnv("DB_SSL_KEY", "")
+	dbSSLRootCert := GetEnv("DB_SSL_ROOT_CERT", "")
+	dbAuditLogEnabled := GetEnv("DB_AUDIT_LOG_ENABLED", "true") == "true"
+
+	// Get secrets management configuration
+	masterEncryptionKey := GetEnv("MASTER_ENCRYPTION_KEY", "")
+	encryptionSalt := GetEnv("ENCRYPTION_SALT", "")
+	secretsRotationEnabled := GetEnv("SECRETS_ROTATION_ENABLED", "false") == "true"
+
+	// Get security monitoring configuration
+	securityMonitoringEnabled := GetEnv("SECURITY_MONITORING_ENABLED", "true") == "true"
+	securityAlertsEnabled := GetEnv("SECURITY_ALERTS_ENABLED", "true") == "true"
+	securityLogLevel := GetEnv("SECURITY_LOG_LEVEL", "info")
+
 	return Config{
 		// Database configuration
 		DBDriver:   dbDriver,
@@ -300,5 +348,29 @@ func DefaultConfig() Config {
 		AnalyzeServiceEnabled: analyzeServiceEnabled,
 		AnalyzeServiceURL:     analyzeServiceURL,
 		AnalyzeServiceTimeout: analyzeServiceTimeout,
+
+		// Security configuration
+		TLSEnabled:             tlsEnabled,
+		TLSCertFile:            tlsCertFile,
+		TLSKeyFile:             tlsKeyFile,
+		SecurityHeadersEnabled: securityHeadersEnabled,
+		InputValidationEnabled: inputValidationEnabled,
+
+		// Database security
+		DBSSLMode:         dbSSLMode,
+		DBSSLCert:         dbSSLCert,
+		DBSSLKey:          dbSSLKey,
+		DBSSLRootCert:     dbSSLRootCert,
+		DBAuditLogEnabled: dbAuditLogEnabled,
+
+		// Secrets management
+		MasterEncryptionKey:    masterEncryptionKey,
+		EncryptionSalt:         encryptionSalt,
+		SecretsRotationEnabled: secretsRotationEnabled,
+
+		// Security monitoring
+		SecurityMonitoringEnabled: securityMonitoringEnabled,
+		SecurityAlertsEnabled:     securityAlertsEnabled,
+		SecurityLogLevel:          securityLogLevel,
 	}
 }

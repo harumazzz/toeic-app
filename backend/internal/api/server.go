@@ -13,13 +13,18 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/toeic-app/internal/analyze"
+	"github.com/toeic-app/internal/backup"
 	"github.com/toeic-app/internal/cache"
-	"github.com/toeic-app/internal/config"
+	configPkg "github.com/toeic-app/internal/config"
 	db "github.com/toeic-app/internal/db/sqlc"
+	"github.com/toeic-app/internal/errors"
 	"github.com/toeic-app/internal/i18n"
 	"github.com/toeic-app/internal/logger"
 	"github.com/toeic-app/internal/middleware"
+	"github.com/toeic-app/internal/monitoring"
+	"github.com/toeic-app/internal/notification"
 	"github.com/toeic-app/internal/performance"
+	"github.com/toeic-app/internal/rbac"
 	"github.com/toeic-app/internal/scheduler"
 	"github.com/toeic-app/internal/token"
 	"github.com/toeic-app/internal/upgrade"
@@ -35,20 +40,23 @@ import (
 
 // Server serves HTTP requests for our banking service.
 type Server struct {
-	config              config.Config
-	store               db.Querier
-	tokenMaker          token.Maker
-	router              *gin.Engine
-	uploader            *uploader.CloudinaryUploader
-	rateLimiter         *middleware.AdvancedRateLimit    // Store the rate limiter instance
-	httpServer          *http.Server                     // Store the HTTP server instance
-	backupScheduler     *scheduler.BackupScheduler       // Automated backup scheduler
-	cache               cache.Cache                      // Cache instance
-	serviceCache        *cache.ServiceCache              // Service layer cache
-	httpCache           *cache.HTTPCacheMiddleware       // HTTP cache middleware
-	objectPool          *performance.ObjectPool          // Object pool for memory optimization
-	responseOptimizer   *performance.ResponseOptimizer   // Response optimization
-	backgroundProcessor *performance.BackgroundProcessor // Background task processor
+	config                  configPkg.Config
+	store                   db.Querier
+	tokenMaker              token.Maker
+	router                  *gin.Engine
+	uploader                *uploader.CloudinaryUploader
+	rateLimiter             *middleware.AdvancedRateLimit      // Store the rate limiter instance
+	httpServer              *http.Server                       // Store the HTTP server instance
+	backupScheduler         *scheduler.BackupScheduler         // Automated backup scheduler
+	enhancedBackupScheduler *scheduler.EnhancedBackupScheduler // Enhanced backup scheduler
+	backupManager           *backup.BackupManager              // Enhanced backup manager
+	notificationManager     *notification.NotificationManager  // Notification manager for backup events
+	cache                   cache.Cache                        // Cache instance
+	serviceCache            *cache.ServiceCache                // Service layer cache
+	httpCache               *cache.HTTPCacheMiddleware         // HTTP cache middleware
+	objectPool              *performance.ObjectPool            // Object pool for memory optimization
+	responseOptimizer       *performance.ResponseOptimizer     // Response optimization
+	backgroundProcessor     *performance.BackgroundProcessor   // Background task processor
 
 	// Enhanced concurrency management
 	concurrencyManager *performance.ConcurrencyManager      // Advanced concurrency management
@@ -66,10 +74,20 @@ type Server struct {
 	cacheManager     *cache.CacheManager     // Advanced cache coordinator
 	distributedCache *cache.DistributedCache // Distributed cache for horizontal scaling
 	cacheWarmer      *cache.CacheWarmer      // Cache warming system
+
+	// RBAC system
+	rbacService    *rbac.Service              // Role-based access control service
+	rbacMiddleware *middleware.RBACMiddleware // RBAC middleware
+
+	// Error metrics for monitoring
+	errorMetrics *errors.ErrorMetrics // Error metrics for monitoring
+
+	// Enhanced monitoring system (Week 4: Advanced Monitoring)
+	monitoringService *monitoring.AdvancedMonitoringService // Advanced monitoring service with Week 4 features
 }
 
 // NewServer creates a new HTTP server and setup routing.
-func NewServer(config config.Config, store db.Querier, dbConn *sql.DB) (*Server, error) {
+func NewServer(config configPkg.Config, store db.Querier, dbConn *sql.DB) (*Server, error) {
 	tokenMaker, err := token.NewJWTMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, err
@@ -208,8 +226,13 @@ func NewServer(config config.Config, store db.Querier, dbConn *sql.DB) (*Server,
 		cacheWarmer:         cacheWarmer,      // Add cache warmer
 	}
 
+	// Initialize RBAC system
+	server.rbacService = rbac.NewService(store)
+	server.rbacMiddleware = middleware.NewRBACMiddleware(server.rbacService)
+
 	logger.Info("Performance optimizations initialized: Object Pool, Response Optimizer, Background Processor")
 	logger.Info("WebSocket manager and upgrade service initialized")
+	logger.Info("RBAC system initialized")
 
 	// Start WebSocket manager
 	wsManager.Start()
@@ -266,6 +289,36 @@ func NewServer(config config.Config, store db.Querier, dbConn *sql.DB) (*Server,
 		logger.Info("Rate limiting initialized with %d requests/sec, %d burst",
 			config.RateLimitRequests, config.RateLimitBurst)
 	}
+
+	// Initialize monitoring service (Week 4: Advanced Monitoring)
+	logger.Info("Initializing advanced monitoring system...")
+	advancedMonitoringConfig := monitoring.DefaultAdvancedMonitoringConfig()
+
+	// Configure external services to monitor if analyze service is enabled
+	if config.AnalyzeServiceEnabled {
+		// Note: Advanced monitoring will inherit basic monitoring external services
+		// through the base MonitoringService configuration
+	}
+
+	server.monitoringService = monitoring.NewAdvancedMonitoringService(dbConn, cacheInstance, config, advancedMonitoringConfig)
+	logger.Info("Advanced monitoring system initialized with Week 4 features: SLA monitoring, anomaly detection, capacity planning, business analytics, security monitoring, and performance optimization")
+
+	// Initialize enhanced backup system
+	logger.Info("Initializing enhanced backup system...")
+
+	// Load backup configuration
+	backupConfig := configPkg.LoadBackupConfig()
+
+	// Initialize notification manager for backup events
+	server.notificationManager = notification.NewNotificationManager(backupConfig)
+
+	// Initialize enhanced backup manager
+	server.backupManager = backup.NewBackupManager(backupConfig, config)
+
+	// Initialize enhanced backup scheduler
+	server.enhancedBackupScheduler = scheduler.NewEnhancedBackupScheduler(backupConfig, config)
+
+	logger.Info("Enhanced backup system initialized successfully")
 
 	// Setup routes
 	server.setupRouter()
@@ -351,10 +404,32 @@ func (server *Server) uploadAudioFile(ctx *gin.Context) {
 }
 
 func (server *Server) setupRouter() {
-	router := gin.New()                        // Create a new clean router without default middleware	// Apply middleware
-	router.Use(gin.Recovery())                 // Recovery middleware recovers from panics
+	router := gin.New() // Create a new clean router without default middleware
+
+	// Initialize error metrics for monitoring
+	errorMetrics := errors.NewErrorMetrics()
+
+	// Enhanced error handling configuration
+	errorConfig := middleware.DefaultErrorHandlerConfig()
+
+	// Apply enhanced recovery middleware instead of default gin.Recovery()
+	router.Use(middleware.Recovery(errorConfig, errorMetrics))
+
+	// Apply error handling middleware
+	router.Use(middleware.ErrorHandler(errorConfig, errorMetrics))
+
+	// Store error metrics in server for access from handlers
+	server.errorMetrics = errorMetrics
+
+	// Apply other middleware
 	router.Use(middleware.Logger())            // Our custom logger
 	router.Use(middleware.CORS(server.config)) // Enable CORS with config
+
+	// Apply monitoring middleware if enabled
+	if server.monitoringService != nil && server.monitoringService.GetMonitor() != nil {
+		router.Use(server.monitoringService.GetMonitor().Middleware())
+		logger.Info("Monitoring middleware enabled - collecting request metrics")
+	}
 
 	// Apply i18n middleware for language detection and setting
 	router.Use(i18n.LanguageMiddleware())
@@ -377,18 +452,58 @@ func (server *Server) setupRouter() {
 	router.Use(advancedSecurity.Middleware())
 	logger.Info("Advanced security middleware enabled - additional headers required for authentication")
 
-	// TEMPORARILY DISABLE GZIP COMPRESSION TO DEBUG JSON PARSING ISSUES
-	// Add gzip compression middleware after security middleware to prevent conflicts
-	// Only compress successful responses to avoid corrupting error messages
-	// gzipConfig := middleware.DefaultGzipConfig()
-	// gzipConfig.ExcludePaths = append(gzipConfig.ExcludePaths, "/api/auth/login", "/api/auth/register")
-	// gzipConfig.MinSize = 2048 // Increase minimum size to avoid compressing small error responses
-	// router.Use(middleware.Gzip(gzipConfig))
-	logger.Info("Gzip compression temporarily disabled for debugging")
+	// Apply enhanced security headers middleware
+	router.Use(middleware.SecurityHeaders(server.config))
+	logger.Info("Enhanced security headers middleware enabled")
+
+	// Apply HTTPS redirect in production
+	router.Use(middleware.HTTPSRedirect(server.config))
+	logger.Info("HTTPS redirect middleware enabled for production")
+
+	// Apply request size limits
+	router.Use(middleware.RequestSizeLimit(10 * 1024 * 1024)) // 10MB limit
+	logger.Info("Request size limiting enabled (10MB)")
+
+	// Apply enhanced input validation
+	inputConfig := middleware.DefaultInputValidationConfig()
+	router.Use(middleware.EnhancedInputValidation(inputConfig))
+	logger.Info("Enhanced input validation middleware enabled")
+
+	// Apply XML bomb protection
+	router.Use(middleware.XMLBombProtection(10, 5))
+	logger.Info("XML bomb protection middleware enabled")
 
 	// Health check and metrics routes
 	router.GET("/health", server.healthCheck)
 	router.GET("/metrics", server.getMetrics)
+
+	// Enhanced monitoring endpoints
+	if server.monitoringService != nil {
+		// Prometheus metrics endpoint
+		if server.monitoringService.GetMonitor() != nil {
+			router.GET("/prometheus", server.monitoringService.GetMonitor().GetPrometheusMetrics())
+		}
+
+		// Enhanced health endpoints
+		if server.monitoringService.GetHealthService() != nil {
+			router.GET("/health/detailed", server.monitoringService.GetHealthService().GetHealthHandler())
+			router.GET("/health/live", server.monitoringService.GetHealthService().GetLivenessHandler())
+			router.GET("/health/ready", server.monitoringService.GetHealthService().GetReadinessHandler())
+		}
+
+		// Alert endpoints
+		if server.monitoringService.GetAlertManager() != nil {
+			router.GET("/alerts", server.getActiveAlerts)
+			router.GET("/alerts/history", server.getAlertHistory)
+		}
+
+		// Advanced monitoring endpoints (Week 4)
+		monitoringGroup := router.Group("/api")
+		server.monitoringService.RegisterAdvancedRoutes(monitoringGroup)
+
+		// Monitoring status endpoint
+		router.GET("/monitoring/status", server.getMonitoringStatus)
+	}
 
 	// Authentication routes
 	authGroup := router.Group("/api/auth")
@@ -447,22 +562,66 @@ func (server *Server) setupRouter() {
 		// Protected routes requiring authentication
 		authRoutes := v1.Group("/")
 		authRoutes.Use(server.authMiddleware())
-		{
+		{ // RBAC management routes
+			rbacRoutes := authRoutes.Group("/rbac")
+			rbacRoutes.Use(server.rbacMiddleware.RequirePermission("rbac", "manage"))
+			{
+				// Role management
+				roles := rbacRoutes.Group("/roles")
+				{
+					roles.POST("", server.createRole)
+					roles.GET("", server.listRoles)
+					roles.GET("/:id", server.getRole)
+					roles.PUT("/:id", server.updateRole)
+					roles.DELETE("/:id", server.deleteRole)
+					roles.POST("/:id/permissions", server.assignPermissionToRole)
+					roles.DELETE("/:id/permissions/:permission_id", server.removePermissionFromRole)
+				} // User role management
+				userRoles := rbacRoutes.Group("/user-roles")
+				{
+					userRoles.POST("", server.assignRole)
+					userRoles.DELETE("/:user_id/:role_id", server.removeRole)
+					userRoles.GET("/user/:user_id", server.getUserRoles)
+					userRoles.GET("/role/:role_id", server.getUsersByRole)
+				}
+
+				// Permission checking
+				permissions := rbacRoutes.Group("/permissions")
+				{
+					permissions.GET("", server.listPermissions)
+					permissions.POST("/check", server.checkPermission)
+					permissions.GET("/user/:user_id", server.getUserPermissions)
+				}
+			}
+
 			// Admin routes for database management
 			adminRoutes := authRoutes.Group("/admin")
-			adminRoutes.Use(middleware.AdminOnly(server.IsUserAdmin))
+			adminRoutes.Use(server.rbacMiddleware.RequirePermission("admin", "access"))
 			{
 				backups := adminRoutes.Group("/backups")
 				{
+					// Legacy backup routes
 					backups.POST("", server.createBackup)                     // Create a new backup
 					backups.GET("", server.listBackups)                       // List all backups
 					backups.GET("/download/:filename", server.downloadBackup) // Download a backup
 					backups.DELETE("/:filename", server.deleteBackup)         // Delete a backup
 					backups.POST("/restore", server.restoreBackup)            // Restore from a backup
 					backups.POST("/upload", server.uploadBackup)              // Upload a backup file
+
+					// Enhanced backup routes
+					backups.POST("/enhanced", server.createEnhancedBackup)          // Create enhanced backup
+					backups.POST("/enhanced/restore", server.restoreEnhancedBackup) // Restore with enhanced features
+					backups.GET("/status", server.getBackupStatus)                  // Get backup system status
+					backups.POST("/validate/:filename", server.validateBackupFile)  // Validate backup file
+					backups.GET("/schedules", server.getBackupSchedules)            // Get backup schedules
+					backups.POST("/schedules", server.addBackupSchedule)            // Add backup schedule
+					backups.DELETE("/schedules/:id", server.removeBackupSchedule)   // Remove backup schedule
+					backups.GET("/history", server.getBackupHistory)                // Get backup history
+					backups.POST("/cleanup", server.cleanupOldBackupsHandler)       // Manual cleanup
 				} // Cache management routes
 				if server.config.CacheEnabled {
 					cacheRoutes := adminRoutes.Group("/cache")
+					cacheRoutes.Use(server.rbacMiddleware.RequirePermission("cache", "manage"))
 					{
 						cacheRoutes.GET("/stats", server.getCacheStats)                   // Get cache statistics
 						cacheRoutes.DELETE("/clear", server.clearCache)                   // Clear all cache
@@ -477,20 +636,23 @@ func (server *Server) setupRouter() {
 				} // Concurrency management routes
 				if server.config.ConcurrencyEnabled {
 					concurrencyRoutes := adminRoutes.Group("/performance/concurrency")
+					concurrencyRoutes.Use(server.rbacMiddleware.RequirePermission("performance", "manage"))
 					{
 						concurrencyRoutes.POST("/reset", server.resetConcurrencyMetrics) // Reset concurrency metrics
 					}
-				} // Admin upgrade management routes
+				}
+				// Admin upgrade management routes
 				upgradeAdmin := adminRoutes.Group("/upgrade")
+				upgradeAdmin.Use(server.rbacMiddleware.RequirePermission("system", "manage"))
 				{
 					upgradeAdmin.GET("/stats", server.getUpgradeStats) // Get upgrade statistics
 					upgradeAdmin.POST("/versions", server.addVersion)  // Add new version
 					upgradeAdmin.POST("/notify", server.notifyUpgrade) // Send upgrade notification
-				}
-
-				// Admin i18n management routes
+				} // Admin i18n management routes
 				i18nAdmin := adminRoutes.Group("/i18n")
+				i18nAdmin.Use(server.rbacMiddleware.RequirePermission("i18n", "manage"))
 				{
+					i18nAdmin.GET("/languages", server.getLanguages)                          // Get languages for admin (reuse public method)
 					i18nAdmin.POST("/languages/:language/messages", server.addMessage)        // Add/update single message
 					i18nAdmin.POST("/languages/:language/messages/batch", server.addMessages) // Add/update multiple messages
 					i18nAdmin.GET("/languages/:language/export", server.exportMessages)       // Export messages for language
@@ -593,19 +755,20 @@ func (server *Server) setupRouter() {
 				userWordProgress.GET("/saved", server.getAllSavedWords)
 			} // Writing routes
 			writing := authRoutes.Group("/writing")
-			{ // Writing prompt routes
-				prompts := writing.Group("/prompts")
-				{
-					prompts.POST("", server.createWritingPrompt)
-					prompts.GET("/:id", server.getWritingPrompt)
-					prompts.GET("", server.listWritingPrompts)
-					prompts.PUT("/:id", server.updateWritingPrompt)
-					prompts.DELETE("/:id", server.deleteWritingPrompt)
-				}
-
+			{
 				// Prompt submissions - separate to avoid wildcard conflict
 				writing.GET("/prompt-submissions/:prompt_id", server.listUserWritingsByPromptID)
-
+				// Writing prompt routes
+				{
+					prompts := writing.Group("/prompts")
+					{
+						prompts.POST("", server.createWritingPrompt)
+						prompts.GET("/:id", server.getWritingPrompt)
+						prompts.GET("", server.listWritingPrompts)
+						prompts.PUT("/:id", server.updateWritingPrompt)
+						prompts.DELETE("/:id", server.deleteWritingPrompt)
+					}
+				}
 				// User writing submissions routes
 				submissions := writing.Group("/submissions")
 				{
@@ -629,7 +792,9 @@ func (server *Server) setupRouter() {
 					sessions.DELETE("/:id", server.deleteSpeakingSession)
 					// Session turns nested under the specific session
 					sessions.GET("/:id/turns", server.listSpeakingTurnsBySessionID)
-				} // User-specific speaking sessions
+				}
+
+				// User-specific speaking sessions
 				speaking.GET("/users/:user_id/sessions", server.listSpeakingSessionsByUserID)
 
 				// Speaking turn routes
@@ -666,9 +831,7 @@ func (server *Server) setupRouter() {
 			}
 
 			// Exam leaderboard route
-			authRoutes.GET("/exams/:id/leaderboard", server.getExamLeaderboard)
-
-			// Text analysis routes
+			authRoutes.GET("/exams/:id/leaderboard", server.getExamLeaderboard) // Text analysis routes
 			if server.config.AnalyzeServiceEnabled && server.analyzeService != nil {
 				analyze := authRoutes.Group("/analyze")
 				{
@@ -698,6 +861,17 @@ func (server *Server) setupRouter() {
 // Start runs the HTTP server on a specific address.
 func (server *Server) Start(address string) error {
 	logger.Info("Starting HTTP server on address: %s", address)
+
+	// Start monitoring service if enabled
+	if server.monitoringService != nil {
+		logger.Info("Starting monitoring service...")
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		server.monitoringService.Start(ctx)
+		logger.Info("Monitoring service started successfully")
+	}
+
 	// Start cache manager if available
 	if server.cacheManager != nil {
 		logger.Info("Starting advanced cache manager...")
@@ -819,9 +993,22 @@ func (server *Server) Shutdown(ctx context.Context) error {
 	return err
 }
 
-// StartAutomaticBackups initializes and starts the automated backup scheduler
+// StartAutomaticBackups initializes and starts the enhanced backup scheduler
 func (server *Server) StartAutomaticBackups(ctx context.Context) error {
-	logger.Info("Setting up automatic database backups")
+	logger.Info("Starting enhanced automatic database backup system")
+
+	// Use the enhanced backup scheduler if available
+	if server.enhancedBackupScheduler != nil {
+		err := server.enhancedBackupScheduler.Start()
+		if err != nil {
+			return fmt.Errorf("failed to start enhanced backup scheduler: %w", err)
+		}
+		logger.Info("Enhanced backup scheduler started successfully")
+		return nil
+	}
+
+	// Fallback to legacy backup system
+	logger.Info("Enhanced backup scheduler not available, using legacy system")
 
 	// Create backup function that will be called by the scheduler
 	backupFunc := func() error {
@@ -856,8 +1043,15 @@ func (server *Server) StartAutomaticBackups(ctx context.Context) error {
 
 // StopAutomaticBackups stops the backup scheduler
 func (server *Server) StopAutomaticBackups() error {
+	// Stop enhanced backup scheduler if available
+	if server.enhancedBackupScheduler != nil && server.enhancedBackupScheduler.IsRunning() {
+		logger.Info("Stopping enhanced automatic database backups")
+		return server.enhancedBackupScheduler.Stop()
+	}
+
+	// Fallback to legacy backup scheduler
 	if server.backupScheduler != nil && server.backupScheduler.IsRunning() {
-		logger.Info("Stopping automatic database backups")
+		logger.Info("Stopping legacy automatic database backups")
 		return server.backupScheduler.Stop()
 	}
 	return nil

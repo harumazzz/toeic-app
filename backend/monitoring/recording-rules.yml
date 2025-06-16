@@ -1,0 +1,170 @@
+groups:
+  - name: toeic-app-recording-rules
+    interval: 30s
+    rules:
+      # SLA related metrics
+      - record: toeic:sla_compliance_1h
+        expr: |
+          avg_over_time(
+            (
+              histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="toeic-app"}[5m])) < 2
+            )[1h:1m]
+          ) * 100
+
+      - record: toeic:sla_compliance_24h
+        expr: |
+          avg_over_time(
+            (
+              histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="toeic-app"}[5m])) < 2
+            )[24h:1h]
+          ) * 100
+
+      # Error rate trends
+      - record: toeic:error_rate_5m
+        expr: |
+          rate(http_requests_total{job="toeic-app", status_code!~"2.."}[5m]) / 
+          rate(http_requests_total{job="toeic-app"}[5m]) * 100
+
+      - record: toeic:error_rate_1h
+        expr: |
+          avg_over_time(toeic:error_rate_5m[1h])
+
+      # Business metrics trends
+      - record: toeic:user_engagement_score
+        expr: |
+          (
+            rate(business_operations_total{job="toeic-app", operation="exam_start"}[1h]) * 0.3 +
+            rate(exams_completed_total{job="toeic-app", status="completed"}[1h]) * 0.5 +
+            rate(audio_uploads_total{job="toeic-app", status="success"}[1h]) * 0.2
+          ) * 100
+
+      - record: toeic:conversion_rate
+        expr: |
+          rate(exams_completed_total{job="toeic-app", status="completed"}[1h]) /
+          rate(business_operations_total{job="toeic-app", operation="exam_start"}[1h]) * 100
+
+      # Performance baselines
+      - record: toeic:response_time_baseline_1h
+        expr: |
+          histogram_quantile(0.95, avg_over_time(rate(http_request_duration_seconds_bucket{job="toeic-app"}[5m])[1h:5m]))
+
+      - record: toeic:response_time_baseline_24h
+        expr: |
+          histogram_quantile(0.95, avg_over_time(rate(http_request_duration_seconds_bucket{job="toeic-app"}[5m])[24h:1h]))
+
+      # Cache efficiency trends
+      - record: toeic:cache_hit_rate_1h
+        expr: |
+          avg_over_time(
+            (
+              rate(cache_hits_total{job="toeic-app"}[5m]) /
+              (rate(cache_hits_total{job="toeic-app"}[5m]) + rate(cache_misses_total{job="toeic-app"}[5m]))
+            )[1h:5m]
+          ) * 100
+
+      # Database performance trends
+      - record: toeic:db_query_latency_p95_1h
+        expr: |
+          histogram_quantile(0.95, avg_over_time(rate(db_query_duration_seconds_bucket{job="toeic-app"}[5m])[1h:5m]))
+
+      - record: toeic:db_connection_utilization
+        expr: |
+          db_connections{job="toeic-app", state="open"} /
+          db_connections{job="toeic-app", state="max_open"} * 100
+
+      # Resource utilization trends
+      - record: toeic:memory_utilization_trend
+        expr: |
+          avg_over_time(memory_usage_bytes{job="toeic-app", type="heap"}[1h]) / 1024 / 1024
+
+      - record: toeic:goroutine_trend
+        expr: |
+          avg_over_time(goroutines_count{job="toeic-app"}[1h])
+
+  - name: toeic-capacity-planning
+    interval: 5m
+    rules:
+      # Capacity predictions
+      - record: toeic:predicted_memory_usage_1h
+        expr: |
+          predict_linear(memory_usage_bytes{job="toeic-app", type="heap"}[2h], 3600)
+
+      - record: toeic:predicted_request_rate_1h
+        expr: |
+          predict_linear(rate(http_requests_total{job="toeic-app"}[5m])[2h], 3600)
+
+      - record: toeic:predicted_db_connections_1h
+        expr: |
+          predict_linear(db_connections{job="toeic-app", state="open"}[2h], 3600)
+
+      # Resource efficiency scores
+      - record: toeic:cpu_efficiency_score
+        expr: |
+          (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))) * 100
+
+      - record: toeic:memory_efficiency_score
+        expr: |
+          (
+            node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes
+          ) / node_memory_MemTotal_bytes * 100
+
+  - name: toeic-anomaly-detection
+    interval: 1m
+    rules:
+      # Anomaly detection using z-score
+      - record: toeic:response_time_zscore
+        expr: |
+          (
+            histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="toeic-app"}[5m])) -
+            avg_over_time(histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="toeic-app"}[5m]))[1h:1m])
+          ) / 
+          stddev_over_time(histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="toeic-app"}[5m]))[1h:1m])
+
+      - record: toeic:error_rate_zscore
+        expr: |
+          (
+            toeic:error_rate_5m -
+            avg_over_time(toeic:error_rate_5m[1h])
+          ) /
+          stddev_over_time(toeic:error_rate_5m[1h])
+
+      - record: toeic:memory_usage_zscore
+        expr: |
+          (
+            memory_usage_bytes{job="toeic-app", type="heap"} -
+            avg_over_time(memory_usage_bytes{job="toeic-app", type="heap"}[1h])
+          ) /
+          stddev_over_time(memory_usage_bytes{job="toeic-app", type="heap"}[1h])
+
+  - name: toeic-business-intelligence
+    interval: 5m
+    rules:
+      # Revenue metrics
+      - record: toeic:revenue_per_hour
+        expr: |
+          increase(business_operations_total{job="toeic-app", operation="payment", status="success"}[1h])
+
+      - record: toeic:daily_active_users
+        expr: |
+          increase(user_registrations_total{job="toeic-app"}[24h]) +
+          active_users{job="toeic-app", time_window="24h"}
+
+      # Customer satisfaction proxy
+      - record: toeic:customer_satisfaction_score
+        expr: |
+          (
+            (100 - toeic:error_rate_1h) * 0.4 +
+            (min(toeic:response_time_baseline_1h * 1000, 100)) * 0.3 +
+            toeic:cache_hit_rate_1h * 0.3
+          )
+
+      # Feature adoption rates
+      - record: toeic:exam_completion_rate
+        expr: |
+          rate(exams_completed_total{job="toeic-app", status="completed"}[1h]) /
+          rate(business_operations_total{job="toeic-app", operation="exam_start"}[1h]) * 100
+
+      - record: toeic:audio_upload_success_rate
+        expr: |
+          rate(audio_uploads_total{job="toeic-app", status="success"}[1h]) /
+          rate(audio_uploads_total{job="toeic-app"}[1h]) * 100

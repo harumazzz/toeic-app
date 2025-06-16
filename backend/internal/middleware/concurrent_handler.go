@@ -261,10 +261,21 @@ func (crh *ConcurrentRequestHandler) Middleware() gin.HandlerFunc {
 		// Update statistics
 		duration := time.Since(start)
 		crh.updateRequestStats(duration, c.Writer.Status() >= 400)
-
 		// Check for slow requests
 		if duration > crh.config.SlowRequestThreshold {
-			logger.Warn("Slow request detected: %s %s took %v", c.Request.Method, c.Request.URL.Path, duration)
+			fields := logger.Fields{
+				"component":    "concurrent_handler",
+				"method":       c.Request.Method,
+				"path":         c.Request.URL.Path,
+				"duration_ms":  duration.Milliseconds(),
+				"duration":     duration.String(),
+				"threshold_ms": crh.config.SlowRequestThreshold.Milliseconds(),
+				"slow_request": true,
+				"client_ip":    c.ClientIP(),
+				"user_agent":   c.GetHeader("User-Agent"),
+				"request_id":   c.GetHeader("X-Request-ID"),
+			}
+			logger.WarnWithFields(fields, "Slow request detected")
 		}
 
 		// Decrement active requests
@@ -410,14 +421,20 @@ func (crh *ConcurrentRequestHandler) isCircuitBreakerOpen() bool {
 // recordFailure records a request failure
 func (crh *ConcurrentRequestHandler) recordFailure() {
 	failures := atomic.AddInt32(&crh.circuitBreaker.failures, 1)
-
 	crh.circuitBreaker.mutex.Lock()
 	crh.circuitBreaker.lastFailure = time.Now()
 	crh.circuitBreaker.mutex.Unlock()
 
 	if failures >= int32(crh.circuitBreaker.maxFailures) {
 		atomic.StoreInt32(&crh.circuitBreaker.state, 1) // Open
-		logger.Warn("HTTP circuit breaker opened due to %d failures", failures)
+		fields := logger.Fields{
+			"component":    "circuit_breaker",
+			"failures":     failures,
+			"max_failures": crh.circuitBreaker.maxFailures,
+			"state":        "open",
+			"last_failure": time.Now().Format(time.RFC3339),
+		}
+		logger.WarnWithFields(fields, "HTTP circuit breaker opened due to failures")
 	}
 }
 
@@ -427,7 +444,12 @@ func (crh *ConcurrentRequestHandler) recordSuccess() {
 	if state == 2 { // Half-open
 		atomic.StoreInt32(&crh.circuitBreaker.state, 0) // Closed
 		atomic.StoreInt32(&crh.circuitBreaker.failures, 0)
-		logger.Info("HTTP circuit breaker closed after successful request")
+		fields := logger.Fields{
+			"component": "circuit_breaker",
+			"state":     "closed",
+			"event":     "recovery",
+		}
+		logger.InfoWithFields(fields, "HTTP circuit breaker closed after successful request")
 	}
 }
 

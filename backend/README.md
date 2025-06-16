@@ -43,6 +43,8 @@ This is a backend service for a TOEIC application using Go, PostgreSQL, and sqlc
 - Docker and Docker Compose
 - Go 1.21 or higher
 - Make (optional, for running commands from the Makefile)
+- **Kubernetes cluster** (for production deployment)
+- **kubectl** (for Kubernetes management)
 
 ## Setup
 
@@ -265,3 +267,47 @@ The system provides comprehensive cache metrics:
 - Latency statistics
 - Shard distribution (distributed cache)
 - Warming cycle performance
+
+## Deployment Options
+
+### 🚀 Kubernetes Deployment (Recommended for Production)
+
+For production environments, deploy to Kubernetes with full monitoring, auto-scaling, and high availability:
+
+```powershell
+# Windows PowerShell
+.\deploy-k8s.ps1 deploy
+
+# Or using bash (Linux/Mac/WSL)
+./deploy-k8s.sh deploy
+```
+
+**Features included:**
+- ✅ Auto-scaling (3-10 replicas)
+- ✅ Database persistence with backups
+- ✅ Redis caching layer
+- ✅ Prometheus + Grafana monitoring
+- ✅ Health checks and rolling updates
+- ✅ Automated daily backups
+- ✅ RBAC security
+
+**Access after deployment:**
+- Backend API: `http://<node-ip>:30080`
+- Prometheus: `http://<node-ip>:30090`
+- Grafana: `http://<node-ip>:30030` (admin/admin123)
+
+📖 **[Complete Kubernetes Setup Guide](k8s/README.md)**
+
+### 🐳 Docker Compose (Development)
+
+For local development and testing:
+
+```bash
+docker compose up -d
+```
+
+### 🏃 Local Development
+
+For development with live reload:
+
+## Setup

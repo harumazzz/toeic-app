@@ -15,6 +15,91 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/alerts": {
+            "get": {
+                "description": "Get all currently active monitoring alerts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Get active alerts",
+                "responses": {
+                    "200": {
+                        "description": "Active alerts retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/monitoring.Alert"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/alerts/history": {
+            "get": {
+                "description": "Get recent alert history",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Get alert history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "Maximum number of alerts to return",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Alert history retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/monitoring.Alert"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "description": "Authenticate a user and return a JWT token",
@@ -361,6 +446,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/admin/backups/cleanup": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Manually trigger cleanup of old backup files",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Manual cleanup of old backups",
+                "parameters": [
+                    {
+                        "description": "Cleanup parameters",
+                        "name": "cleanup",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/api.cleanupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Cleanup completed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to cleanup backups",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/backups/download/{filename}": {
             "get": {
                 "security": [
@@ -406,6 +535,190 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to serve backup file",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/backups/enhanced": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Creates a backup with advanced features like compression, encryption, and validation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Create enhanced database backup",
+                "parameters": [
+                    {
+                        "description": "Enhanced backup details",
+                        "name": "backup",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.enhancedBackupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Backup created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.enhancedBackupResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create backup",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/backups/enhanced/restore": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Restores database with advanced validation and safety measures",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Restore database from enhanced backup",
+                "parameters": [
+                    {
+                        "description": "Enhanced restore details",
+                        "name": "restore",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.enhancedRestoreRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Database restored successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.enhancedRestoreResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Backup file not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to restore database",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/backups/history": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get backup history and statistics",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Get backup history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "Limit number of results",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Backup history retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.backupHistoryResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get backup history",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -463,6 +776,187 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to restore database",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/backups/schedules": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all active backup schedules",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Get backup schedules",
+                "responses": {
+                    "200": {
+                        "description": "Backup schedules retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.scheduleInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get schedules",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Add a new backup schedule",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Add backup schedule",
+                "parameters": [
+                    {
+                        "description": "Schedule details",
+                        "name": "schedule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.addScheduleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Schedule added successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to add schedule",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/backups/schedules/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Remove a backup schedule",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Remove backup schedule",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Schedule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Schedule removed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to remove schedule",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/backups/status": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Returns backup system status, recent activity, and health metrics",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Get backup status and health",
+                "responses": {
+                    "200": {
+                        "description": "Backup status retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.backupStatusResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve backup status",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -585,6 +1079,73 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to delete backup file",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/backups/{filename}/validate": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Validates the integrity and structure of a backup file",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Validate backup file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Backup filename",
+                        "name": "filename",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Backup validation completed",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.backupValidationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid filename",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Backup file not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Validation failed",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -911,6 +1472,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/admin/check-permission": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Check if a user has a specific permission (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Check user permission",
+                "parameters": [
+                    {
+                        "description": "Permission check information",
+                        "name": "check",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CheckPermissionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Permission check completed",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.PermissionCheckResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/i18n/languages/{language}/export": {
             "get": {
                 "security": [
@@ -1115,6 +1745,395 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/admin/metrics/errors/categories": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get error counts grouped by category (CLIENT, SERVER, DATABASE, etc.)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Get error counts by category",
+                "responses": {
+                    "200": {
+                        "description": "Category counts retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "integer"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/metrics/errors/counts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get error counts grouped by error code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Get error counts by code",
+                "responses": {
+                    "200": {
+                        "description": "Error counts retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "integer"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/metrics/errors/rate": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get the current error rate per minute",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Get error rate",
+                "responses": {
+                    "200": {
+                        "description": "Error rate retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/metrics/errors/reset": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Reset all error metrics counters to zero",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Reset error metrics",
+                "responses": {
+                    "200": {
+                        "description": "Error metrics reset successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/metrics/errors/severity": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get error counts grouped by severity level (LOW, MEDIUM, HIGH, CRITICAL)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Get error counts by severity",
+                "responses": {
+                    "200": {
+                        "description": "Severity counts retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "integer"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/metrics/errors/status": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get error counts grouped by HTTP status code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Get error counts by HTTP status",
+                "responses": {
+                    "200": {
+                        "description": "HTTP status counts retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "integer"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/metrics/errors/summary": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get a comprehensive summary of error metrics including counts, rates, and top errors",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Get error metrics summary",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of top errors to include",
+                        "name": "top_errors",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Error metrics retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/errors.ErrorSummary"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/metrics/errors/top": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get the most frequently occurring errors",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Get top errors",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of top errors to return",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Top errors retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/performance/concurrency/reset": {
             "post": {
                 "security": [
@@ -1151,6 +2170,730 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/permissions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get a list of all permissions in the system (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "List permissions",
+                "responses": {
+                    "200": {
+                        "description": "Permissions retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.PermissionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/roles": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get a list of all roles in the system (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "List all roles",
+                "responses": {
+                    "200": {
+                        "description": "Roles retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.RoleResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new role in the system (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Create a new role",
+                "parameters": [
+                    {
+                        "description": "Role information",
+                        "name": "role",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Role created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.RoleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/roles/users/{roleName}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve all users assigned to a specific role (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Get users by role",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Role name",
+                        "name": "roleName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Users retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.UserRoleAssignmentResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid role name",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Role not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/roles/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve a role by its ID (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Get role by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.RoleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid role ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Role not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update an existing role (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Update a role",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated role information",
+                        "name": "role",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role updated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.RoleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Role not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete a role from the system (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Delete a role",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid role ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Role not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/roles/{role_id}/permissions/{permission_id}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Assign a permission to a role (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Assign permission to role",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "role_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Permission ID",
+                        "name": "permission_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Permission assigned successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Role or permission not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Remove a permission from a role (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Remove permission from role",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "role_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Permission ID",
+                        "name": "permission_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Permission removed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Role or permission not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/user-roles": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Assign a role to a user (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Assign role to user",
+                "parameters": [
+                    {
+                        "description": "Role assignment information",
+                        "name": "assignment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.AssignRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role assigned successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User or role not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/users/{user_id}/roles/{role_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Remove a role from a user (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Remove role from user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "role_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role removed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user or role ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -4613,6 +6356,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/performance/cache": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves cache hit ratio statistics for buffer and index caches",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "performance"
+                ],
+                "summary": "Get cache hit ratio",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/performance.CacheStats"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/performance/concurrency": {
             "get": {
                 "description": "Returns detailed concurrency metrics including active operations, worker pool status, and performance statistics",
@@ -4677,6 +6451,171 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/performance/dashboard": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Provides a comprehensive performance dashboard with key metrics and alerts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "performance"
+                ],
+                "summary": "Get performance dashboard",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/performance/indexes": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves detailed index usage statistics for performance analysis",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "performance"
+                ],
+                "summary": "Get index usage statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/performance.IndexUsageStats"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/performance/metrics": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves comprehensive database performance metrics including index usage, table stats, and cache hit ratios",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "performance"
+                ],
+                "summary": "Get database performance metrics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/performance.PerformanceMetrics"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/performance/optimize": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Executes automated database optimization procedures",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "performance"
+                ],
+                "summary": "Run database optimization",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/performance/recommendations": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves automated recommendations for database optimization",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "performance"
+                ],
+                "summary": "Get optimization recommendations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/performance.OptimizationRecommendation"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -4758,6 +6697,40 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to get performance stats",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/performance/tables": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves detailed table statistics including sequential scans and size information",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "performance"
+                ],
+                "summary": "Get table statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/performance.TableStats"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -7320,6 +9293,146 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/users/{user_id}/permissions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all permissions granted to a user through their roles",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Get user permissions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User permissions retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.PermissionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/{user_id}/roles": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all roles assigned to a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Get user roles",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User roles retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.RoleResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/words": {
             "get": {
                 "security": [
@@ -8471,6 +10584,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/monitoring/status": {
+            "get": {
+                "description": "Get the overall monitoring system status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Get monitoring status",
+                "responses": {
+                    "200": {
+                        "description": "Monitoring status retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/upload": {
             "post": {
                 "description": "Uploads an image file to Cloudinary and returns the URL.",
@@ -8616,6 +10764,27 @@ const docTemplate = `{
                 }
             }
         },
+        "api.AssignRoleRequest": {
+            "type": "object",
+            "required": [
+                "role_id",
+                "user_id"
+            ],
+            "properties": {
+                "expires_at": {
+                    "description": "Unix timestamp",
+                    "type": "integer"
+                },
+                "role_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "user_id": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
         "api.AttemptAnswersResponse": {
             "type": "object",
             "properties": {
@@ -8669,6 +10838,22 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                }
+            }
+        },
+        "api.CheckPermissionRequest": {
+            "type": "object",
+            "required": [
+                "permission",
+                "user_id"
+            ],
+            "properties": {
+                "permission": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },
@@ -8740,6 +10925,23 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                }
+            }
+        },
+        "api.CreateRoleRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 500
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2
                 }
             }
         },
@@ -9263,6 +11465,46 @@ const docTemplate = `{
                 }
             }
         },
+        "api.PermissionCheckResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "has_permission": {
+                    "type": "boolean"
+                },
+                "permission": {
+                    "type": "string"
+                },
+                "resource": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.PermissionResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "resource": {
+                    "type": "string"
+                }
+            }
+        },
         "api.QuestionResponse": {
             "type": "object",
             "properties": {
@@ -9312,6 +11554,32 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.RoleResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.PermissionResponse"
+                    }
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -9432,6 +11700,23 @@ const docTemplate = `{
                 }
             }
         },
+        "api.UpdateRoleRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 500
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2
+                }
+            }
+        },
         "api.UserAnswerResponse": {
             "type": "object",
             "properties": {
@@ -9515,6 +11800,29 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "api.UserRoleAssignmentResponse": {
+            "type": "object",
+            "properties": {
+                "assigned_at": {
+                    "type": "string"
+                },
+                "assigned_by": {
+                    "type": "integer"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "integer"
+                },
+                "role_name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -9715,6 +12023,28 @@ const docTemplate = `{
                 }
             }
         },
+        "api.addScheduleRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "id",
+                "schedule"
+            ],
+            "properties": {
+                "backup_type": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "schedule": {
+                    "type": "string"
+                }
+            }
+        },
         "api.addVersionRequest": {
             "type": "object",
             "required": [
@@ -9821,6 +12151,118 @@ const docTemplate = `{
                 }
             }
         },
+        "api.backupActivityItem": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "backup, restore, cleanup",
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "success, failure, warning",
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.backupConfigSummary": {
+            "type": "object",
+            "properties": {
+                "compress_backups": {
+                    "type": "boolean"
+                },
+                "encrypt_backups": {
+                    "type": "boolean"
+                },
+                "max_backup_count": {
+                    "type": "integer"
+                },
+                "retention_days": {
+                    "type": "integer"
+                },
+                "storage_type": {
+                    "type": "string"
+                },
+                "validate_backups": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "api.backupHealthStatus": {
+            "type": "object",
+            "properties": {
+                "issues": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "last_check": {
+                    "type": "string"
+                },
+                "overall": {
+                    "description": "healthy, warning, critical",
+                    "type": "string"
+                }
+            }
+        },
+        "api.backupHistoryItem": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "operation": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.backupHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.backupHistoryItem"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "api.backupListItem": {
             "type": "object",
             "properties": {
@@ -9872,6 +12314,85 @@ const docTemplate = `{
                 }
             }
         },
+        "api.backupStatusResponse": {
+            "type": "object",
+            "properties": {
+                "auto_backup": {
+                    "type": "boolean"
+                },
+                "configuration": {
+                    "$ref": "#/definitions/api.backupConfigSummary"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "health": {
+                    "$ref": "#/definitions/api.backupHealthStatus"
+                },
+                "last_backup": {
+                    "type": "string"
+                },
+                "next_backup": {
+                    "type": "string"
+                },
+                "oldest_backup": {
+                    "type": "string"
+                },
+                "recent_activity": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.backupActivityItem"
+                    }
+                },
+                "total_backups": {
+                    "type": "integer"
+                },
+                "total_size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.backupValidationResponse": {
+            "type": "object",
+            "properties": {
+                "checksum_match": {
+                    "type": "boolean"
+                },
+                "file_exists": {
+                    "type": "boolean"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "issues": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "last_modified": {
+                    "type": "string"
+                },
+                "readable_file": {
+                    "type": "boolean"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "valid": {
+                    "type": "boolean"
+                },
+                "valid_structure": {
+                    "type": "boolean"
+                },
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "api.batchGetExamplesRequest": {
             "type": "object",
             "required": [
@@ -9897,6 +12418,15 @@ const docTemplate = `{
                     "items": {
                         "type": "integer"
                     }
+                }
+            }
+        },
+        "api.cleanupRequest": {
+            "type": "object",
+            "properties": {
+                "max_age": {
+                    "description": "Duration string like \"720h\" for 30 days",
+                    "type": "string"
                 }
             }
         },
@@ -10280,6 +12810,94 @@ const docTemplate = `{
                 }
             }
         },
+        "api.enhancedBackupRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "type"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "manual, automatic, migration, etc.",
+                    "type": "string"
+                }
+            }
+        },
+        "api.enhancedBackupResponse": {
+            "type": "object",
+            "properties": {
+                "checksum": {
+                    "type": "string"
+                },
+                "compressed": {
+                    "type": "boolean"
+                },
+                "download_url": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "string"
+                },
+                "encrypted": {
+                    "type": "boolean"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "validated": {
+                    "type": "boolean"
+                },
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "api.enhancedRestoreRequest": {
+            "type": "object",
+            "required": [
+                "filename"
+            ],
+            "properties": {
+                "filename": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.enhancedRestoreResponse": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "type": "string"
+                },
+                "records_count": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "tables_count": {
+                    "type": "integer"
+                },
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "api.loginUserRequest": {
             "type": "object",
             "required": [
@@ -10410,6 +13028,29 @@ const docTemplate = `{
             ],
             "properties": {
                 "filename": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.scheduleInfo": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_run": {
+                    "type": "string"
+                },
+                "next_run": {
+                    "type": "string"
+                },
+                "schedule": {
                     "type": "string"
                 }
             }
@@ -10760,6 +13401,383 @@ const docTemplate = `{
                 "ExamStatusEnumCompleted",
                 "ExamStatusEnumAbandoned"
             ]
+        },
+        "errors.ErrorCategory": {
+            "type": "string",
+            "enum": [
+                "CLIENT",
+                "SERVER",
+                "DATABASE",
+                "EXTERNAL",
+                "VALIDATION",
+                "AUTH",
+                "BUSINESS"
+            ],
+            "x-enum-varnames": [
+                "CategoryClient",
+                "CategoryServer",
+                "CategoryDatabase",
+                "CategoryExternal",
+                "CategoryValidation",
+                "CategoryAuth",
+                "CategoryBusiness"
+            ]
+        },
+        "errors.ErrorCode": {
+            "type": "string",
+            "enum": [
+                "UNAUTHORIZED",
+                "FORBIDDEN",
+                "INVALID_CREDENTIALS",
+                "TOKEN_EXPIRED",
+                "TOKEN_INVALID",
+                "VALIDATION_FAILED",
+                "INVALID_INPUT",
+                "MISSING_FIELD",
+                "INVALID_FORMAT",
+                "NOT_FOUND",
+                "ALREADY_EXISTS",
+                "CONFLICT",
+                "DATABASE_ERROR",
+                "CONNECTION_FAILED",
+                "TRANSACTION_FAILED",
+                "CONSTRAINT_VIOLATION",
+                "EXTERNAL_SERVICE_ERROR",
+                "SERVICE_UNAVAILABLE",
+                "TIMEOUT",
+                "BUSINESS_LOGIC_ERROR",
+                "INSUFFICIENT_DATA",
+                "INVALID_OPERATION",
+                "INTERNAL_SERVER_ERROR",
+                "FILE_SYSTEM_ERROR",
+                "MEMORY_LIMIT_EXCEEDED",
+                "RATE_LIMITED"
+            ],
+            "x-enum-varnames": [
+                "ErrCodeUnauthorized",
+                "ErrCodeForbidden",
+                "ErrCodeInvalidCredentials",
+                "ErrCodeTokenExpired",
+                "ErrCodeTokenInvalid",
+                "ErrCodeValidationFailed",
+                "ErrCodeInvalidInput",
+                "ErrCodeMissingField",
+                "ErrCodeInvalidFormat",
+                "ErrCodeNotFound",
+                "ErrCodeAlreadyExists",
+                "ErrCodeConflict",
+                "ErrCodeDatabaseError",
+                "ErrCodeConnectionFailed",
+                "ErrCodeTransactionFailed",
+                "ErrCodeConstraintViolation",
+                "ErrCodeExternalService",
+                "ErrCodeServiceUnavailable",
+                "ErrCodeTimeout",
+                "ErrCodeBusinessLogic",
+                "ErrCodeInsufficientData",
+                "ErrCodeInvalidOperation",
+                "ErrCodeInternalServer",
+                "ErrCodeFileSystem",
+                "ErrCodeMemoryLimit",
+                "ErrCodeRateLimited"
+            ]
+        },
+        "errors.ErrorSeverity": {
+            "type": "string",
+            "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "CRITICAL"
+            ],
+            "x-enum-varnames": [
+                "SeverityLow",
+                "SeverityMedium",
+                "SeverityHigh",
+                "SeverityCritical"
+            ]
+        },
+        "errors.ErrorSummary": {
+            "type": "object",
+            "properties": {
+                "category_counts": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "error_rate_per_minute": {
+                    "type": "number"
+                },
+                "http_status_counts": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "severity_counts": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "since_reset": {
+                    "type": "string",
+                    "example": "5m30s"
+                },
+                "top_errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/errors.TopErrorStat"
+                    }
+                },
+                "total_errors": {
+                    "type": "integer"
+                }
+            }
+        },
+        "errors.TopErrorStat": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/errors.ErrorCategory"
+                },
+                "code": {
+                    "$ref": "#/definitions/errors.ErrorCode"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "percentage": {
+                    "type": "number"
+                },
+                "severity": {
+                    "$ref": "#/definitions/errors.ErrorSeverity"
+                }
+            }
+        },
+        "monitoring.Alert": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "Number of times this alert fired",
+                    "type": "integer"
+                },
+                "details": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_fired": {
+                    "type": "string"
+                },
+                "level": {
+                    "$ref": "#/definitions/monitoring.AlertLevel"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "resolved": {
+                    "type": "boolean"
+                },
+                "resolved_at": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "monitoring.AlertLevel": {
+            "type": "string",
+            "enum": [
+                "INFO",
+                "WARNING",
+                "CRITICAL"
+            ],
+            "x-enum-varnames": [
+                "AlertLevelInfo",
+                "AlertLevelWarning",
+                "AlertLevelCritical"
+            ]
+        },
+        "performance.CacheStats": {
+            "type": "object",
+            "properties": {
+                "buffer_cache_hit_ratio": {
+                    "type": "number"
+                },
+                "index_cache_hit_ratio": {
+                    "type": "number"
+                }
+            }
+        },
+        "performance.DatabaseSizeStats": {
+            "type": "object",
+            "properties": {
+                "index_ratio": {
+                    "type": "number"
+                },
+                "index_size": {
+                    "type": "string"
+                },
+                "table_size": {
+                    "type": "string"
+                },
+                "total_size": {
+                    "type": "string"
+                }
+            }
+        },
+        "performance.IndexUsageStats": {
+            "type": "object",
+            "properties": {
+                "index_name": {
+                    "type": "string"
+                },
+                "index_size": {
+                    "type": "string"
+                },
+                "scans": {
+                    "type": "integer"
+                },
+                "schema_name": {
+                    "type": "string"
+                },
+                "table_name": {
+                    "type": "string"
+                },
+                "tuples_fetch": {
+                    "type": "integer"
+                },
+                "tuples_read": {
+                    "type": "integer"
+                },
+                "usage_level": {
+                    "type": "string"
+                }
+            }
+        },
+        "performance.OptimizationRecommendation": {
+            "type": "object",
+            "properties": {
+                "column_names": {
+                    "type": "string"
+                },
+                "estimated_benefit": {
+                    "type": "string"
+                },
+                "rationale": {
+                    "type": "string"
+                },
+                "sql_command": {
+                    "type": "string"
+                },
+                "table_name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "performance.PerformanceMetrics": {
+            "type": "object",
+            "properties": {
+                "cache_hit_ratio": {
+                    "$ref": "#/definitions/performance.CacheStats"
+                },
+                "database_size": {
+                    "$ref": "#/definitions/performance.DatabaseSizeStats"
+                },
+                "index_usage": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/performance.IndexUsageStats"
+                    }
+                },
+                "query_performance": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/performance.QueryPerformanceStats"
+                    }
+                },
+                "table_stats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/performance.TableStats"
+                    }
+                }
+            }
+        },
+        "performance.QueryPerformanceStats": {
+            "type": "object",
+            "properties": {
+                "calls": {
+                    "type": "integer"
+                },
+                "hit_percent": {
+                    "type": "number"
+                },
+                "mean_time": {
+                    "type": "number"
+                },
+                "query": {
+                    "type": "string"
+                },
+                "rows": {
+                    "type": "integer"
+                },
+                "total_time": {
+                    "type": "number"
+                }
+            }
+        },
+        "performance.TableStats": {
+            "type": "object",
+            "properties": {
+                "deletes": {
+                    "type": "integer"
+                },
+                "idx_tuples_fetch": {
+                    "type": "integer"
+                },
+                "index_scans": {
+                    "type": "integer"
+                },
+                "inserts": {
+                    "type": "integer"
+                },
+                "schema_name": {
+                    "type": "string"
+                },
+                "seq_scan_percentage": {
+                    "type": "number"
+                },
+                "seq_tuples_read": {
+                    "type": "integer"
+                },
+                "sequential_scans": {
+                    "type": "integer"
+                },
+                "table_name": {
+                    "type": "string"
+                },
+                "total_size": {
+                    "type": "string"
+                },
+                "updates": {
+                    "type": "integer"
+                }
+            }
         },
         "upgrade.AppVersion": {
             "type": "object",
