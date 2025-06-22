@@ -139,13 +139,21 @@ func (c *CacheHealthChecker) CheckHealth(ctx context.Context) *ComponentHealth {
 		LastChecked: start,
 		Details:     make(map[string]interface{}),
 	}
-
 	if c.cache == nil {
 		health.Status = HealthStatusDown
 		health.Message = "Cache is not initialized"
 		health.ResponseTime = time.Since(start)
 		return health
 	}
+
+	// Additional safety check for nil pointer in interface
+	defer func() {
+		if r := recover(); r != nil {
+			health.Status = HealthStatusDown
+			health.Message = fmt.Sprintf("Cache operation panicked: %v", r)
+			health.ResponseTime = time.Since(start)
+		}
+	}()
 	// Test cache with a simple operation
 	testKey := "health_check_test"
 	testValue := []byte("test_value")

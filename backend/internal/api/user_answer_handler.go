@@ -50,6 +50,35 @@ type AttemptScoreResponse struct {
 	CalculatedScore float64 `json:"calculated_score"`
 }
 
+// BulkUserAnswerRequest defines the structure for bulk submitting user answers
+type BulkUserAnswerRequest struct {
+	AttemptID int32                  `json:"attempt_id" binding:"required,min=1"`
+	Answers   []UserAnswerSubmission `json:"answers" binding:"required,min=1"`
+}
+
+// UserAnswerSubmission defines individual answer submission in bulk request
+type UserAnswerSubmission struct {
+	QuestionID     int32  `json:"question_id" binding:"required,min=1"`
+	SelectedAnswer string `json:"selected_answer" binding:"required"`
+}
+
+// BulkUserAnswerResponse provides response for bulk submission
+type BulkUserAnswerResponse struct {
+	AttemptID      int32                    `json:"attempt_id"`
+	TotalSubmitted int32                    `json:"total_submitted"`
+	TotalCorrect   int32                    `json:"total_correct"`
+	Answers        []UserAnswerResponse     `json:"answers"`
+	Score          *AttemptScoreResponse    `json:"score,omitempty"`
+	FailedAnswers  []FailedAnswerSubmission `json:"failed_answers,omitempty"`
+}
+
+// FailedAnswerSubmission represents answers that failed to submit
+type FailedAnswerSubmission struct {
+	QuestionID     int32  `json:"question_id"`
+	SelectedAnswer string `json:"selected_answer"`
+	Error          string `json:"error"`
+}
+
 // NewUserAnswerResponse creates a response from db.UserAnswer model
 func NewUserAnswerResponse(userAnswer db.UserAnswer) UserAnswerResponse {
 	response := UserAnswerResponse{
@@ -104,6 +133,11 @@ type createUserAnswerRequest struct {
 // getUserAnswerRequest defines the structure for getting a user answer by ID
 type getUserAnswerRequest struct {
 	UserAnswerID int32 `uri:"id" binding:"required,min=1"`
+}
+
+// updateUserAnswerRequest defines the structure for updating a user answer
+type updateUserAnswerRequest struct {
+	SelectedAnswer string `json:"selected_answer" binding:"required"`
 }
 
 // @Summary     Submit a user answer
@@ -169,6 +203,7 @@ func (server *Server) createUserAnswer(ctx *gin.Context) {
 
 	// Get question to check correct answer
 	question, err := server.store.GetQuestion(ctx, req.QuestionID)
+	// fmt.Println("question:", question)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ErrorResponse(ctx, http.StatusNotFound, "question_not_found", err)
@@ -297,7 +332,7 @@ func (server *Server) getUserAnswer(ctx *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       id path int true "User Answer ID"
-// @Param       answer body map[string]string true "Updated answer data"
+// @Param       answer body updateUserAnswerRequest true "Updated answer data"
 // @Success     200 {object} Response{data=UserAnswerResponse} "Answer updated successfully"
 // @Failure     400 {object} Response "Invalid request"
 // @Failure     401 {object} Response "Unauthorized"
@@ -312,9 +347,7 @@ func (server *Server) updateUserAnswer(ctx *gin.Context) {
 		return
 	}
 
-	var updateReq struct {
-		SelectedAnswer string `json:"selected_answer" binding:"required"`
-	}
+	var updateReq updateUserAnswerRequest
 	if err := ctx.ShouldBindJSON(&updateReq); err != nil {
 		ErrorResponse(ctx, http.StatusBadRequest, "invalid_request_body", err)
 		return
@@ -670,4 +703,157 @@ func (server *Server) deleteUserAnswer(ctx *gin.Context) {
 
 	logger.Info("User answer %d deleted by user %d", req.UserAnswerID, authPayload.ID)
 	SuccessResponse(ctx, http.StatusOK, "user_answer_deleted_successfully", nil)
+}
+
+// @Summary     Submit user answers in bulk
+// @Description Submit multiple answers for an exam attempt
+// @Tags        user-answers
+// @Accept      json
+// @Produce     json
+// @Param       answers body BulkUserAnswerRequest true "Bulk user answers to submit"
+// @Success     201 {object} Response{data=BulkUserAnswerResponse} "Answers submitted successfully"
+// @Failure     400 {object} Response "Invalid request body"
+// @Failure     401 {object} Response "Unauthorized"
+// @Failure     404 {object} Response "Attempt not found"
+// @Failure     500 {object} Response "Failed to submit answers"
+// @Security    ApiKeyAuth
+// @Router      /api/v1/user-answers/bulk [post]
+func (server *Server) submitBulkUserAnswers(ctx *gin.Context) {
+	var req BulkUserAnswerRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ErrorResponse(ctx, http.StatusBadRequest, "invalid_request_body", err)
+		return
+	}
+
+	// Get user from authorization
+	payload, exists := ctx.Get(AuthorizationPayloadKey)
+	if !exists {
+		ErrorResponse(ctx, http.StatusUnauthorized, "authorization_payload_not_found", nil)
+		return
+	}
+
+	authPayload, ok := payload.(*token.Payload)
+	if !ok {
+		ErrorResponse(ctx, http.StatusUnauthorized, "invalid_authorization_payload", nil)
+		return
+	}
+
+	// Verify the attempt belongs to the user
+	_, err := server.store.GetExamAttemptByUser(ctx, db.GetExamAttemptByUserParams{
+		AttemptID: req.AttemptID,
+		UserID:    authPayload.ID,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ErrorResponse(ctx, http.StatusNotFound, "exam_attempt_not_found", err)
+			return
+		}
+		ErrorResponse(ctx, http.StatusInternalServerError, "failed_to_verify_exam_attempt", err)
+		return
+	}
+
+	// Prepare response
+	bulkResponse := BulkUserAnswerResponse{
+		AttemptID:      req.AttemptID,
+		TotalSubmitted: int32(len(req.Answers)),
+		Answers:        make([]UserAnswerResponse, 0, len(req.Answers)),
+		FailedAnswers:  make([]FailedAnswerSubmission, 0),
+	}
+
+	// Process each answer submission
+	correctCount := int32(0)
+	for _, answer := range req.Answers {
+		// Check if answer already exists for this question
+		_, err := server.store.GetUserAnswerByAttemptAndQuestion(ctx, db.GetUserAnswerByAttemptAndQuestionParams{
+			AttemptID:  req.AttemptID,
+			QuestionID: answer.QuestionID,
+		})
+		if err == nil {
+			// Answer already exists, add to failed answers
+			bulkResponse.FailedAnswers = append(bulkResponse.FailedAnswers, FailedAnswerSubmission{
+				QuestionID:     answer.QuestionID,
+				SelectedAnswer: answer.SelectedAnswer,
+				Error:          "answer_already_exists",
+			})
+			continue
+		} else if err != sql.ErrNoRows {
+			bulkResponse.FailedAnswers = append(bulkResponse.FailedAnswers, FailedAnswerSubmission{
+				QuestionID:     answer.QuestionID,
+				SelectedAnswer: answer.SelectedAnswer,
+				Error:          "failed_to_check_existing_answer",
+			})
+			continue
+		}
+
+		// Get question to check correct answer
+		question, err := server.store.GetQuestion(ctx, answer.QuestionID)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				// Question not found, add to failed answers
+				bulkResponse.FailedAnswers = append(bulkResponse.FailedAnswers, FailedAnswerSubmission{
+					QuestionID:     answer.QuestionID,
+					SelectedAnswer: answer.SelectedAnswer,
+					Error:          "question_not_found",
+				})
+				continue
+			}
+			ErrorResponse(ctx, http.StatusInternalServerError, "failed_to_retrieve_question", err)
+			return
+		}
+
+		// Determine if answer is correct
+		isCorrect := answer.SelectedAnswer == question.TrueAnswer
+		if isCorrect {
+			correctCount++
+		}
+
+		// Create the user answer
+		arg := db.CreateUserAnswerParams{
+			AttemptID:      req.AttemptID,
+			QuestionID:     answer.QuestionID,
+			SelectedAnswer: answer.SelectedAnswer,
+			IsCorrect:      isCorrect,
+			AnswerTime:     sql.NullTime{Time: time.Now(), Valid: true},
+		}
+
+		userAnswer, err := server.store.CreateUserAnswer(ctx, arg)
+		if err != nil {
+			// Failed to create answer, add to failed answers
+			bulkResponse.FailedAnswers = append(bulkResponse.FailedAnswers, FailedAnswerSubmission{
+				QuestionID:     answer.QuestionID,
+				SelectedAnswer: answer.SelectedAnswer,
+				Error:          "failed_to_create_user_answer",
+			})
+			continue
+		}
+
+		// Add to successful responses
+		bulkResponse.Answers = append(bulkResponse.Answers, NewUserAnswerResponse(userAnswer))
+	}
+
+	// Update response with correct count
+	bulkResponse.TotalCorrect = correctCount
+	bulkResponse.TotalSubmitted = int32(len(bulkResponse.Answers))
+
+	// Calculate score for successfully submitted answers
+	score := float64(0)
+	if len(bulkResponse.Answers) > 0 {
+		score = float64(correctCount) / float64(len(bulkResponse.Answers)) * 100
+	}
+
+	bulkResponse.Score = &AttemptScoreResponse{
+		AttemptID:       req.AttemptID,
+		TotalQuestions:  int32(len(bulkResponse.Answers)),
+		CorrectAnswers:  correctCount,
+		CalculatedScore: score,
+	}
+
+	// Clear user cache if we have successful submissions
+	if len(bulkResponse.Answers) > 0 && server.serviceCache != nil {
+		go func() {
+			server.ClearUserCache(int64(authPayload.ID))
+		}()
+	}
+
+	SuccessResponse(ctx, http.StatusCreated, "user_answers_bulk_submitted_successfully", bulkResponse)
 }

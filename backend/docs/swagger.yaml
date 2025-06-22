@@ -67,6 +67,39 @@ definitions:
       total_questions:
         type: integer
     type: object
+  api.BulkUserAnswerRequest:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/api.UserAnswerSubmission'
+        minItems: 1
+        type: array
+      attempt_id:
+        minimum: 1
+        type: integer
+    required:
+    - answers
+    - attempt_id
+    type: object
+  api.BulkUserAnswerResponse:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/api.UserAnswerResponse'
+        type: array
+      attempt_id:
+        type: integer
+      failed_answers:
+        items:
+          $ref: '#/definitions/api.FailedAnswerSubmission'
+        type: array
+      score:
+        $ref: '#/definitions/api.AttemptScoreResponse'
+      total_correct:
+        type: integer
+      total_submitted:
+        type: integer
+    type: object
   api.CacheStats:
     properties:
       basic_stats:
@@ -257,6 +290,15 @@ definitions:
       meaning:
         type: string
       title:
+        type: string
+    type: object
+  api.FailedAnswerSubmission:
+    properties:
+      error:
+        type: string
+      question_id:
+        type: integer
+      selected_answer:
         type: string
     type: object
   api.GrammarContent:
@@ -668,6 +710,17 @@ definitions:
         type: string
       user_answer_id:
         type: integer
+    type: object
+  api.UserAnswerSubmission:
+    properties:
+      question_id:
+        minimum: 1
+        type: integer
+      selected_answer:
+        type: string
+    required:
+    - question_id
+    - selected_answer
     type: object
   api.UserAnswerWithQuestionResponse:
     properties:
@@ -1122,6 +1175,13 @@ definitions:
       max_age:
         description: Duration string like "720h" for 30 days
         type: string
+    type: object
+  api.completeExamAttemptRequest:
+    properties:
+      score:
+        type: string
+    required:
+    - score
     type: object
   api.createContentRequest:
     properties:
@@ -1679,6 +1739,13 @@ definitions:
         type: string
       timestamp:
         type: string
+    type: object
+  api.updateUserAnswerRequest:
+    properties:
+      selected_answer:
+        type: string
+    required:
+    - selected_answer
     type: object
   api.updateUserRequest:
     properties:
@@ -4625,14 +4692,12 @@ paths:
         name: id
         required: true
         type: integer
-      - description: Final score
+      - description: Complete exam attempt request
         in: body
-        name: score
+        name: request
         required: true
         schema:
-          additionalProperties:
-            type: string
-          type: object
+          $ref: '#/definitions/api.completeExamAttemptRequest'
       produces:
       - application/json
       responses:
@@ -7217,9 +7282,7 @@ paths:
         name: answer
         required: true
         schema:
-          additionalProperties:
-            type: string
-          type: object
+          $ref: '#/definitions/api.updateUserAnswerRequest'
       produces:
       - application/json
       responses:
@@ -7251,6 +7314,51 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update a user answer
+      tags:
+      - user-answers
+  /api/v1/user-answers/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Submit multiple answers for an exam attempt
+      parameters:
+      - description: Bulk user answers to submit
+        in: body
+        name: answers
+        required: true
+        schema:
+          $ref: '#/definitions/api.BulkUserAnswerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Answers submitted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.BulkUserAnswerResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Attempt not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to submit answers
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Submit user answers in bulk
       tags:
       - user-answers
   /api/v1/user-word-progress:

@@ -27,6 +27,9 @@ type Config struct {
 	RefreshTokenDuration int64         `mapstructure:"REFRESH_TOKEN_DURATION"`
 	CloudinaryURL        string        `mapstructure:"CLOUDINARY_URL"`
 
+	// Security configuration
+	DisableHTTPSRedirect bool `mapstructure:"DISABLE_HTTPS_REDIRECT"`
+
 	// Google AI configuration
 	GoogleAIAPIKey string `mapstructure:"GOOGLE_AI_API_KEY"`
 
@@ -154,6 +157,22 @@ func GetEnvAsInt(key string, defaultValue int64) int64 {
 	return value
 }
 
+// GetEnvAsBool gets an environment variable as bool or returns a default value
+func GetEnvAsBool(key string, defaultValue bool) bool {
+	valueStr := os.Getenv(key)
+	if valueStr == "" {
+		return defaultValue
+	}
+
+	value, err := strconv.ParseBool(valueStr)
+	if err != nil {
+		log.Printf("Warning: could not parse %s as bool: %v", key, err)
+		return defaultValue
+	}
+
+	return value
+}
+
 // DefaultConfig returns configuration from environment variables
 func DefaultConfig() Config {
 	// Load environment variables from .env file
@@ -189,6 +208,9 @@ func DefaultConfig() Config {
 	if cloudinaryURL == "" {
 		log.Fatal("CLOUDINARY_URL environment variable is required")
 	}
+
+	// Get security configuration
+	disableHTTPSRedirect := GetEnvAsBool("DISABLE_HTTPS_REDIRECT", false)
 
 	// Get Google AI configuration
 	googleAIAPIKey := GetEnv("GOOGLE_AI_API_KEY", "")
@@ -289,6 +311,9 @@ func DefaultConfig() Config {
 		AccessTokenDuration:  accessTokenDuration,
 		RefreshTokenDuration: refreshTokenDuration,
 		CloudinaryURL:        cloudinaryURL,
+
+		// Security configuration
+		DisableHTTPSRedirect: disableHTTPSRedirect,
 
 		// Google AI configuration
 		GoogleAIAPIKey: googleAIAPIKey,

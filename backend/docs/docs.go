@@ -4173,15 +4173,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Final score",
-                        "name": "score",
+                        "description": "Complete exam attempt request",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/api.completeExamAttemptRequest"
                         }
                     }
                 ],
@@ -8216,6 +8213,81 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/user-answers/bulk": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Submit multiple answers for an exam attempt",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-answers"
+                ],
+                "summary": "Submit user answers in bulk",
+                "parameters": [
+                    {
+                        "description": "Bulk user answers to submit",
+                        "name": "answers",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.BulkUserAnswerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Answers submitted successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.BulkUserAnswerResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Attempt not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to submit answers",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user-answers/{id}": {
             "get": {
                 "security": [
@@ -8319,10 +8391,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/api.updateUserAnswerRequest"
                         }
                     }
                 ],
@@ -10822,6 +10891,55 @@ const docTemplate = `{
                 }
             }
         },
+        "api.BulkUserAnswerRequest": {
+            "type": "object",
+            "required": [
+                "answers",
+                "attempt_id"
+            ],
+            "properties": {
+                "answers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/api.UserAnswerSubmission"
+                    }
+                },
+                "attempt_id": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "api.BulkUserAnswerResponse": {
+            "type": "object",
+            "properties": {
+                "answers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.UserAnswerResponse"
+                    }
+                },
+                "attempt_id": {
+                    "type": "integer"
+                },
+                "failed_answers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.FailedAnswerSubmission"
+                    }
+                },
+                "score": {
+                    "$ref": "#/definitions/api.AttemptScoreResponse"
+                },
+                "total_correct": {
+                    "type": "integer"
+                },
+                "total_submitted": {
+                    "type": "integer"
+                }
+            }
+        },
         "api.CacheStats": {
             "type": "object",
             "properties": {
@@ -11116,6 +11234,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.FailedAnswerSubmission": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "question_id": {
+                    "type": "integer"
+                },
+                "selected_answer": {
                     "type": "string"
                 }
             }
@@ -11740,6 +11872,22 @@ const docTemplate = `{
                 },
                 "user_answer_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "api.UserAnswerSubmission": {
+            "type": "object",
+            "required": [
+                "question_id",
+                "selected_answer"
+            ],
+            "properties": {
+                "question_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "selected_answer": {
+                    "type": "string"
                 }
             }
         },
@@ -12426,6 +12574,17 @@ const docTemplate = `{
             "properties": {
                 "max_age": {
                     "description": "Duration string like \"720h\" for 30 days",
+                    "type": "string"
+                }
+            }
+        },
+        "api.completeExamAttemptRequest": {
+            "type": "object",
+            "required": [
+                "score"
+            ],
+            "properties": {
+                "score": {
                     "type": "string"
                 }
             }
@@ -13250,6 +13409,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.updateUserAnswerRequest": {
+            "type": "object",
+            "required": [
+                "selected_answer"
+            ],
+            "properties": {
+                "selected_answer": {
                     "type": "string"
                 }
             }

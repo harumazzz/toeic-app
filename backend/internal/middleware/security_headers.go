@@ -17,9 +17,13 @@ func SecurityHeaders(cfg config.Config) gin.HandlerFunc {
 		if c.Request.TLS != nil || c.GetHeader("X-Forwarded-Proto") == "https" {
 			c.Header("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
 		}
-
-		// Content Security Policy (CSP)
-		csp := buildContentSecurityPolicy(cfg)
+		// Content Security Policy (CSP) - relaxed for Swagger UI
+		var csp string
+		if strings.HasPrefix(c.Request.URL.Path, "/swagger") {
+			csp = buildSwaggerCSP(cfg)
+		} else {
+			csp = buildContentSecurityPolicy(cfg)
+		}
 		c.Header("Content-Security-Policy", csp)
 
 		// Additional security headers
@@ -61,10 +65,37 @@ func buildContentSecurityPolicy(cfg config.Config) string {
 		"base-uri 'none'",
 		"form-action 'none'",
 	}
+	// Allow specific origins for development
+	if strings.Contains(cfg.CORSAllowedOrigins, "localhost") || cfg.DisableHTTPSRedirect {
+		// Development: don't upgrade insecure requests
+		// csp = append(csp, "upgrade-insecure-requests") - commented out for dev
+	} else {
+		// Production: require HTTPS
+		csp = append(csp, "upgrade-insecure-requests", "block-all-mixed-content")
+	}
+
+	return strings.Join(csp, "; ")
+}
+
+// buildSwaggerCSP creates a CSP header suitable for Swagger UI
+func buildSwaggerCSP(cfg config.Config) string {
+	// More permissive CSP for Swagger UI to function properly
+	csp := []string{
+		"default-src 'self'",
+		"script-src 'self' 'unsafe-inline'",
+		"style-src 'self' 'unsafe-inline'",
+		"img-src 'self' data:",
+		"font-src 'self'",
+		"connect-src 'self'",
+		"frame-ancestors 'none'",
+		"base-uri 'self'",
+		"form-action 'self'",
+	}
 
 	// Allow specific origins for development
-	if strings.Contains(cfg.CORSAllowedOrigins, "localhost") {
-		csp = append(csp, "upgrade-insecure-requests")
+	if strings.Contains(cfg.CORSAllowedOrigins, "localhost") || cfg.DisableHTTPSRedirect {
+		// Development: don't upgrade insecure requests
+		// csp = append(csp, "upgrade-insecure-requests") - commented out for dev
 	} else {
 		// Production: require HTTPS
 		csp = append(csp, "upgrade-insecure-requests", "block-all-mixed-content")
@@ -115,8 +146,36 @@ func TLSConfig() *tls.Config {
 // HTTPSRedirect middleware redirects HTTP to HTTPS in production
 func HTTPSRedirect(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Skip redirect in development
-		if strings.Contains(cfg.ServerAddress, "127.0.0.1") || strings.Contains(cfg.ServerAddress, "localhost") {
+		// Log the configuration for debugging
+		logger.InfoWithFields(logger.Fields{
+			"component":              "security",
+			"action":                 "https_redirect_check",
+			"server_address":         cfg.ServerAddress,
+			"disable_https_redirect": cfg.DisableHTTPSRedirect,
+		}, "Checking HTTPS redirect configuration")
+
+		// Skip redirect if explicitly disabled
+		if cfg.DisableHTTPSRedirect {
+			logger.Info("HTTPS redirect disabled by configuration")
+			c.Next()
+			return
+		}
+
+		// Skip redirect in development environments
+		isDevelopment := strings.Contains(cfg.ServerAddress, "127.0.0.1") ||
+			strings.Contains(cfg.ServerAddress, "localhost") ||
+			strings.HasPrefix(cfg.ServerAddress, "192.168.") ||
+			strings.HasPrefix(cfg.ServerAddress, "10.") ||
+			strings.HasPrefix(cfg.ServerAddress, "172.16.") ||
+			strings.Contains(cfg.ServerAddress, ":8000") || // Common dev port
+			strings.Contains(cfg.ServerAddress, ":3000") // Common dev port
+
+		if isDevelopment {
+			logger.InfoWithFields(logger.Fields{
+				"component": "security",
+				"action":    "https_redirect_skip",
+				"reason":    "development_environment",
+			}, "Skipping HTTPS redirect for development")
 			c.Next()
 			return
 		}

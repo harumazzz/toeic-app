@@ -98,6 +98,11 @@ type listLeaderboardRequest struct {
 	Offset int32 `form:"offset" binding:"min=0"`
 }
 
+// completeExamAttemptRequest defines the structure for completing an exam attempt
+type completeExamAttemptRequest struct {
+	Score string `json:"score" binding:"required"`
+}
+
 // @Summary     Start a new exam attempt
 // @Description Create a new exam attempt for the authenticated user
 // @Tags        exam-attempts
@@ -416,7 +421,7 @@ func (server *Server) updateExamAttempt(ctx *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       id path int true "Exam Attempt ID"
-// @Param       score body map[string]string true "Final score"
+// @Param       request body completeExamAttemptRequest true "Complete exam attempt request"
 // @Success     200 {object} Response{data=ExamAttemptResponse} "Exam attempt completed successfully"
 // @Failure     400 {object} Response "Invalid request"
 // @Failure     401 {object} Response "Unauthorized"
@@ -431,9 +436,7 @@ func (server *Server) completeExamAttempt(ctx *gin.Context) {
 		return
 	}
 
-	var scoreReq struct {
-		Score string `json:"score" binding:"required"`
-	}
+	var scoreReq completeExamAttemptRequest
 	if err := ctx.ShouldBindJSON(&scoreReq); err != nil {
 		ErrorResponse(ctx, http.StatusBadRequest, "invalid_request_body", err)
 		return

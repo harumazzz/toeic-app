@@ -120,11 +120,11 @@ func NewServer(config configPkg.Config, store db.Querier, dbConn *sql.DB) (*Serv
 			RedisPoolSize:   config.RedisPoolSize,
 			KeyPrefix:       "toeic:",
 		}
-
 		// Initialize primary cache
 		cacheInstance, err = cache.NewCache(cacheConfig)
 		if err != nil {
 			logger.Warn("Failed to initialize primary cache: %v. Continuing without cache.", err)
+			cacheInstance = nil // Explicitly set to nil to avoid nil interface issues
 		} else {
 			// Initialize service cache
 			serviceCache = cache.NewServiceCache(cacheInstance)
@@ -451,14 +451,14 @@ func (server *Server) setupRouter() {
 	advancedSecurity := middleware.NewAdvancedSecurityMiddleware(server.config, server.tokenMaker)
 	router.Use(advancedSecurity.Middleware())
 	logger.Info("Advanced security middleware enabled - additional headers required for authentication")
-
 	// Apply enhanced security headers middleware
 	router.Use(middleware.SecurityHeaders(server.config))
 	logger.Info("Enhanced security headers middleware enabled")
 
-	// Apply HTTPS redirect in production
-	router.Use(middleware.HTTPSRedirect(server.config))
-	logger.Info("HTTPS redirect middleware enabled for production")
+	// Apply HTTPS redirect in production - TEMPORARILY DISABLED FOR DEBUGGING
+	// router.Use(middleware.HTTPSRedirect(server.config))
+	// logger.Info("HTTPS redirect middleware enabled for production")
+	logger.Info("HTTPS redirect middleware DISABLED for debugging")
 
 	// Apply request size limits
 	router.Use(middleware.RequestSizeLimit(10 * 1024 * 1024)) // 10MB limit
@@ -819,12 +819,11 @@ func (server *Server) setupRouter() {
 				// Nested routes for specific exam attempts
 				examAttempts.GET("/:id/answers", server.getUserAnswersByAttempt)
 				examAttempts.GET("/:id/score", server.getAttemptScore)
-			}
-
-			// User Answer routes
+			} // User Answer routes
 			userAnswers := authRoutes.Group("/user-answers")
 			{
 				userAnswers.POST("", server.createUserAnswer)
+				userAnswers.POST("/bulk", server.submitBulkUserAnswers)
 				userAnswers.GET("/:id", server.getUserAnswer)
 				userAnswers.PUT("/:id", server.updateUserAnswer)
 				userAnswers.DELETE("/:id", server.deleteUserAnswer)

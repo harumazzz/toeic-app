@@ -82,7 +82,11 @@ func NewCache(config CacheConfig) (Cache, error) {
 	case TypeMemory:
 		return NewMemoryCache(config), nil
 	case TypeRedis:
-		return NewRedisCache(config)
+		cache, err := NewRedisCache(config)
+		if err != nil {
+			return nil, err
+		}
+		return cache, nil
 	default:
 		return NewMemoryCache(config), nil
 	}
