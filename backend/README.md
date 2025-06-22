@@ -16,6 +16,13 @@ This is a backend service for a TOEIC application using Go, PostgreSQL, and sqlc
 - **Concurrency Management**: Advanced worker pools for DB, HTTP, and cache operations
 - **Background Processing**: Async task processing with configurable worker pools
 - **Rate Limiting**: DDoS protection with burst support and per-user limits
+- **HTTP/2 Support**: Full HTTP/2 implementation with TLS (h2) and cleartext (h2c) support
+
+### Network & Protocol Support
+- **HTTP/2**: Multiplexing, header compression, and improved performance
+- **TLS 1.2+**: Secure connections with modern encryption standards
+- **ALPN**: Automatic protocol negotiation for optimal client compatibility
+- **Graceful Degradation**: Automatic fallback to HTTP/1.1 for legacy clients
 
 ### Monitoring & Observability
 - **Performance Metrics**: Real-time monitoring of cache hit rates, latency, and throughput

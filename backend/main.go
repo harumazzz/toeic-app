@@ -154,8 +154,7 @@ func main() {
 	}
 
 	// Set release mode
-	server.SetReleaseMode()
-	// Close cache if enabled
+	server.SetReleaseMode() // Close cache if enabled
 	cache := server.GetCache()
 	if cache != nil {
 		logger.Info("Closing cache connection...")

@@ -97,6 +97,9 @@ type Config struct {
 	TLSEnabled             bool   `mapstructure:"TLS_ENABLED"`
 	TLSCertFile            string `mapstructure:"TLS_CERT_FILE"`
 	TLSKeyFile             string `mapstructure:"TLS_KEY_FILE"`
+	HTTP2Enabled           bool   `mapstructure:"HTTP2_ENABLED"`
+	HTTP2MaxStreams        uint32 `mapstructure:"HTTP2_MAX_STREAMS"`
+	HTTP2IdleTimeout       int    `mapstructure:"HTTP2_IDLE_TIMEOUT"`
 	SecurityHeadersEnabled bool   `mapstructure:"SECURITY_HEADERS_ENABLED"`
 	InputValidationEnabled bool   `mapstructure:"INPUT_VALIDATION_ENABLED"`
 
@@ -276,6 +279,9 @@ func DefaultConfig() Config {
 	tlsEnabled := GetEnv("TLS_ENABLED", "false") == "true"
 	tlsCertFile := GetEnv("TLS_CERT_FILE", "")
 	tlsKeyFile := GetEnv("TLS_KEY_FILE", "")
+	http2Enabled := GetEnv("HTTP2_ENABLED", "false") == "true"
+	http2MaxStreams := uint32(GetEnvAsInt("HTTP2_MAX_STREAMS", 250))
+	http2IdleTimeout := GetEnvAsInt("HTTP2_IDLE_TIMEOUT", 120)
 	securityHeadersEnabled := GetEnv("SECURITY_HEADERS_ENABLED", "true") == "true"
 	inputValidationEnabled := GetEnv("INPUT_VALIDATION_ENABLED", "true") == "true"
 
@@ -378,6 +384,9 @@ func DefaultConfig() Config {
 		TLSEnabled:             tlsEnabled,
 		TLSCertFile:            tlsCertFile,
 		TLSKeyFile:             tlsKeyFile,
+		HTTP2Enabled:           http2Enabled,
+		HTTP2MaxStreams:        http2MaxStreams,
+		HTTP2IdleTimeout:       int(http2IdleTimeout),
 		SecurityHeadersEnabled: securityHeadersEnabled,
 		InputValidationEnabled: inputValidationEnabled,
 

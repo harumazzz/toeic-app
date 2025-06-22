@@ -644,3 +644,48 @@ func (bm *BackupManager) cleanupOldBackups() {
 
 	logger.Info("Backup cleanup completed: removed %d old backups", deletedCount)
 }
+
+// CleanupOldBackups is a public method to clean up old backups with a specific max age
+func (bm *BackupManager) CleanupOldBackups(maxAge time.Duration) error {
+	logger.Info("Starting manual backup cleanup process (max age: %v)", maxAge)
+
+	files, err := os.ReadDir(bm.config.BackupDir)
+	if err != nil {
+		return fmt.Errorf("failed to read backup directory: %w", err)
+	}
+
+	now := time.Now()
+	deletedCount := 0
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+
+		// Check if it's a backup file
+		if !bm.isValidBackupFilename(file.Name()) {
+			continue
+		}
+
+		fileInfo, err := file.Info()
+		if err != nil {
+			logger.Warn("Failed to get file info for %s: %v", file.Name(), err)
+			continue
+		}
+
+		// Check age
+		if now.Sub(fileInfo.ModTime()) > maxAge {
+			filePath := filepath.Join(bm.config.BackupDir, file.Name())
+			if err := os.Remove(filePath); err != nil {
+				logger.Warn("Failed to delete old backup %s: %v", file.Name(), err)
+				continue
+			}
+
+			logger.Debug("Deleted old backup: %s (age: %v)", file.Name(), now.Sub(fileInfo.ModTime()))
+			deletedCount++
+		}
+	}
+
+	logger.Info("Manual backup cleanup completed: removed %d old backups", deletedCount)
+	return nil
+}

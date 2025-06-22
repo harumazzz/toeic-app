@@ -160,7 +160,7 @@ func (c *BackupConfig) Validate() error {
 	}
 
 	if c.StorageType == "azure" && c.AzureConfig == nil {
-		return fmt.Errorf("Azure configuration required when storage type is azure")
+		return fmt.Errorf("azure configuration required when storage type is azure")
 	}
 
 	if c.EncryptBackups && c.EncryptionKey == "" {
