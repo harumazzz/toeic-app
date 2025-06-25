@@ -5,9 +5,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/use_cases/use_case.dart';
-import '../../data/repositories/writing_repository_impl.dart';
+import '../../data/repositories/user_writing_repository_impl.dart';
 import '../entities/user_writing.dart';
-import '../repositories/writing_repository.dart';
+import '../repositories/user_writing_repository.dart';
 
 part 'user_writing_usecases.freezed.dart';
 part 'user_writing_usecases.g.dart';
@@ -16,7 +16,7 @@ part 'user_writing_usecases.g.dart';
 CreateUserWritingUseCase createUserWritingUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
+  final repository = ref.watch(userWritingRepositoryProvider);
   return CreateUserWritingUseCase(repository);
 }
 
@@ -24,7 +24,7 @@ class CreateUserWritingUseCase
     implements UseCase<UserWriting, UserWritingRequest> {
   const CreateUserWritingUseCase(this._repository);
 
-  final WritingRepository _repository;
+  final UserWritingRepository _repository;
 
   @override
   Future<Either<Failure, UserWriting>> call(
@@ -36,13 +36,13 @@ class CreateUserWritingUseCase
 GetUserWritingUseCase getUserWritingUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
+  final repository = ref.watch(userWritingRepositoryProvider);
   return GetUserWritingUseCase(repository);
 }
 
 class GetUserWritingUseCase implements UseCase<UserWriting, int> {
   const GetUserWritingUseCase(this._repository);
-  final WritingRepository _repository;
+  final UserWritingRepository _repository;
 
   @override
   Future<Either<Failure, UserWriting>> call(
@@ -54,14 +54,14 @@ class GetUserWritingUseCase implements UseCase<UserWriting, int> {
 ListUserWritingsByUserIdUseCase listUserWritingsByUserIdUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
+  final repository = ref.watch(userWritingRepositoryProvider);
   return ListUserWritingsByUserIdUseCase(repository);
 }
 
 class ListUserWritingsByUserIdUseCase
     implements UseCase<List<UserWriting>, int> {
   const ListUserWritingsByUserIdUseCase(this._repository);
-  final WritingRepository _repository;
+  final UserWritingRepository _repository;
 
   @override
   Future<Either<Failure, List<UserWriting>>> call(
@@ -73,19 +73,21 @@ class ListUserWritingsByUserIdUseCase
 ListUserWritingsByPromptIdUseCase listUserWritingsByPromptIdUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
+  final repository = ref.watch(userWritingRepositoryProvider);
   return ListUserWritingsByPromptIdUseCase(repository);
 }
 
 class ListUserWritingsByPromptIdUseCase
     implements UseCase<List<UserWriting>, int> {
   const ListUserWritingsByPromptIdUseCase(this._repository);
-  final WritingRepository _repository;
+  final UserWritingRepository _repository;
 
   @override
   Future<Either<Failure, List<UserWriting>>> call(
     final int params,
-  ) async => _repository.listUserWritingsByPromptId(promptId: params);
+  ) async => _repository.listUserWritingsByPromptId(
+    promptId: params,
+  );
 }
 
 @freezed
@@ -100,14 +102,14 @@ sealed class UpdateUserWritingParams with _$UpdateUserWritingParams {
 UpdateUserWritingUseCase updateUserWritingUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
+  final repository = ref.watch(userWritingRepositoryProvider);
   return UpdateUserWritingUseCase(repository);
 }
 
 class UpdateUserWritingUseCase
     implements UseCase<UserWriting, UpdateUserWritingParams> {
   const UpdateUserWritingUseCase(this._repository);
-  final WritingRepository _repository;
+  final UserWritingRepository _repository;
 
   @override
   Future<Either<Failure, UserWriting>> call(
@@ -122,13 +124,13 @@ class UpdateUserWritingUseCase
 DeleteUserWritingUseCase deleteUserWritingUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
+  final repository = ref.watch(userWritingRepositoryProvider);
   return DeleteUserWritingUseCase(repository);
 }
 
 class DeleteUserWritingUseCase implements UseCase<Success, int> {
   const DeleteUserWritingUseCase(this._repository);
-  final WritingRepository _repository;
+  final UserWritingRepository _repository;
 
   @override
   Future<Either<Failure, Success>> call(
@@ -150,14 +152,14 @@ sealed class SubmitWritingForEvaluationParams
 SubmitWritingForEvaluationUseCase submitWritingForEvaluationUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
+  final repository = ref.watch(userWritingRepositoryProvider);
   return SubmitWritingForEvaluationUseCase(repository);
 }
 
 class SubmitWritingForEvaluationUseCase
     implements UseCase<UserWriting, SubmitWritingForEvaluationParams> {
   const SubmitWritingForEvaluationUseCase(this._repository);
-  final WritingRepository _repository;
+  final UserWritingRepository _repository;
 
   @override
   Future<Either<Failure, UserWriting>> call(
@@ -184,14 +186,14 @@ sealed class AddAIFeedbackParams with _$AddAIFeedbackParams {
 AddAIFeedbackUseCase addAIFeedbackUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
+  final repository = ref.watch(userWritingRepositoryProvider);
   return AddAIFeedbackUseCase(repository);
 }
 
 class AddAIFeedbackUseCase
     implements UseCase<UserWriting, AddAIFeedbackParams> {
   const AddAIFeedbackUseCase(this._repository);
-  final WritingRepository _repository;
+  final UserWritingRepository _repository;
 
   @override
   Future<Either<Failure, UserWriting>> call(
@@ -209,14 +211,14 @@ class AddAIFeedbackUseCase
 GetUserWritingProgressUseCase getUserWritingProgressUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
+  final repository = ref.watch(userWritingRepositoryProvider);
   return GetUserWritingProgressUseCase(repository);
 }
 
 class GetUserWritingProgressUseCase
     implements UseCase<UserWritingProgress, int> {
-  GetUserWritingProgressUseCase(this._repository);
-  final WritingRepository _repository;
+  const GetUserWritingProgressUseCase(this._repository);
+  final UserWritingRepository _repository;
 
   @override
   Future<Either<Failure, UserWritingProgress>> call(
@@ -239,9 +241,9 @@ class GetUserWritingProgressUseCase
         final sortedWritings = List<UserWriting>.from(writings)..sort(
           (final a, final b) => a.submittedAt.compareTo(b.submittedAt),
         );
-        final evaluatedWritings =
-            sortedWritings.where((final w) => w.aiScore != null).toList();
-
+        final evaluatedWritings = sortedWritings.where(
+          (final w) => w.aiScore != null,
+        );
         final totalSubmissions = writings.length;
         final evaluatedSubmissions = evaluatedWritings.length;
         var averageScore = null as double?;
@@ -277,7 +279,7 @@ class GetUserWritingProgressUseCase
             averageScore: averageScore,
             latestScore: latestScore,
             improvementTrend: improvementTrend,
-            recentSubmissions: sortedWritings.take(5).toList(),
+            recentSubmissions: [...sortedWritings.take(5)],
             bestSubmission:
                 evaluatedWritings.isEmpty
                     ? null
@@ -305,14 +307,14 @@ sealed class ReviseWritingSubmissionParams
 ReviseWritingSubmissionUseCase reviseWritingSubmissionUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
+  final repository = ref.watch(userWritingRepositoryProvider);
   return ReviseWritingSubmissionUseCase(repository);
 }
 
 class ReviseWritingSubmissionUseCase
     implements UseCase<UserWriting, ReviseWritingSubmissionParams> {
-  ReviseWritingSubmissionUseCase(this._repository);
-  final WritingRepository _repository;
+  const ReviseWritingSubmissionUseCase(this._repository);
+  final UserWritingRepository _repository;
 
   @override
   Future<Either<Failure, UserWriting>> call(

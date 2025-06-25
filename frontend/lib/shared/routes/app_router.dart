@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/storage/secure_storage_service.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/exam/presentation/screens/exam_screen.dart';
 import '../../features/grammars/presentation/screens/grammar_detail_screen.dart';
 import '../../features/grammars/presentation/screens/grammar_list_screen.dart';
 import '../../features/help/presentation/screens/help_screen.dart';
@@ -12,10 +13,15 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/practice/presentation/screens/practice_screen.dart';
 import '../../features/progress/presentation/screens/progress_screen.dart';
 import '../../features/settings/presentation/screens/setting_screen.dart';
+import '../../features/speaking/presentation/screens/speaking_detail_screen.dart';
 import '../../features/speaking/presentation/screens/speaking_screen.dart';
 import '../../features/vocabulary/presentation/screens/vocabulary_screen.dart';
 import '../../features/vocabulary/presentation/screens/word_detail_screen.dart';
+import '../../features/writing/presentation/screens/drafts_management_screen.dart';
+import '../../features/writing/presentation/screens/practice_writing_screen.dart';
+import '../../features/writing/presentation/screens/writing_detail_screen.dart';
 import '../../features/writing/presentation/screens/writing_screen.dart';
+import '../../features/writing/presentation/screens/writing_submission_success_screen.dart';
 import '../../injection_container.dart';
 
 part 'app_router.g.dart';
@@ -49,9 +55,20 @@ class AppRouter {
 
   static const String speakingRoute = 'speaking';
 
+  static const String speakingDetailRoute = 'speaking-detail';
+
   static const String writingRoute = 'writing';
 
   static const String examsRoute = 'exams';
+
+  static const String practiceWritingRoute = 'practice-writing';
+
+  static const String writingSubmissionSuccessRoute =
+      'writing-submission-success';
+
+  static const String draftsManagementRoute = 'drafts-management';
+
+  static const String writingDetailRoute = 'writing-detail';
 
   static GoRouter get router => _router;
 }
@@ -244,6 +261,24 @@ class SpeakingRoute extends GoRouteData with _$SpeakingRoute {
   ) => const SpeakingScreen();
 }
 
+@TypedGoRoute<SpeakingDetailRoute>(
+  path: '/${AppRouter.speakingDetailRoute}/:sessionId',
+  name: AppRouter.speakingDetailRoute,
+)
+class SpeakingDetailRoute extends GoRouteData with _$SpeakingDetailRoute {
+  const SpeakingDetailRoute({
+    required this.sessionId,
+  });
+
+  final int sessionId;
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => SpeakingDetailScreen(sessionId: sessionId);
+}
+
 @TypedGoRoute<WritingRoute>(
   path: '/${AppRouter.writingRoute}',
   name: AppRouter.writingRoute,
@@ -256,6 +291,103 @@ class WritingRoute extends GoRouteData with _$WritingRoute {
     final BuildContext context,
     final GoRouterState state,
   ) => const WritingScreen();
+}
+
+@TypedGoRoute<ExamRoute>(
+  path: '/${AppRouter.examsRoute}',
+  name: AppRouter.examsRoute,
+)
+class ExamRoute extends GoRouteData with _$ExamRoute {
+  const ExamRoute(this.examId);
+
+  final int examId;
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => ExamScreen(examId: examId);
+}
+
+@TypedGoRoute<PracticeWritingRoute>(
+  path: '/${AppRouter.practiceWritingRoute}',
+  name: AppRouter.practiceWritingRoute,
+)
+class PracticeWritingRoute extends GoRouteData with _$PracticeWritingRoute {
+  const PracticeWritingRoute({
+    this.prompt,
+    this.promptId,
+  });
+
+  final String? prompt;
+  final int? promptId;
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => PracticeWritingScreen(
+    prompt: prompt,
+    promptId: promptId,
+  );
+}
+
+@TypedGoRoute<WritingDetailRoute>(
+  path: '/${AppRouter.writingDetailRoute}/:promptId',
+  name: AppRouter.writingDetailRoute,
+)
+class WritingDetailRoute extends GoRouteData with _$WritingDetailRoute {
+  const WritingDetailRoute({
+    required this.promptId,
+  });
+
+  final int promptId;
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => WritingDetailScreen(promptId: promptId);
+}
+
+@TypedGoRoute<WritingSubmissionSuccessRoute>(
+  path: '/${AppRouter.writingSubmissionSuccessRoute}',
+  name: AppRouter.writingSubmissionSuccessRoute,
+)
+class WritingSubmissionSuccessRoute extends GoRouteData
+    with _$WritingSubmissionSuccessRoute {
+  const WritingSubmissionSuccessRoute({
+    required this.wordCount,
+    required this.content,
+    this.prompt,
+  });
+
+  final int wordCount;
+  final String content;
+  final String? prompt;
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => WritingSubmissionSuccessScreen(
+    wordCount: wordCount,
+    content: content,
+    prompt: prompt,
+  );
+}
+
+@TypedGoRoute<DraftsManagementRoute>(
+  path: '/${AppRouter.draftsManagementRoute}',
+  name: AppRouter.draftsManagementRoute,
+)
+class DraftsManagementRoute extends GoRouteData with _$DraftsManagementRoute {
+  const DraftsManagementRoute();
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const DraftsManagementScreen();
 }
 
 final GoRouter _router = GoRouter(

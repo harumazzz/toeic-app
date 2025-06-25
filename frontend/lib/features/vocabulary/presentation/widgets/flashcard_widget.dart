@@ -143,7 +143,7 @@ class FrontSideCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${t.common.level} ${word.level}',
+                    '${context.t.common.level} ${word.level}',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

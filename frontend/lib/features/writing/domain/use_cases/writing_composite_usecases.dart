@@ -5,9 +5,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/use_cases/use_case.dart';
+import '../../data/repositories/user_writing_repository_impl.dart';
 import '../../data/repositories/writing_repository_impl.dart';
 import '../entities/user_writing.dart';
 import '../entities/writing_prompt.dart';
+import '../repositories/user_writing_repository.dart';
 import '../repositories/writing_repository.dart';
 
 part 'writing_composite_usecases.g.dart';
@@ -29,14 +31,25 @@ sealed class WritingPracticeSessionRequest
 WritingPracticeSessionUseCase writingPracticeSessionUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
-  return WritingPracticeSessionUseCase(repository);
+  final writingRepository = ref.watch(writingRepositoryProvider);
+  final userWritingRepository = ref.watch(userWritingRepositoryProvider);
+  return WritingPracticeSessionUseCase(
+    userWritingRepository: userWritingRepository,
+    writingRepository: writingRepository,
+  );
 }
 
 class WritingPracticeSessionUseCase
     implements UseCase<WritingSessionResult, WritingPracticeSessionRequest> {
-  const WritingPracticeSessionUseCase(this._repository);
-  final WritingRepository _repository;
+  const WritingPracticeSessionUseCase({
+    required final WritingRepository writingRepository,
+    required final UserWritingRepository userWritingRepository,
+  }) : _writingRepository = writingRepository,
+       _userWritingRepository = userWritingRepository;
+
+  final WritingRepository _writingRepository;
+
+  final UserWritingRepository _userWritingRepository;
 
   @override
   Future<Either<Failure, WritingSessionResult>> call(
@@ -44,7 +57,7 @@ class WritingPracticeSessionUseCase
   ) async {
     var selectedPrompt = null as WritingPrompt?;
     if (request.promptId != null) {
-      final promptResult = await _repository.getWritingPrompt(
+      final promptResult = await _writingRepository.getWritingPrompt(
         id: request.promptId!,
       );
       final promptOrFailure = promptResult.fold(
@@ -58,7 +71,7 @@ class WritingPracticeSessionUseCase
         return Left((promptOrFailure as Left<Failure, WritingPrompt>).value);
       }
     } else {
-      final allPromptsResult = await _repository.listWritingPrompts();
+      final allPromptsResult = await _writingRepository.listWritingPrompts();
       final randomPromptResult = allPromptsResult.fold(
         ifLeft: Left.new,
         ifRight: (final prompts) {
@@ -101,7 +114,7 @@ class WritingPracticeSessionUseCase
         return Left((randomPromptResult as Left<Failure, WritingPrompt>).value);
       }
     }
-    final submissionResult = await _repository.createUserWriting(
+    final submissionResult = await _userWritingRepository.createUserWriting(
       request: UserWritingRequest(
         userId: request.userId,
         promptId: selectedPrompt!.id,
@@ -137,14 +150,19 @@ sealed class BatchEvaluateWritingsRequest with _$BatchEvaluateWritingsRequest {
 BatchEvaluateWritingsUseCase batchEvaluateWritingsUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
-  return BatchEvaluateWritingsUseCase(repository);
+  final userWritingRepository = ref.watch(userWritingRepositoryProvider);
+  return BatchEvaluateWritingsUseCase(
+    userWritingRepository: userWritingRepository,
+  );
 }
 
 class BatchEvaluateWritingsUseCase
     implements UseCase<BatchEvaluationResult, BatchEvaluateWritingsRequest> {
-  const BatchEvaluateWritingsUseCase(this._repository);
-  final WritingRepository _repository;
+  const BatchEvaluateWritingsUseCase({
+    required final UserWritingRepository userWritingRepository,
+  }) : _userWritingRepository = userWritingRepository;
+
+  final UserWritingRepository _userWritingRepository;
 
   @override
   Future<Either<Failure, BatchEvaluationResult>> call(
@@ -153,7 +171,7 @@ class BatchEvaluateWritingsUseCase
     final List<UserWriting> successfulEvaluations = [];
     final List<EvaluationFailure> failedEvaluations = [];
     for (final submissionId in request.submissionIds) {
-      final submissionResult = await _repository.getUserWriting(
+      final submissionResult = await _userWritingRepository.getUserWriting(
         id: submissionId,
       );
       await submissionResult.fold(
@@ -171,7 +189,7 @@ class BatchEvaluateWritingsUseCase
             request.evaluationCriteria,
           );
           final mockScore = _calculateMockScore(submission.submissionText);
-          final updateResult = await _repository.updateUserWriting(
+          final updateResult = await _userWritingRepository.updateUserWriting(
             id: submissionId,
             request: UserWritingUpdateRequest(
               aiFeedback: mockFeedback,
@@ -276,20 +294,30 @@ sealed class WritingAnalyticsRequest with _$WritingAnalyticsRequest {
 WritingAnalyticsUseCase writingAnalyticsUseCase(
   final Ref ref,
 ) {
-  final repository = ref.watch(writingRepositoryProvider);
-  return WritingAnalyticsUseCase(repository);
+  final writingRepository = ref.watch(writingRepositoryProvider);
+  final userWritingRepository = ref.watch(userWritingRepositoryProvider);
+  return WritingAnalyticsUseCase(
+    writingRepository: writingRepository,
+    userWritingRepository: userWritingRepository,
+  );
 }
 
 class WritingAnalyticsUseCase
     implements UseCase<WritingAnalytics, WritingAnalyticsRequest> {
-  const WritingAnalyticsUseCase(this._repository);
-  final WritingRepository _repository;
+  const WritingAnalyticsUseCase({
+    required final WritingRepository writingRepository,
+    required final UserWritingRepository userWritingRepository,
+  }) : _writingRepository = writingRepository,
+       _userWritingRepository = userWritingRepository;
+
+  final WritingRepository _writingRepository;
+  final UserWritingRepository _userWritingRepository;
 
   @override
   Future<Either<Failure, WritingAnalytics>> call(
     final WritingAnalyticsRequest request,
   ) async {
-    final promptsResult = await _repository.listWritingPrompts();
+    final promptsResult = await _writingRepository.listWritingPrompts();
     if (promptsResult is Left) {
       return Left((promptsResult as Left<Failure, List<WritingPrompt>>).value);
     }
@@ -297,9 +325,10 @@ class WritingAnalyticsUseCase
         (promptsResult as Right<Failure, List<WritingPrompt>>).value;
     var allWritings = <UserWriting>[];
     if (request.userId != null) {
-      final userWritingsResult = await _repository.listUserWritingsByUserId(
-        userId: request.userId!,
-      );
+      final userWritingsResult = await _userWritingRepository
+          .listUserWritingsByUserId(
+            userId: request.userId!,
+          );
       if (userWritingsResult is Left) {
         return Left(
           (userWritingsResult as Left<Failure, List<UserWriting>>).value,
@@ -309,7 +338,7 @@ class WritingAnalyticsUseCase
           (userWritingsResult as Right<Failure, List<UserWriting>>).value;
     } else {
       for (final prompt in prompts) {
-        final promptWritingsResult = await _repository
+        final promptWritingsResult = await _userWritingRepository
             .listUserWritingsByPromptId(promptId: prompt.id);
         promptWritingsResult.fold(
           ifLeft: (final failure) {},
@@ -341,8 +370,7 @@ class WritingAnalyticsUseCase
     final List<UserWriting> writings,
     final int? userId,
   ) {
-    final evaluatedWritings =
-        writings.where((final w) => w.aiScore != null).toList();
+    final evaluatedWritings = writings.where((final w) => w.aiScore != null);
 
     final totalPrompts = prompts.length;
     final totalSubmissions = writings.length;
@@ -404,7 +432,7 @@ class WritingAnalyticsUseCase
       difficultyDistribution: difficultyDistribution,
       activityTrends: activityTrends,
       mostPopularPrompts: mostPopularPrompts,
-      recentActivity: writings.take(10).toList(),
+      recentActivity: [...writings.take(10)],
       generatedAt: DateTime.now(),
       userId: userId,
     );

@@ -108,7 +108,9 @@ class WordController extends _$WordController {
         return WordState.loaded(
           words:
               offset > 0
-                  ? HashSet<Word>.from([...currentWords, ...words]).toList()
+                  ? [
+                    ...HashSet<Word>.from([...currentWords, ...words]),
+                  ]
                   : words,
           isFinished: isFinished,
         );

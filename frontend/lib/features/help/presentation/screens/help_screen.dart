@@ -53,8 +53,6 @@ class HelpScreen extends HookWidget {
                   ),
                 ],
               ),
-
-              // Study Features
               HelpCategorySection(
                 title: context.t.help.categories.studyFeatures,
                 icon: Symbols.school,
@@ -73,8 +71,6 @@ class HelpScreen extends HookWidget {
                   ),
                 ],
               ),
-
-              // Test Preparation
               HelpCategorySection(
                 title: context.t.help.categories.testPreparation,
                 icon: Symbols.quiz,
@@ -93,8 +89,6 @@ class HelpScreen extends HookWidget {
                   ),
                 ],
               ),
-
-              // Account Settings
               HelpCategorySection(
                 title: context.t.help.categories.accountSettings,
                 icon: Symbols.settings,
@@ -116,8 +110,6 @@ class HelpScreen extends HookWidget {
                   ),
                 ],
               ),
-
-              // Troubleshooting
               HelpCategorySection(
                 title: context.t.help.categories.troubleshooting,
                 icon: Symbols.troubleshoot,

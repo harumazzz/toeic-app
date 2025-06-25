@@ -77,8 +77,6 @@ final class AuthInterceptor extends Interceptor {
             RefreshTokenRequest(refreshToken: refreshToken),
           );
           debugPrint('[AuthInterceptor] Token refresh successful');
-
-          // Save new tokens
           await secureStorageService.saveAccessToken(response.accessToken);
           if (response.refreshToken != null) {
             await secureStorageService.saveRefreshToken(response.refreshToken!);
@@ -100,10 +98,10 @@ final class AuthInterceptor extends Interceptor {
             try {
               if (e.response?.data != null) {
                 final errorData = e.response!.data as Map<String, dynamic>;
-                final tokenError = TokenError.fromJson(errorData);
+                final error = TokenError.fromJson(errorData);
+                debugPrint('[AuthInterceptor] Error: ${error.error}');
                 debugPrint(
-                  // ignore: lines_longer_than_80_chars
-                  '[AuthInterceptor] Error: ${tokenError.error}, Description: ${tokenError.errorDescription}',
+                  '[AuthInterceptor] Description: ${error.errorDescription}',
                 );
               }
             } catch (parseError) {

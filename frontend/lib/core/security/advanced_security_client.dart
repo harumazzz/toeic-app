@@ -61,7 +61,7 @@ class AdvancedSecurityClient {
       }
       if (_debug) {
         debugPrint(
-          '[AdvancedSecurity] Generated headers: ${headers.keys.toList()}',
+          '[AdvancedSecurity] Generated headers: ${[...headers.keys]}',
         );
       }
       return headers;

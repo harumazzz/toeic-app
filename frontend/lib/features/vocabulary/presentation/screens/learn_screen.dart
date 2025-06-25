@@ -41,7 +41,6 @@ class LearnScreen extends HookConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Header section
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: switch (reviewProgressState) {
@@ -57,7 +56,6 @@ class LearnScreen extends HookConsumerWidget {
                 ReviewProgressError() => const SizedBox.shrink(),
               },
             ),
-            // Main content area
             Expanded(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16),

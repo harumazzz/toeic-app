@@ -4,24 +4,31 @@ import 'package:dart_either/dart_either.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learn/core/error/failures.dart';
 import 'package:learn/features/writing/domain/entities/user_writing.dart';
+import 'package:learn/features/writing/domain/repositories/user_writing_repository.dart';
 import 'package:learn/features/writing/domain/repositories/writing_repository.dart';
 import 'package:learn/features/writing/domain/use_cases/user_writing_usecases.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockWritingRepository extends Mock implements WritingRepository {}
 
+class MockUserWritingRepository extends Mock implements UserWritingRepository {}
+
 void main() {
   late MockWritingRepository mockWritingRepository;
+  late MockUserWritingRepository mockUserWritingRepository;
 
   setUp(() {
     mockWritingRepository = MockWritingRepository();
+    mockUserWritingRepository = MockUserWritingRepository();
   });
 
   group('CreateUserWritingUseCase', () {
     late CreateUserWritingUseCase usecase;
 
     setUp(() {
-      usecase = CreateUserWritingUseCase(mockWritingRepository);
+      usecase = CreateUserWritingUseCase(
+        mockUserWritingRepository,
+      );
     });
 
     const tUserWritingRequest = UserWritingRequest(
@@ -49,7 +56,7 @@ void main() {
     test('should create user writing successfully', () async {
       // arrange
       when(
-        () => mockWritingRepository.createUserWriting(
+        () => mockUserWritingRepository.createUserWriting(
           request: any(named: 'request'),
         ),
       ).thenAnswer((_) async => Right(tUserWriting));
@@ -60,11 +67,11 @@ void main() {
       // assert
       expect(result, Right(tUserWriting));
       verify(
-        () => mockWritingRepository.createUserWriting(
+        () => mockUserWritingRepository.createUserWriting(
           request: tUserWritingRequest,
         ),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
 
     test(
@@ -75,7 +82,7 @@ void main() {
           message: 'Submission text cannot be empty',
         );
         when(
-          () => mockWritingRepository.createUserWriting(
+          () => mockUserWritingRepository.createUserWriting(
             request: any(named: 'request'),
           ),
         ).thenAnswer((_) async => const Left(tFailure));
@@ -86,11 +93,11 @@ void main() {
         // assert
         expect(result, const Left(tFailure));
         verify(
-          () => mockWritingRepository.createUserWriting(
+          () => mockUserWritingRepository.createUserWriting(
             request: tUserWritingRequest,
           ),
         );
-        verifyNoMoreInteractions(mockWritingRepository);
+        verifyNoMoreInteractions(mockUserWritingRepository);
       },
     );
 
@@ -100,7 +107,7 @@ void main() {
         // arrange
         const tFailure = ServerFailure(message: 'Writing prompt not found');
         when(
-          () => mockWritingRepository.createUserWriting(
+          () => mockUserWritingRepository.createUserWriting(
             request: any(named: 'request'),
           ),
         ).thenAnswer((_) async => const Left(tFailure));
@@ -111,11 +118,11 @@ void main() {
         // assert
         expect(result, const Left(tFailure));
         verify(
-          () => mockWritingRepository.createUserWriting(
+          () => mockUserWritingRepository.createUserWriting(
             request: tUserWritingRequest,
           ),
         );
-        verifyNoMoreInteractions(mockWritingRepository);
+        verifyNoMoreInteractions(mockUserWritingRepository);
       },
     );
 
@@ -123,7 +130,7 @@ void main() {
       // arrange
       const tFailure = ServerFailure(message: 'Failed to create user writing');
       when(
-        () => mockWritingRepository.createUserWriting(
+        () => mockUserWritingRepository.createUserWriting(
           request: any(named: 'request'),
         ),
       ).thenAnswer((_) async => const Left(tFailure));
@@ -134,11 +141,11 @@ void main() {
       // assert
       expect(result, const Left(tFailure));
       verify(
-        () => mockWritingRepository.createUserWriting(
+        () => mockUserWritingRepository.createUserWriting(
           request: tUserWritingRequest,
         ),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
   });
 
@@ -146,7 +153,7 @@ void main() {
     late GetUserWritingUseCase usecase;
 
     setUp(() {
-      usecase = GetUserWritingUseCase(mockWritingRepository);
+      usecase = GetUserWritingUseCase(mockUserWritingRepository);
     });
 
     const tUserWritingId = 1;
@@ -166,7 +173,7 @@ void main() {
     test('should get user writing by ID successfully', () async {
       // arrange
       when(
-        () => mockWritingRepository.getUserWriting(id: any(named: 'id')),
+        () => mockUserWritingRepository.getUserWriting(id: any(named: 'id')),
       ).thenAnswer((_) async => Right(tUserWriting));
 
       // act
@@ -174,8 +181,10 @@ void main() {
 
       // assert
       expect(result, Right(tUserWriting));
-      verify(() => mockWritingRepository.getUserWriting(id: tUserWritingId));
-      verifyNoMoreInteractions(mockWritingRepository);
+      verify(
+        () => mockUserWritingRepository.getUserWriting(id: tUserWritingId),
+      );
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
 
     test(
@@ -184,7 +193,7 @@ void main() {
         // arrange
         const tFailure = ServerFailure(message: 'User writing not found');
         when(
-          () => mockWritingRepository.getUserWriting(id: any(named: 'id')),
+          () => mockUserWritingRepository.getUserWriting(id: any(named: 'id')),
         ).thenAnswer((_) async => const Left(tFailure));
 
         // act
@@ -192,8 +201,10 @@ void main() {
 
         // assert
         expect(result, const Left(tFailure));
-        verify(() => mockWritingRepository.getUserWriting(id: tUserWritingId));
-        verifyNoMoreInteractions(mockWritingRepository);
+        verify(
+          () => mockUserWritingRepository.getUserWriting(id: tUserWritingId),
+        );
+        verifyNoMoreInteractions(mockUserWritingRepository);
       },
     );
 
@@ -201,7 +212,7 @@ void main() {
       // arrange
       const tFailure = ServerFailure(message: 'Internal server error');
       when(
-        () => mockWritingRepository.getUserWriting(id: any(named: 'id')),
+        () => mockUserWritingRepository.getUserWriting(id: any(named: 'id')),
       ).thenAnswer((_) async => const Left(tFailure));
 
       // act
@@ -209,8 +220,10 @@ void main() {
 
       // assert
       expect(result, const Left(tFailure));
-      verify(() => mockWritingRepository.getUserWriting(id: tUserWritingId));
-      verifyNoMoreInteractions(mockWritingRepository);
+      verify(
+        () => mockUserWritingRepository.getUserWriting(id: tUserWritingId),
+      );
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
   });
 
@@ -218,7 +231,7 @@ void main() {
     late ListUserWritingsByUserIdUseCase usecase;
 
     setUp(() {
-      usecase = ListUserWritingsByUserIdUseCase(mockWritingRepository);
+      usecase = ListUserWritingsByUserIdUseCase(mockUserWritingRepository);
     });
 
     const tUserId = 123;
@@ -250,7 +263,7 @@ void main() {
     test('should get user writings by user ID successfully', () async {
       // arrange
       when(
-        () => mockWritingRepository.listUserWritingsByUserId(
+        () => mockUserWritingRepository.listUserWritingsByUserId(
           userId: any(named: 'userId'),
         ),
       ).thenAnswer((_) async => Right(tUserWritingsList));
@@ -261,15 +274,16 @@ void main() {
       // assert
       expect(result, Right(tUserWritingsList));
       verify(
-        () => mockWritingRepository.listUserWritingsByUserId(userId: tUserId),
+        () =>
+            mockUserWritingRepository.listUserWritingsByUserId(userId: tUserId),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
 
     test('should return empty list when user has no writings', () async {
       // arrange
       when(
-        () => mockWritingRepository.listUserWritingsByUserId(
+        () => mockUserWritingRepository.listUserWritingsByUserId(
           userId: any(named: 'userId'),
         ),
       ).thenAnswer((_) async => const Right([]));
@@ -280,9 +294,10 @@ void main() {
       // assert
       expect(result, const Right(<UserWriting>[]));
       verify(
-        () => mockWritingRepository.listUserWritingsByUserId(userId: tUserId),
+        () =>
+            mockUserWritingRepository.listUserWritingsByUserId(userId: tUserId),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
 
     test('should return ServerFailure when server error occurs', () async {
@@ -291,7 +306,7 @@ void main() {
         message: 'Failed to retrieve user writings',
       );
       when(
-        () => mockWritingRepository.listUserWritingsByUserId(
+        () => mockUserWritingRepository.listUserWritingsByUserId(
           userId: any(named: 'userId'),
         ),
       ).thenAnswer((_) async => const Left(tFailure));
@@ -302,9 +317,10 @@ void main() {
       // assert
       expect(result, const Left(tFailure));
       verify(
-        () => mockWritingRepository.listUserWritingsByUserId(userId: tUserId),
+        () =>
+            mockUserWritingRepository.listUserWritingsByUserId(userId: tUserId),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
   });
 
@@ -312,7 +328,7 @@ void main() {
     late ListUserWritingsByPromptIdUseCase usecase;
 
     setUp(() {
-      usecase = ListUserWritingsByPromptIdUseCase(mockWritingRepository);
+      usecase = ListUserWritingsByPromptIdUseCase(mockUserWritingRepository);
     });
 
     const tPromptId = 456;
@@ -344,7 +360,7 @@ void main() {
     test('should get user writings by prompt ID successfully', () async {
       // arrange
       when(
-        () => mockWritingRepository.listUserWritingsByPromptId(
+        () => mockUserWritingRepository.listUserWritingsByPromptId(
           promptId: any(named: 'promptId'),
         ),
       ).thenAnswer((_) async => Right(tUserWritingsList));
@@ -355,17 +371,17 @@ void main() {
       // assert
       expect(result, Right(tUserWritingsList));
       verify(
-        () => mockWritingRepository.listUserWritingsByPromptId(
+        () => mockUserWritingRepository.listUserWritingsByPromptId(
           promptId: tPromptId,
         ),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
 
     test('should return empty list when prompt has no writings', () async {
       // arrange
       when(
-        () => mockWritingRepository.listUserWritingsByPromptId(
+        () => mockUserWritingRepository.listUserWritingsByPromptId(
           promptId: any(named: 'promptId'),
         ),
       ).thenAnswer((_) async => const Right([]));
@@ -376,11 +392,11 @@ void main() {
       // assert
       expect(result, const Right(<UserWriting>[]));
       verify(
-        () => mockWritingRepository.listUserWritingsByPromptId(
+        () => mockUserWritingRepository.listUserWritingsByPromptId(
           promptId: tPromptId,
         ),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
 
     test('should return ServerFailure when server error occurs', () async {
@@ -389,7 +405,7 @@ void main() {
         message: 'Failed to retrieve writings for prompt',
       );
       when(
-        () => mockWritingRepository.listUserWritingsByPromptId(
+        () => mockUserWritingRepository.listUserWritingsByPromptId(
           promptId: any(named: 'promptId'),
         ),
       ).thenAnswer((_) async => const Left(tFailure));
@@ -400,11 +416,11 @@ void main() {
       // assert
       expect(result, const Left(tFailure));
       verify(
-        () => mockWritingRepository.listUserWritingsByPromptId(
+        () => mockUserWritingRepository.listUserWritingsByPromptId(
           promptId: tPromptId,
         ),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
   });
 
@@ -412,7 +428,7 @@ void main() {
     late UpdateUserWritingUseCase usecase;
 
     setUp(() {
-      usecase = UpdateUserWritingUseCase(mockWritingRepository);
+      usecase = UpdateUserWritingUseCase(mockUserWritingRepository);
     });
 
     const tUserWritingId = 1;
@@ -438,7 +454,7 @@ void main() {
     test('should update user writing successfully', () async {
       // arrange
       when(
-        () => mockWritingRepository.updateUserWriting(
+        () => mockUserWritingRepository.updateUserWriting(
           id: any(named: 'id'),
           request: any(named: 'request'),
         ),
@@ -455,12 +471,12 @@ void main() {
       // assert
       expect(result, Right(tUpdatedUserWriting));
       verify(
-        () => mockWritingRepository.updateUserWriting(
+        () => mockUserWritingRepository.updateUserWriting(
           id: tUserWritingId,
           request: tUserWritingUpdateRequest,
         ),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
 
     test(
@@ -469,7 +485,7 @@ void main() {
         // arrange
         const tFailure = ServerFailure(message: 'User writing not found');
         when(
-          () => mockWritingRepository.updateUserWriting(
+          () => mockUserWritingRepository.updateUserWriting(
             id: any(named: 'id'),
             request: any(named: 'request'),
           ),
@@ -486,12 +502,12 @@ void main() {
         // assert
         expect(result, const Left(tFailure));
         verify(
-          () => mockWritingRepository.updateUserWriting(
+          () => mockUserWritingRepository.updateUserWriting(
             id: tUserWritingId,
             request: tUserWritingUpdateRequest,
           ),
         );
-        verifyNoMoreInteractions(mockWritingRepository);
+        verifyNoMoreInteractions(mockUserWritingRepository);
       },
     );
 
@@ -503,7 +519,7 @@ void main() {
           message: 'AI score must be between 0 and 10',
         );
         when(
-          () => mockWritingRepository.updateUserWriting(
+          () => mockUserWritingRepository.updateUserWriting(
             id: any(named: 'id'),
             request: any(named: 'request'),
           ),
@@ -520,12 +536,12 @@ void main() {
         // assert
         expect(result, const Left(tFailure));
         verify(
-          () => mockWritingRepository.updateUserWriting(
+          () => mockUserWritingRepository.updateUserWriting(
             id: tUserWritingId,
             request: tUserWritingUpdateRequest,
           ),
         );
-        verifyNoMoreInteractions(mockWritingRepository);
+        verifyNoMoreInteractions(mockUserWritingRepository);
       },
     );
   });
@@ -534,7 +550,7 @@ void main() {
     late DeleteUserWritingUseCase usecase;
 
     setUp(() {
-      usecase = DeleteUserWritingUseCase(mockWritingRepository);
+      usecase = DeleteUserWritingUseCase(mockUserWritingRepository);
     });
 
     const tUserWritingId = 1;
@@ -542,7 +558,7 @@ void main() {
     test('should delete user writing successfully', () async {
       // arrange
       when(
-        () => mockWritingRepository.deleteUserWriting(id: any(named: 'id')),
+        () => mockUserWritingRepository.deleteUserWriting(id: any(named: 'id')),
       ).thenAnswer((_) async => const Right(Success()));
 
       // act
@@ -550,8 +566,10 @@ void main() {
 
       // assert
       expect(result, const Right(Success()));
-      verify(() => mockWritingRepository.deleteUserWriting(id: tUserWritingId));
-      verifyNoMoreInteractions(mockWritingRepository);
+      verify(
+        () => mockUserWritingRepository.deleteUserWriting(id: tUserWritingId),
+      );
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
 
     test(
@@ -560,7 +578,8 @@ void main() {
         // arrange
         const tFailure = ServerFailure(message: 'User writing not found');
         when(
-          () => mockWritingRepository.deleteUserWriting(id: any(named: 'id')),
+          () =>
+              mockUserWritingRepository.deleteUserWriting(id: any(named: 'id')),
         ).thenAnswer((_) async => const Left(tFailure));
 
         // act
@@ -569,9 +588,9 @@ void main() {
         // assert
         expect(result, const Left(tFailure));
         verify(
-          () => mockWritingRepository.deleteUserWriting(id: tUserWritingId),
+          () => mockUserWritingRepository.deleteUserWriting(id: tUserWritingId),
         );
-        verifyNoMoreInteractions(mockWritingRepository);
+        verifyNoMoreInteractions(mockUserWritingRepository);
       },
     );
 
@@ -583,7 +602,8 @@ void main() {
           message: 'Not authorized to delete this writing',
         );
         when(
-          () => mockWritingRepository.deleteUserWriting(id: any(named: 'id')),
+          () =>
+              mockUserWritingRepository.deleteUserWriting(id: any(named: 'id')),
         ).thenAnswer((_) async => const Left(tFailure));
 
         // act
@@ -592,9 +612,9 @@ void main() {
         // assert
         expect(result, const Left(tFailure));
         verify(
-          () => mockWritingRepository.deleteUserWriting(id: tUserWritingId),
+          () => mockUserWritingRepository.deleteUserWriting(id: tUserWritingId),
         );
-        verifyNoMoreInteractions(mockWritingRepository);
+        verifyNoMoreInteractions(mockUserWritingRepository);
       },
     );
   });
@@ -603,7 +623,7 @@ void main() {
     late SubmitWritingForEvaluationUseCase usecase;
 
     setUp(() {
-      usecase = SubmitWritingForEvaluationUseCase(mockWritingRepository);
+      usecase = SubmitWritingForEvaluationUseCase(mockUserWritingRepository);
     });
 
     const tUserId = 123;
@@ -622,7 +642,7 @@ void main() {
     test('should submit writing for evaluation successfully', () async {
       // arrange
       when(
-        () => mockWritingRepository.createUserWriting(
+        () => mockUserWritingRepository.createUserWriting(
           request: any(named: 'request'),
         ),
       ).thenAnswer((_) async => Right(tUserWriting));
@@ -639,7 +659,7 @@ void main() {
       // assert
       expect(result, Right(tUserWriting));
       verify(
-        () => mockWritingRepository.createUserWriting(
+        () => mockUserWritingRepository.createUserWriting(
           request: const UserWritingRequest(
             userId: tUserId,
             promptId: tPromptId,
@@ -647,13 +667,13 @@ void main() {
           ),
         ),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
 
     test('should submit writing without prompt ID successfully', () async {
       // arrange
       when(
-        () => mockWritingRepository.createUserWriting(
+        () => mockUserWritingRepository.createUserWriting(
           request: any(named: 'request'),
         ),
       ).thenAnswer((_) async => Right(tUserWriting));
@@ -669,14 +689,14 @@ void main() {
       // assert
       expect(result, Right(tUserWriting));
       verify(
-        () => mockWritingRepository.createUserWriting(
+        () => mockUserWritingRepository.createUserWriting(
           request: const UserWritingRequest(
             userId: tUserId,
             submissionText: tSubmissionText,
           ),
         ),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
 
     test(
@@ -687,7 +707,7 @@ void main() {
           message: 'Submission text cannot be empty',
         );
         when(
-          () => mockWritingRepository.createUserWriting(
+          () => mockUserWritingRepository.createUserWriting(
             request: any(named: 'request'),
           ),
         ).thenAnswer((_) async => const Left(tFailure));
@@ -704,11 +724,11 @@ void main() {
         // assert
         expect(result, const Left(tFailure));
         verify(
-          () => mockWritingRepository.createUserWriting(
+          () => mockUserWritingRepository.createUserWriting(
             request: any(named: 'request'),
           ),
         );
-        verifyNoMoreInteractions(mockWritingRepository);
+        verifyNoMoreInteractions(mockUserWritingRepository);
       },
     );
   });
@@ -717,7 +737,7 @@ void main() {
     late AddAIFeedbackUseCase usecase;
 
     setUp(() {
-      usecase = AddAIFeedbackUseCase(mockWritingRepository);
+      usecase = AddAIFeedbackUseCase(mockUserWritingRepository);
     });
 
     const tSubmissionId = 1;
@@ -743,7 +763,7 @@ void main() {
     test('should add AI feedback successfully', () async {
       // arrange
       when(
-        () => mockWritingRepository.updateUserWriting(
+        () => mockUserWritingRepository.updateUserWriting(
           id: any(named: 'id'),
           request: any(named: 'request'),
         ),
@@ -761,7 +781,7 @@ void main() {
       // assert
       expect(result, Right(tUpdatedUserWriting));
       verify(
-        () => mockWritingRepository.updateUserWriting(
+        () => mockUserWritingRepository.updateUserWriting(
           id: tSubmissionId,
           request: any(named: 'request'),
         ),
@@ -775,7 +795,7 @@ void main() {
         // arrange
         const tFailure = ServerFailure(message: 'User writing not found');
         when(
-          () => mockWritingRepository.updateUserWriting(
+          () => mockUserWritingRepository.updateUserWriting(
             id: any(named: 'id'),
             request: any(named: 'request'),
           ),
@@ -793,12 +813,12 @@ void main() {
         // assert
         expect(result, const Left(tFailure));
         verify(
-          () => mockWritingRepository.updateUserWriting(
+          () => mockUserWritingRepository.updateUserWriting(
             id: tSubmissionId,
             request: any(named: 'request'),
           ),
         );
-        verifyNoMoreInteractions(mockWritingRepository);
+        verifyNoMoreInteractions(mockUserWritingRepository);
       },
     );
 
@@ -808,7 +828,7 @@ void main() {
         message: 'AI score must be between 0 and 10',
       );
       when(
-        () => mockWritingRepository.updateUserWriting(
+        () => mockUserWritingRepository.updateUserWriting(
           id: any(named: 'id'),
           request: any(named: 'request'),
         ),
@@ -826,12 +846,12 @@ void main() {
       // assert
       expect(result, const Left(tFailure));
       verify(
-        () => mockWritingRepository.updateUserWriting(
+        () => mockUserWritingRepository.updateUserWriting(
           id: tSubmissionId,
           request: any(named: 'request'),
         ),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
   });
 
@@ -839,7 +859,7 @@ void main() {
     late GetUserWritingProgressUseCase usecase;
 
     setUp(() {
-      usecase = GetUserWritingProgressUseCase(mockWritingRepository);
+      usecase = GetUserWritingProgressUseCase(mockUserWritingRepository);
     });
 
     const tUserId = 123;
@@ -850,7 +870,7 @@ void main() {
         message: 'Failed to retrieve user writings',
       );
       when(
-        () => mockWritingRepository.listUserWritingsByUserId(
+        () => mockUserWritingRepository.listUserWritingsByUserId(
           userId: any(named: 'userId'),
         ),
       ).thenAnswer((_) async => const Left(tFailure));
@@ -861,9 +881,10 @@ void main() {
       // assert
       expect(result, const Left(tFailure));
       verify(
-        () => mockWritingRepository.listUserWritingsByUserId(userId: tUserId),
+        () =>
+            mockUserWritingRepository.listUserWritingsByUserId(userId: tUserId),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
   });
 
@@ -871,7 +892,7 @@ void main() {
     late ReviseWritingSubmissionUseCase usecase;
 
     setUp(() {
-      usecase = ReviseWritingSubmissionUseCase(mockWritingRepository);
+      usecase = ReviseWritingSubmissionUseCase(mockUserWritingRepository);
     });
 
     const tSubmissionId = 1;
@@ -889,7 +910,7 @@ void main() {
     test('should revise writing submission successfully', () async {
       // arrange
       when(
-        () => mockWritingRepository.updateUserWriting(
+        () => mockUserWritingRepository.updateUserWriting(
           id: any(named: 'id'),
           request: any(named: 'request'),
         ),
@@ -906,14 +927,14 @@ void main() {
       // assert
       expect(result, Right(tRevisedUserWriting));
       verify(
-        () => mockWritingRepository.updateUserWriting(
+        () => mockUserWritingRepository.updateUserWriting(
           id: tSubmissionId,
           request: const UserWritingUpdateRequest(
             submissionText: tRevisedText,
           ),
         ),
       );
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
 
     test(
@@ -922,7 +943,7 @@ void main() {
         // arrange
         const tFailure = ServerFailure(message: 'User writing not found');
         when(
-          () => mockWritingRepository.updateUserWriting(
+          () => mockUserWritingRepository.updateUserWriting(
             id: any(named: 'id'),
             request: any(named: 'request'),
           ),
@@ -939,19 +960,19 @@ void main() {
         // assert
         expect(result, const Left(tFailure));
         verify(
-          () => mockWritingRepository.updateUserWriting(
+          () => mockUserWritingRepository.updateUserWriting(
             id: tSubmissionId,
             request: any(named: 'request'),
           ),
         );
-        verifyNoMoreInteractions(mockWritingRepository);
+        verifyNoMoreInteractions(mockUserWritingRepository);
       },
     );
 
     test('should clear AI feedback when revising text', () async {
       // arrange
       when(
-        () => mockWritingRepository.updateUserWriting(
+        () => mockUserWritingRepository.updateUserWriting(
           id: any(named: 'id'),
           request: any(named: 'request'),
         ),
@@ -968,7 +989,7 @@ void main() {
       // assert - Verify that AI feedback is cleared
       final captured =
           verify(
-                () => mockWritingRepository.updateUserWriting(
+                () => mockUserWritingRepository.updateUserWriting(
                   id: tSubmissionId,
                   request: captureAny(named: 'request'),
                 ),
@@ -979,7 +1000,7 @@ void main() {
       expect(captured.aiFeedback, null);
       expect(captured.aiScore, null);
       expect(captured.evaluatedAt, null);
-      verifyNoMoreInteractions(mockWritingRepository);
+      verifyNoMoreInteractions(mockUserWritingRepository);
     });
   });
 }

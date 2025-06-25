@@ -37,12 +37,8 @@ class SecurityInterceptor extends Interceptor {
       debugPrint(
         '[SecurityInterceptor] Adding security headers for: ${options.path}',
       );
-
-      // Set origin and referer headers
       options.headers['Origin'] = 'flutter-app://toeic-app';
       options.headers['Referer'] = 'flutter-app://toeic-app/';
-
-      // Get security key and generate headers
       final secretKey = await _getSecretKey();
       if (secretKey != null && secretKey.isNotEmpty) {
         final securityClient = AdvancedSecurityClient(

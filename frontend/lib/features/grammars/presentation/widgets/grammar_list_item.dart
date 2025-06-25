@@ -104,27 +104,26 @@ class _TagWrap extends StatelessWidget {
   Widget build(final BuildContext context) => Wrap(
     spacing: 6,
     runSpacing: 2,
-    children:
-        tags
-            .map(
-              (final tag) => Chip(
-                label: Text(
-                  tag,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                ),
-                visualDensity: VisualDensity.compact,
-              ),
-            )
-            .toList(),
+    children: [
+      ...tags.map(
+        (final tag) => Chip(
+          label: Text(
+            tag,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 8,
+          ),
+          visualDensity: VisualDensity.compact,
+        ),
+      ),
+    ],
   );
 
   @override

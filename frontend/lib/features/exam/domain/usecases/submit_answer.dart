@@ -1,0 +1,34 @@
+import 'package:dart_either/dart_either.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../../../core/error/failures.dart';
+import '../../../../core/use_cases/use_case.dart';
+import '../../data/repositories/answer_submit_repository_impl.dart';
+import '../entities/result.dart';
+import '../repositories/answer_submit_repository.dart';
+
+part 'submit_answer.g.dart';
+
+@riverpod
+SubmitAnswer submitAnswer(
+  final Ref ref,
+) {
+  final repository = ref.watch(answerSubmitRepositoryProvider);
+  return SubmitAnswer(repository: repository);
+}
+
+class SubmitAnswer implements UseCase<UserResult, Answer> {
+  const SubmitAnswer({
+    required this.repository,
+  });
+
+  final AnswerSubmitRepository repository;
+
+  @override
+  Future<Either<Failure, UserResult>> call(
+    final Answer params,
+  ) => repository.submitAnswers(
+    request: params,
+  );
+}

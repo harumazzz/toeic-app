@@ -46,6 +46,7 @@ dependencies:
   audioplayers: ^6.4.0
   flutter_local_notifications: ^19.2.1
   path: ^1.9.1
+  record: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -59,5 +60,9 @@ dev_dependencies:
   injectable_generator: ^2.7.0
   go_router_builder: ^3.0.0
   mocktail: ^1.0.4
+
+dependency_overrides:
+  analyzer_plugin: ^0.13.1
+  
 flutter:
   uses-material-design: true

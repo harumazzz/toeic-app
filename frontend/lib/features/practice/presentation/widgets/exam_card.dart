@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../i18n/strings.g.dart';
+import '../../../../shared/routes/app_router.dart';
 import '../../domain/entities/exam.dart';
 
 class ExamCard extends StatelessWidget {
@@ -88,26 +89,12 @@ class ExamCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                _ExamStats(
-                  difficulty: _getDifficultyLevel(exam.timeLimitMinutes),
-                  color: colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
-                ),
               ],
             ),
           ),
         ),
       ),
     );
-  }
-
-  String _getDifficultyLevel(final int duration) {
-    if (duration <= 30) {
-      return 'Easy';
-    }
-    if (duration <= 60) {
-      return 'Medium';
-    }
-    return 'Hard';
   }
 
   Future<void> _showExamDialog(final BuildContext context) async {
@@ -178,9 +165,9 @@ class ExamCard extends StatelessWidget {
                 child: Text(context.t.common.cancel),
               ),
               FilledButton(
-                onPressed: () {
+                onPressed: () async {
                   Navigator.pop(context);
-                  // TODO(dev): Navigate to exam details
+                  await ExamRoute(exam.examId).push(context);
                 },
                 child: Text(context.t.common.yes),
               ),
@@ -302,90 +289,6 @@ class _ExamMetadata extends StatelessWidget {
     super.debugFillProperties(properties);
     properties
       ..add(IntProperty('duration', duration))
-      ..add(ColorProperty('color', color));
-  }
-}
-
-class _ExamStats extends StatelessWidget {
-  const _ExamStats({
-    required this.difficulty,
-    required this.color,
-  });
-
-  final String difficulty;
-  final Color color;
-  @override
-  Widget build(final BuildContext context) => Row(
-    children: [
-      _StatChip(
-        icon: Symbols.quiz,
-        label: 'Practice',
-        color: color,
-      ),
-      const SizedBox(width: 8),
-      _StatChip(
-        icon: Symbols.trending_up,
-        label: difficulty,
-        color: color,
-      ),
-    ],
-  );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(StringProperty('difficulty', difficulty))
-      ..add(ColorProperty('color', color));
-  }
-}
-
-class _StatChip extends StatelessWidget {
-  const _StatChip({
-    required this.icon,
-    required this.label,
-    required this.color,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-  @override
-  Widget build(final BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(
-        color: color.withValues(alpha: 0.2),
-      ),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          size: 12,
-          color: color,
-        ),
-        const SizedBox(width: 3),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: color,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    ),
-  );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(DiagnosticsProperty<IconData>('icon', icon))
-      ..add(StringProperty('label', label))
       ..add(ColorProperty('color', color));
   }
 }
