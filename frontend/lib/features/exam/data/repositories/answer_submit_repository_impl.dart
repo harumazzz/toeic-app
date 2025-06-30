@@ -30,8 +30,8 @@ class AnswerSubmitRepositoryImpl implements AnswerSubmitRepository {
   final UserAnswerRemoteDataSource remoteDataSource;
 
   @override
-  Future<Either<Failure, UserResult>> submitAnswers({
-    required final Answer request,
+  Future<Either<Failure, SubmittedAnswer>> submitAnswers({
+    required final SubmitAnswersRequest request,
   }) async {
     try {
       final response = await remoteDataSource.submitAnswers(

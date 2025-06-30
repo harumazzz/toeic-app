@@ -62,6 +62,9 @@
 	<string>This app uses speech recognition to help improve your pronunciation.</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>This app would like to track your usage to provide personalized learning experience.</string>
+	<!-- Face ID / Touch ID Usage Description -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>This app uses Face ID for secure and convenient authentication to access your learning progress.</string>
 	<!-- App Category -->
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.education</string>

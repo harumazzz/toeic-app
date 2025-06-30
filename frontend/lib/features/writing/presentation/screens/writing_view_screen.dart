@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../core/services/toast_service.dart';
 import '../../../../i18n/strings.g.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../domain/entities/text_analyze.dart';
 import '../../domain/entities/user_writing.dart';
 import '../providers/user_writing_provider.dart';
 
@@ -19,9 +21,28 @@ class WritingViewScreen extends HookConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final authState = ref.watch(authControllerProvider);
+    final analysisState = ref.watch(userWritingAnalysisControllerProvider);
+
+    // Trigger analysis when the screen loads
+    useEffect(() {
+      if (writing.submissionText.isNotEmpty) {
+        Future.microtask(() {
+          ref
+              .read(userWritingAnalysisControllerProvider.notifier)
+              .analyzeWriting(
+                TextAnalyzeRequest(
+                  minSynonymLevel: 'A1',
+                  text: writing.submissionText,
+                ),
+              );
+        });
+      }
+      return null;
+    }, [writing.submissionText]);
 
     return _WritingViewContent(
       writing: writing,
+      analysisState: analysisState,
       onDelete: () async {
         if (authState is AuthAuthenticated) {
           final success = await ref
@@ -32,13 +53,13 @@ class WritingViewScreen extends HookConsumerWidget {
             if (success) {
               ToastService.success(
                 context: context,
-                message: 'Writing deleted successfully',
+                message: t.writingAnalysis.writingDeletedSuccessfully,
               );
               Navigator.of(context).pop();
             } else {
               ToastService.error(
                 context: context,
-                message: 'Failed to delete writing',
+                message: t.writingAnalysis.failedToDeleteWriting,
               );
             }
           }
@@ -55,8 +76,13 @@ class WritingViewScreen extends HookConsumerWidget {
 }
 
 class _WritingViewContent extends StatelessWidget {
-  const _WritingViewContent({required this.writing, this.onDelete});
+  const _WritingViewContent({
+    required this.writing,
+    required this.analysisState,
+    this.onDelete,
+  });
   final UserWriting writing;
+  final UserWritingAnalysisState analysisState;
   final VoidCallback? onDelete;
 
   @override
@@ -89,6 +115,13 @@ class _WritingViewContent extends StatelessWidget {
             WritingMetadataCard(writing: writing),
             const SizedBox(height: 12),
             WritingContentCard(writing: writing),
+            const SizedBox(height: 12),
+            // Add the vocabulary analysis section
+            _AnalysisSection(
+              analysisState: analysisState,
+              wordCount: _getWordCount(writing.submissionText),
+              content: writing.submissionText,
+            ),
             if (writing.aiFeedback != null) ...[
               const SizedBox(height: 12),
               AiFeedbackCard(feedback: writing.aiFeedback!),
@@ -99,32 +132,34 @@ class _WritingViewContent extends StatelessWidget {
     );
   }
 
+  int _getWordCount(final String text) =>
+      text.trim().isEmpty ? 0 : text.trim().split(RegExp(r'\s+')).length;
+
   void _showDeleteDialog(final BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (final context) => AlertDialog(
-            title: const Text('Delete Writing'),
-            content: const Text(
-              'Are you sure you want to delete this writing submission? This action cannot be undone.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  onDelete?.call();
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                ),
-                child: const Text('Delete'),
-              ),
-            ],
+      builder: (final context) => AlertDialog(
+        title: Text(context.t.writing.deleteWriting),
+        content: Text(
+          context.t.writing.deleteWritingConfirm,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(context.t.common.cancel),
           ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              onDelete?.call();
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: Text(context.t.common.delete),
+          ),
+        ],
+      ),
     );
   }
 
@@ -133,6 +168,12 @@ class _WritingViewContent extends StatelessWidget {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty<UserWriting>('writing', writing))
+      ..add(
+        DiagnosticsProperty<UserWritingAnalysisState>(
+          'analysisState',
+          analysisState,
+        ),
+      )
       ..add(ObjectFlagProperty<VoidCallback?>.has('onDelete', onDelete));
   }
 }
@@ -588,5 +629,470 @@ class _AiFeedbackContent extends StatelessWidget {
     properties.add(
       DiagnosticsProperty<Map<String, dynamic>>('feedback', feedback),
     );
+  }
+}
+
+class _AnalysisSection extends StatelessWidget {
+  const _AnalysisSection({
+    required this.analysisState,
+    required this.wordCount,
+    required this.content,
+  });
+
+  final UserWritingAnalysisState analysisState;
+  final int wordCount;
+  final String content;
+
+  @override
+  Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(
+            alpha: 0.2,
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Symbols.analytics,
+                size: 32,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  t.writingAnalysis.writingAnalysisVocabulary,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Statistics Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _StatItem(
+                icon: Symbols.text_fields,
+                label: t.writingAnalysis.words,
+                value: wordCount.toString(),
+              ),
+              _StatItem(
+                icon: Symbols.timer,
+                label: t.writingAnalysis.time,
+                value: _getEstimatedTime(),
+              ),
+              _StatItem(
+                icon: Symbols.edit,
+                label: t.writingAnalysis.characters,
+                value: content.length.toString(),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Analysis Results
+          switch (analysisState) {
+            UserWritingAnalysisInitial() => const _AnalysisInitial(),
+            UserWritingAnalysisLoading() => const _AnalysisLoading(),
+            UserWritingAnalysisLoaded(:final data) => _AnalysisResults(
+              data: data,
+            ),
+            UserWritingAnalysisError(:final message) => _AnalysisError(
+              message: message,
+            ),
+          },
+        ],
+      ),
+    );
+  }
+
+  String _getEstimatedTime() {
+    final minutes = (wordCount / 40).ceil();
+    return '${minutes}m';
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(
+        DiagnosticsProperty<UserWritingAnalysisState>(
+          'analysisState',
+          analysisState,
+        ),
+      )
+      ..add(IntProperty('wordCount', wordCount))
+      ..add(StringProperty('content', content));
+  }
+}
+
+class _AnalysisInitial extends StatelessWidget {
+  const _AnalysisInitial();
+
+  @override
+  Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Symbols.analytics,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            t.writingAnalysis.preparingAnalysis,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnalysisLoading extends StatelessWidget {
+  const _AnalysisLoading();
+
+  @override
+  Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                theme.colorScheme.primary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            t.writingAnalysis.analyzingYourWriting,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnalysisError extends StatelessWidget {
+  const _AnalysisError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Symbols.error_outline,
+            color: theme.colorScheme.error,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              '${t.writingAnalysis.analysisUnavailable}: $message',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('message', message));
+  }
+}
+
+class _AnalysisResults extends StatelessWidget {
+  const _AnalysisResults({required this.data});
+
+  final TextAnalyze data;
+
+  @override
+  Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (data.result.words.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.3,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Symbols.check_circle,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                t.writingAnalysis.greatWorkGood,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Symbols.lightbulb,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                t.writingAnalysis.vocabularyRecommendations,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...data.result.words
+            .take(3)
+            .map((final word) => _WordRecommendation(word: word)),
+        if (data.result.words.length > 3) ...[
+          const SizedBox(height: 8),
+          Text(
+            '+${data.result.words.length - 3} more recommendations available',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<TextAnalyze>('data', data));
+  }
+}
+
+class _WordRecommendation extends StatelessWidget {
+  const _WordRecommendation({required this.word});
+
+  final Word word;
+
+  @override
+  Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _getLevelColor(
+                    word.level,
+                    theme,
+                  ).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  word.word,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: _getLevelColor(word.level, theme),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'Level ${word.level}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                'Used ${word.count}x',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+          if (word.suggestions != null && word.suggestions!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Try: ${word.suggestions!.take(2).map((final s) => s.word).join(
+                ', ',
+              )}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Color _getLevelColor(final String level, final ThemeData theme) {
+    switch (level.toUpperCase()) {
+      case 'A1':
+      case 'A2':
+        return Colors.green;
+      case 'B1':
+      case 'B2':
+        return Colors.orange;
+      case 'C1':
+      case 'C2':
+        return Colors.red;
+      default:
+        return theme.colorScheme.primary;
+    }
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Word>('word', word));
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  const _StatItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        Icon(
+          icon,
+          size: 28,
+          color: theme.colorScheme.primary,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty<IconData>('icon', icon))
+      ..add(StringProperty('label', label))
+      ..add(StringProperty('value', value));
   }
 }

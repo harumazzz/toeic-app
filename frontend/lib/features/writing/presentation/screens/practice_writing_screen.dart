@@ -223,8 +223,8 @@ class PracticeWritingScreen extends HookConsumerWidget {
                 controller: textController,
                 maxLines: null,
                 expands: true,
-                decoration: const InputDecoration(
-                  hintText: 'Start writing your practice essay here...',
+                decoration: InputDecoration(
+                  hintText: t.writingAnalysis.startWritingHere,
                 ),
                 style: Theme.of(context).textTheme.bodyLarge,
                 textInputAction: TextInputAction.newline,
@@ -251,42 +251,29 @@ class PracticeWritingScreen extends HookConsumerWidget {
             const SizedBox(width: 8),
             IconButton(
               onPressed: isSubmitting ? null : saveDraftManually,
-              icon:
-                  isLoading.value
-                      ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                      : const Icon(Symbols.save),
+              icon: isLoading.value
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Symbols.save),
               tooltip: context.t.writing.drafts.saveDraft,
-            ),
-            IconButton(
-              onPressed: () async {
-                // TODO(dev): Save as file functionality
-                ToastService.info(
-                  context: context,
-                  message: context.t.writing.drafts.saveSuccessfully,
-                );
-              },
-              icon: const Icon(Symbols.file_download),
-              tooltip: context.t.writing.drafts.saveAsFile,
             ),
             const Spacer(),
             FloatingActionButton(
               tooltip: context.t.writing.drafts.submit,
               onPressed: isSubmitting ? null : submitWriting,
-              child:
-                  isSubmitting
-                      ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                      : const Icon(Symbols.check),
+              child: isSubmitting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Symbols.check),
             ),
           ],
         ),

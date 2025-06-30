@@ -18,14 +18,11 @@ TextAnalyzeRemoteDataSource textAnalyzeRemoteDataSource(
 
 @RestApi()
 abstract class TextAnalyzeRemoteDataSource {
-
-  factory TextAnalyzeRemoteDataSource (
-    final Dio dio
-  ) = _TextAnalyzeRemoteDataSource;
+  factory TextAnalyzeRemoteDataSource(final Dio dio) =
+      _TextAnalyzeRemoteDataSource;
 
   @POST('/api/v1/analyze/text')
   Future<TextAnalyzeModel> analyzeText({
-    required final TextAnalyzeRequestModel request,
+    @Body() required final TextAnalyzeRequestModel request,
   });
-
 }

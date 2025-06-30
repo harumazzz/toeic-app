@@ -6,9 +6,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
+import '../../../../core/services/toast_service.dart';
+import '../../../../core/services/word_notification_service.dart';
 import '../../../../i18n/strings.g.dart';
 import '../../../progress/domain/entities/progress.dart';
 import '../../../progress/presentation/providers/review_progress_provider.dart';
+import '../../../settings/services/notification_scheduler_service.dart';
+import '../providers/word_provider.dart';
 import '../widgets/flashcard_widget.dart';
 
 class LearnScreen extends HookConsumerWidget {
@@ -17,8 +21,10 @@ class LearnScreen extends HookConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final reviewProgressState = ref.watch(reviewProgressNotifierProvider);
+    final wordState = ref.watch(wordControllerProvider);
     final currentIndex = useState(0);
     final offset = useState(0);
+    final hasRequestedPermission = useState(false);
 
     useEffect(() {
       Future.microtask(() async {
@@ -29,6 +35,12 @@ class LearnScreen extends HookConsumerWidget {
               offset: offset.value,
             );
         offset.value += 10;
+        if (!hasRequestedPermission.value) {
+          hasRequestedPermission.value = true;
+          if (context.mounted) {
+            await _requestNotificationPermissions(context);
+          }
+        }
       });
       return null;
     }, const []);
@@ -37,6 +49,13 @@ class LearnScreen extends HookConsumerWidget {
       appBar: AppBar(
         title: Text(context.t.modules.learnWords),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Symbols.notifications_active),
+            onPressed: () => _showNotificationMenu(context, ref, wordState),
+            tooltip: 'Schedule word notifications',
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -50,9 +69,9 @@ class LearnScreen extends HookConsumerWidget {
                   state.progress.isEmpty
                       ? const SizedBox.shrink()
                       : _ProgressHeader(
-                        currentIndex: currentIndex.value,
-                        totalCards: state.progress.length,
-                      ),
+                          currentIndex: currentIndex.value,
+                          totalCards: state.progress.length,
+                        ),
                 ReviewProgressError() => const SizedBox.shrink(),
               },
             ),
@@ -66,11 +85,11 @@ class LearnScreen extends HookConsumerWidget {
                     state.progress.isEmpty
                         ? const _EmptyStateView()
                         : _FlashcardSwiper(
-                          progress: state.progress,
-                          onIndexChanged: (final index) {
-                            currentIndex.value = index;
-                          },
-                        ),
+                            progress: state.progress,
+                            onIndexChanged: (final index) {
+                              currentIndex.value = index;
+                            },
+                          ),
                   final ReviewProgressError state => _ReviewProgressErrorView(
                     message: state.message,
                     onRetry: () async {
@@ -216,18 +235,15 @@ class _FlashcardSwiper extends StatelessWidget {
   Widget build(final BuildContext context) => Swiper(
     onIndexChanged: onIndexChanged,
     itemCount: progress.length,
-    itemBuilder:
-        (final context, final index) => FlashcardWidget(
-          word: progress[index].word,
-          frontBuilder:
-              (final context, final word) => FrontSideCard(
-                word: word,
-              ),
-          backBuilder:
-              (final context, final word) => BackSideCard(
-                word: word,
-              ),
-        ),
+    itemBuilder: (final context, final index) => FlashcardWidget(
+      word: progress[index].word,
+      frontBuilder: (final context, final word) => FrontSideCard(
+        word: word,
+      ),
+      backBuilder: (final context, final word) => BackSideCard(
+        word: word,
+      ),
+    ),
     itemHeight: MediaQuery.of(context).size.height * 0.55,
     viewportFraction: 0.85,
     scale: 0.85,
@@ -536,5 +552,280 @@ class _ShimmerContainer extends StatelessWidget {
     properties
       ..add(DiagnosticsProperty<Widget>('child', child))
       ..add(DiagnosticsProperty<Duration>('interval', interval));
+  }
+}
+
+Future<void> _requestNotificationPermissions(final BuildContext context) async {
+  final hasPermission = await NotificationSchedulerService.requestPermissions();
+
+  if (!hasPermission && context.mounted) {
+    ToastService.error(
+      context: context,
+      message: 'Permission to send notifications was denied',
+    );
+  }
+}
+
+void _showNotificationMenu(
+  final BuildContext context,
+  final WidgetRef ref,
+  final dynamic wordState,
+) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (final context) => DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      maxChildSize: 0.9,
+      minChildSize: 0.3,
+      builder: (final context, final scrollController) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 20),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.outline.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Icon(
+                    Symbols.notifications_active,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Word Notifications',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Notification options
+            Expanded(
+              child: ListView(
+                controller: scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                children: [
+                  _NotificationOption(
+                    icon: Symbols.schedule,
+                    title: context.t.learning.scheduleDailyLearning,
+                    description: 'Get daily reminders to learn new words',
+                    onTap: () => _scheduleNotification(context, ref, 'daily'),
+                  ),
+                  const SizedBox(height: 12),
+                  _NotificationOption(
+                    icon: Symbols.repeat,
+                    title: context.t.learning.scheduleMultipleReminders,
+                    description: 'Get reminders multiple times per day',
+                    onTap: () =>
+                        _scheduleNotification(context, ref, 'multiple'),
+                  ),
+                  const SizedBox(height: 12),
+                  _NotificationOption(
+                    icon: Symbols.star,
+                    title: context.t.learning.motivationalNotifications,
+                    description: 'Get encouraging messages to keep learning',
+                    onTap: () =>
+                        _scheduleNotification(context, ref, 'motivational'),
+                  ),
+                  const SizedBox(height: 12),
+                  _NotificationOption(
+                    icon: Symbols.cancel,
+                    title: context.t.learning.cancelAllNotifications,
+                    description: 'Stop all scheduled word notifications',
+                    onTap: () => _cancelAllNotifications(context, ref),
+                    isDestructive: true,
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+Future<void> _scheduleNotification(
+  final BuildContext context,
+  final WidgetRef ref,
+  final String type,
+) async {
+  Navigator.of(context).pop(); // Close bottom sheet
+
+  try {
+    switch (type) {
+      case 'daily':
+        // Schedule basic daily notification at default time (9 AM)
+        await NotificationSchedulerService.scheduleWordNotifications(
+          words: const [], // Using empty words list for basic notification
+          frequency: NotificationFrequency.daily,
+          preferredHour: 9,
+        );
+        break;
+      case 'multiple':
+        // Schedule multiple notifications per day
+        await NotificationSchedulerService.scheduleWordNotifications(
+          words: const [], // Using empty words list for basic notification
+          frequency: NotificationFrequency.twiceDaily,
+          preferredHour: 9,
+        );
+        break;
+      case 'motivational':
+        await NotificationSchedulerService.scheduleMotivationalNotifications();
+        break;
+    }
+
+    if (context.mounted) {
+      ToastService.success(
+        context: context,
+        message: 'Notifications scheduled successfully',
+      );
+    }
+  } catch (e) {
+    debugPrint(e.toString());
+    if (context.mounted) {
+      ToastService.error(
+        context: context,
+        message: 'Failed to schedule notifications',
+      );
+    }
+  }
+}
+
+Future<void> _cancelAllNotifications(
+  final BuildContext context,
+  final WidgetRef ref,
+) async {
+  Navigator.of(context).pop(); // Close bottom sheet
+
+  try {
+    await NotificationSchedulerService.cancelAllWordNotifications();
+
+    if (context.mounted) {
+      ToastService.success(
+        context: context,
+        message: 'All notifications cancelled',
+      );
+    }
+  } catch (e) {
+    if (context.mounted) {
+      ToastService.error(
+        context: context,
+        message: 'Failed to cancel notifications',
+      );
+    }
+  }
+}
+
+class _NotificationOption extends StatelessWidget {
+  const _NotificationOption({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  @override
+  Widget build(final BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final color = isDestructive ? colorScheme.error : colorScheme.primary;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: color.withValues(alpha: 0.3),
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Symbols.chevron_right,
+                color: colorScheme.outline,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty<IconData>('icon', icon))
+      ..add(StringProperty('title', title))
+      ..add(StringProperty('description', description))
+      ..add(ObjectFlagProperty<VoidCallback>.has('onTap', onTap))
+      ..add(DiagnosticsProperty<bool>('isDestructive', isDestructive));
   }
 }

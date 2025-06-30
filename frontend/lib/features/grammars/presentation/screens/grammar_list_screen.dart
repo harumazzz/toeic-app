@@ -120,26 +120,24 @@ class GrammarListScreen extends HookConsumerWidget {
           decoration: InputDecoration(
             hintText: context.t.grammar.searchHint,
             border: InputBorder.none,
-            suffixIcon:
-                searchController.text.isNotEmpty
-                    ? IconButton(
-                      icon: const Icon(Symbols.clear),
-                      onPressed: () async {
-                        searchController.clear();
-                        isSearching.value = false;
-                        await ref
-                            .read(grammarListProvider.notifier)
-                            .loadGrammars(
-                              limit: pageSize,
-                              offset: 0,
-                            );
-                      },
-                    )
-                    : null,
+            suffixIcon: searchController.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Symbols.clear),
+                    onPressed: () async {
+                      searchController.clear();
+                      isSearching.value = false;
+                      await ref
+                          .read(grammarListProvider.notifier)
+                          .loadGrammars(
+                            limit: pageSize,
+                            offset: 0,
+                          );
+                    },
+                  )
+                : null,
           ),
           textInputAction: TextInputAction.search,
         ),
-        centerTitle: false,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 2,
       ),
@@ -148,9 +146,8 @@ class GrammarListScreen extends HookConsumerWidget {
           if (state.isLoading && state.grammars.isEmpty) {
             return ListView.builder(
               itemCount: 5,
-              itemBuilder:
-                  (final context, final index) =>
-                      const GrammarListItemShimmer(),
+              itemBuilder: (final context, final index) =>
+                  const GrammarListItemShimmer(),
             );
           } else if (state.error != null) {
             return Center(

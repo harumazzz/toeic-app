@@ -163,6 +163,15 @@
     "notification": "Send notification",
     "notification_enabled": "Enabled",
     "notification_disabled": "Disabled",
+    "wordNotifications": "Word Learning Notifications",
+    "wordNotifications_enabled": "Get notifications for word learning",
+    "wordNotifications_disabled": "Word notifications are disabled",
+    "notificationFrequency": "Notification Frequency",
+    "notificationTime": "Notification Time",
+    "frequency_daily": "Once a day",
+    "frequency_twice_daily": "Twice a day",
+    "frequency_three_times_daily": "Three times a day",
+    "frequency_hourly": "Every hour",
     "loading": "Loading settings..."
   },
   "help": {
@@ -313,6 +322,21 @@
       "successTitle": "Exam Submitted!",
       "successMessage": "Your exam has been successfully submitted!",
       "answeredQuestions": "Answered: $answered / $total questions",
+      "backToHome": "Back to Home"
+    },
+    "results": {
+      "title": "Exam Results",
+      "examCompleted": "Exam Completed!",
+      "yourScore": "Your Score",
+      "correct": "Correct",
+      "incorrect": "Incorrect",
+      "total": "Total",
+      "reviewAnswers": "Review Your Answers",
+      "questionNumber": "Question $number",
+      "answerOptions": "Answer Options",
+      "explanation": "Explanation",
+      "questionNotFound": "Question not found",
+      "tryAgain": "Try Again",
       "backToHome": "Back to Home"
     }
   },
@@ -476,5 +500,107 @@
     "ai": "AI",
     "user": "User",
     "playingRecordedAudio": "Playing recorded audio..."
+  },
+  "writingAnalysis": {
+    "writingAnalysisRecommendations": "Writing Analysis & Recommendations",
+    "writingAnalysisVocabulary": "Writing Analysis & Vocabulary",
+    "words": "Words",
+    "time": "Time",
+    "characters": "Characters",
+    "preparingAnalysis": "Preparing analysis...",
+    "analyzingYourWriting": "Analyzing your writing...",
+    "analysisUnavailable": "Analysis unavailable",
+    "greatWorkGood": "Great work! Your writing looks good with no specific recommendations.",
+    "vocabularyRecommendations": "Vocabulary Recommendations",
+    "writingDeletedSuccessfully": "Writing deleted successfully",
+    "failedToDeleteWriting": "Failed to delete writing",
+    "startWritingHere": "Start writing your practice essay here...",
+    "delete": "Delete"
+  },
+  "biometric": {
+    "title": "Biometric Authentication",
+    "subtitle": "Use fingerprint or face recognition for quick access to the app",
+    "enableBiometric": "Enable biometric authentication",
+    "enableBiometricSubtitle": "Allow login with fingerprint or face recognition",
+    "authenticateNow": "Authenticate Now",
+    "authenticating": "Authenticating...",
+    "loginWithPassword": "Login with password",
+    "authenticationFailed": "Authentication failed",
+    "authenticationError": "Authentication error occurred",
+    "biometricEnabled": "Biometric authentication enabled",
+    "biometricDisabled": "Biometric authentication disabled",
+    "settingChangeError": "Error occurred while changing settings",
+    "deviceSupport": "Device Support",
+    "deviceSupportedMessage": "Your device supports biometric authentication",
+    "deviceNotSupportedMessage": "Your device does not support biometric authentication",
+    "biometricsAvailable": "Biometrics Available",
+    "biometricsAvailableMessage": "Biometrics are set up on your device",
+    "biometricsNotAvailableMessage": "Biometrics are not set up on your device",
+    "availableMethods": "Available methods:",
+    "setupInstructions": "Please set up fingerprint or face recognition in your device settings to use this feature.",
+    "debugAndTest": "Debug & Test",
+    "testAuthentication": "Test Authentication",
+    "directLocalAuthTest": "Direct LocalAuth Test",
+    "showDebugInfo": "Show Debug Info",
+    "testResult": "Test result",
+    "debugInfo": "Debug Info",
+    "deviceSupported": "Device Supported",
+    "hasAvailable": "Has Available",
+    "availableTypes": "Available Types",
+    "userEnabled": "User Enabled",
+    "success": "Success",
+    "failed": "Failed",
+    "directTest": "Direct test",
+    "authenticateToEnable": "Authenticate to enable biometric login feature",
+    "authenticateToAccess": "Authenticate to access TOEIC app",
+    "testBiometricAuth": "Test biometric authentication",
+    "directLocalAuthTestName": "Direct LocalAuth test",
+    "biometricTypes": {
+      "face": "Face Recognition",
+      "fingerprint": "Fingerprint",
+      "iris": "Iris Recognition",
+      "strong": "Strong Biometric Authentication",
+      "weak": "Weak Biometric Authentication"
+    },
+    "security": "Security",
+    "securitySubtitle": "Biometric and security settings"
+  },
+  "notifications": {
+    "wordLearning": {
+      "timeToLearnNewWord": "📚 Time to learn a new word!",
+      "timeForWordReview": "🔄 Time for word review!",
+      "vocabularyLearningTip": "💡 Vocabulary Learning Tip",
+      "maintainYourStreak": "🔥 Maintain your streak!",
+      "customWordReminder": "📝 Custom Word Reminder",
+      "expandVocabulary": "Expand your vocabulary",
+      "reviewWordMessage": "Review \"{}\" to strengthen your memory",
+      "learnWordMessage": "{} - {}",
+      "customLearnMessage": "Learn this word: {} - {}",
+      "streakMessage": "You're on a {}-day learning streak! Don't break it now!"
+    },
+    "motivational": {
+      "keepGoing": "Keep going! Every word you learn brings you closer to fluency! 🌟",
+      "greatJob": "Great job learning new words! Your vocabulary is expanding! 📖",
+      "boostSkills": "Time to boost your English skills with some new vocabulary! 💪",
+      "wordADay": "Learning a new word a day keeps the language barriers away! 🚀",
+      "dedicationInspiring": "Your dedication to learning is inspiring! Ready for today's word? ✨"
+    }
+  },
+  "routes": {
+    "forgotPasswordScreen": "Forgot Password Screen",
+    "invalidExamResultsData": "Invalid exam results data"
+  },
+  "learning": {
+    "scheduleDailyLearning": "Schedule Daily Learning",
+    "scheduleMultipleReminders": "Schedule Multiple Reminders",
+    "motivationalNotifications": "Motivational Notifications",
+    "cancelAllNotifications": "Cancel All Notifications"
+  },
+  "exceptions": {
+    "speechRecognitionNotAvailable": "Speech recognition not available",
+    "failedToSaveSpeakingTurn": "Failed to save speaking turn",
+    "speechToTextError": "Speech to text error",
+    "speechToTextStatus": "Speech to text status",
+    "failedToInitializeSpeechToText": "Failed to initialize speech to text"
   }
 }

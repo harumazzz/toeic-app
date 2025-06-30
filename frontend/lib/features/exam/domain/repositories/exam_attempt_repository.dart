@@ -32,8 +32,4 @@ abstract interface class ExamAttemptRepository {
   Future<Either<Failure, ExamAttempt>> completeExamAttempt(
     final int id,
   );
-
-  Future<Either<Failure, Map<String, dynamic>>> getExamLeaderboard(
-    final int examId,
-  );
 }

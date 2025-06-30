@@ -11,23 +11,24 @@ import '../repositories/answer_submit_repository.dart';
 part 'submit_answer.g.dart';
 
 @riverpod
-SubmitAnswer submitAnswer(
+SubmitAnswerUseCase submitAnswer(
   final Ref ref,
 ) {
   final repository = ref.watch(answerSubmitRepositoryProvider);
-  return SubmitAnswer(repository: repository);
+  return SubmitAnswerUseCase(repository: repository);
 }
 
-class SubmitAnswer implements UseCase<UserResult, Answer> {
-  const SubmitAnswer({
+class SubmitAnswerUseCase
+    implements UseCase<SubmittedAnswer, SubmitAnswersRequest> {
+  const SubmitAnswerUseCase({
     required this.repository,
   });
 
   final AnswerSubmitRepository repository;
 
   @override
-  Future<Either<Failure, UserResult>> call(
-    final Answer params,
+  Future<Either<Failure, SubmittedAnswer>> call(
+    final SubmitAnswersRequest params,
   ) => repository.submitAnswers(
     request: params,
   );

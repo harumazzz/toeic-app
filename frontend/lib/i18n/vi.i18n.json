@@ -163,6 +163,15 @@
     "notification": "Gửi thông báo",
     "notification_enabled": "Bật",
     "notification_disabled": "Tắt",
+    "wordNotifications": "Thông báo học từ vựng",
+    "wordNotifications_enabled": "Nhận thông báo để học từ vựng",
+    "wordNotifications_disabled": "Thông báo từ vựng đã tắt",
+    "notificationFrequency": "Tần suất thông báo",
+    "notificationTime": "Thời gian thông báo",
+    "frequency_daily": "Mỗi ngày một lần",
+    "frequency_twice_daily": "Hai lần mỗi ngày",
+    "frequency_three_times_daily": "Ba lần mỗi ngày",
+    "frequency_hourly": "Mỗi giờ",
     "loading": "Đang tải cài đặt..."
   },
   "help": {
@@ -313,6 +322,21 @@
       "successTitle": "Đã nộp bài thi!",
       "successMessage": "Bài thi của bạn đã được nộp thành công!",
       "answeredQuestions": "Đã trả lời: $answered / $total câu hỏi",
+      "backToHome": "Về trang chủ"
+    },
+    "results": {
+      "title": "Kết quả bài thi",
+      "examCompleted": "Hoàn thành bài thi!",
+      "yourScore": "Điểm của bạn",
+      "correct": "Đúng",
+      "incorrect": "Sai",
+      "total": "Tổng",
+      "reviewAnswers": "Xem lại câu trả lời",
+      "questionNumber": "Câu hỏi $number",
+      "answerOptions": "Các lựa chọn",
+      "explanation": "Giải thích",
+      "questionNotFound": "Không tìm thấy câu hỏi",
+      "tryAgain": "Thử lại",
       "backToHome": "Về trang chủ"
     }
   },
@@ -476,5 +500,107 @@
     "ai": "AI",
     "user": "Người dùng",
     "playingRecordedAudio": "Đang phát ghi âm..."
+  },
+  "writingAnalysis": {
+    "writingAnalysisRecommendations": "Phân tích bài viết & Đề xuất",
+    "writingAnalysisVocabulary": "Phân tích bài viết & Từ vựng",
+    "words": "Từ",
+    "time": "Thời gian",
+    "characters": "Ký tự",
+    "preparingAnalysis": "Đang chuẩn bị phân tích...",
+    "analyzingYourWriting": "Đang phân tích bài viết của bạn...",
+    "analysisUnavailable": "Không thể phân tích",
+    "greatWorkGood": "Tuyệt vời! Bài viết của bạn rất tốt và không có đề xuất cụ thể nào.",
+    "vocabularyRecommendations": "Đề xuất từ vựng",
+    "writingDeletedSuccessfully": "Đã xóa bài viết thành công",
+    "failedToDeleteWriting": "Không thể xóa bài viết",
+    "startWritingHere": "Bắt đầu viết bài luyện tập của bạn tại đây...",
+    "delete": "Xóa"
+  },
+  "biometric": {
+    "title": "Xác thực sinh trắc học",
+    "subtitle": "Sử dụng vân tay hoặc khuôn mặt để truy cập nhanh vào ứng dụng",
+    "enableBiometric": "Bật xác thực sinh trắc học",
+    "enableBiometricSubtitle": "Cho phép đăng nhập bằng vân tay hoặc khuôn mặt",
+    "authenticateNow": "Xác thực ngay",
+    "authenticating": "Đang xác thực...",
+    "loginWithPassword": "Đăng nhập bằng mật khẩu",
+    "authenticationFailed": "Xác thực không thành công",
+    "authenticationError": "Có lỗi xảy ra khi xác thực",
+    "biometricEnabled": "Đã bật xác thực sinh trắc học",
+    "biometricDisabled": "Đã tắt xác thực sinh trắc học",
+    "settingChangeError": "Có lỗi xảy ra khi thay đổi cài đặt",
+    "deviceSupport": "Hỗ trợ thiết bị",
+    "deviceSupportedMessage": "Thiết bị của bạn hỗ trợ xác thực sinh trắc học",
+    "deviceNotSupportedMessage": "Thiết bị của bạn không hỗ trợ xác thực sinh trắc học",
+    "biometricsAvailable": "Sinh trắc học có sẵn",
+    "biometricsAvailableMessage": "Đã thiết lập sinh trắc học trên thiết bị",
+    "biometricsNotAvailableMessage": "Chưa thiết lập sinh trắc học trên thiết bị",
+    "availableMethods": "Phương thức có sẵn:",
+    "setupInstructions": "Vui lòng thiết lập vân tay hoặc khuôn mặt trong cài đặt thiết bị để sử dụng tính năng này.",
+    "debugAndTest": "Debug & Test",
+    "testAuthentication": "Test Authentication",
+    "directLocalAuthTest": "Direct LocalAuth Test",
+    "showDebugInfo": "Show Debug Info",
+    "testResult": "Kết quả test",
+    "debugInfo": "Debug Info",
+    "deviceSupported": "Device Supported",
+    "hasAvailable": "Has Available",
+    "availableTypes": "Available Types",
+    "userEnabled": "User Enabled",
+    "success": "Thành công",
+    "failed": "Thất bại",
+    "directTest": "Direct test",
+    "authenticateToEnable": "Xác thực để bật tính năng đăng nhập bằng sinh trắc học",
+    "authenticateToAccess": "Xác thực để truy cập ứng dụng TOEIC",
+    "testBiometricAuth": "Test biometric authentication",
+    "directLocalAuthTestName": "Direct LocalAuth test",
+    "biometricTypes": {
+      "face": "Nhận diện khuôn mặt",
+      "fingerprint": "Vân tay",
+      "iris": "Nhận diện mống mắt",
+      "strong": "Xác thực sinh trắc học mạnh",
+      "weak": "Xác thực sinh trắc học yếu"
+    },
+    "security": "Bảo mật",
+    "securitySubtitle": "Cài đặt bảo mật và sinh trắc học"
+  },
+  "notifications": {
+    "wordLearning": {
+      "timeToLearnNewWord": "📚 Đã đến lúc học từ mới!",
+      "timeForWordReview": "🔄 Đã đến lúc ôn tập từ vựng!",
+      "vocabularyLearningTip": "💡 Mẹo học từ vựng",
+      "maintainYourStreak": "🔥 Duy trì chuỗi học tập!",
+      "customWordReminder": "📝 Nhắc nhở từ vựng tùy chỉnh",
+      "expandVocabulary": "Mở rộng vốn từ vựng",
+      "reviewWordMessage": "Ôn tập \"{}\" để củng cố trí nhớ",
+      "learnWordMessage": "{} - {}",
+      "customLearnMessage": "Học từ này: {} - {}",
+      "streakMessage": "Bạn đang có chuỗi học tập {} ngày! Đừng để mất chuỗi!"
+    },
+    "motivational": {
+      "keepGoing": "Tiếp tục nào! Mỗi từ bạn học sẽ đưa bạn đến gần hơn với sự thành thạo! 🌟",
+      "greatJob": "Làm tốt lắm! Vốn từ vựng của bạn đang được mở rộng! 📖",
+      "boostSkills": "Đã đến lúc nâng cao kỹ năng tiếng Anh với những từ vựng mới! 💪",
+      "wordADay": "Học một từ mỗi ngày sẽ loại bỏ rào cản ngôn ngữ! 🚀",
+      "dedicationInspiring": "Sự tận tâm học tập của bạn thật đáng ngưỡng mộ! Sẵn sàng cho từ hôm nay chưa? ✨"
+    }
+  },
+  "routes": {
+    "forgotPasswordScreen": "Màn hình quên mật khẩu",
+    "invalidExamResultsData": "Dữ liệu kết quả thi không hợp lệ"
+  },
+  "learning": {
+    "scheduleDailyLearning": "Lập lịch học hàng ngày",
+    "scheduleMultipleReminders": "Lập lịch nhiều nhắc nhở",
+    "motivationalNotifications": "Thông báo động viên",
+    "cancelAllNotifications": "Hủy tất cả thông báo"
+  },
+  "exceptions": {
+    "speechRecognitionNotAvailable": "Nhận dạng giọng nói không khả dụng",
+    "failedToSaveSpeakingTurn": "Không thể lưu lượt nói",
+    "speechToTextError": "Lỗi chuyển giọng nói thành văn bản",
+    "speechToTextStatus": "Trạng thái chuyển giọng nói thành văn bản",
+    "failedToInitializeSpeechToText": "Không thể khởi tạo chuyển giọng nói thành văn bản"
   }
 }

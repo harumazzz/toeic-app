@@ -8,7 +8,6 @@ part 'setting_provider.g.dart';
 @Riverpod(keepAlive: true)
 class SettingNotifier extends _$SettingNotifier {
   late final SettingLocalDataSource _localDataSource;
-
   @override
   Future<Setting> build() async {
     _localDataSource = ref.read(settingLocalDataSourceProvider);
@@ -28,6 +27,13 @@ class SettingNotifier extends _$SettingNotifier {
         themeMode: setting.themeMode.name,
         language: setting.language.name,
         notificationEnabled: setting.notificationEnabled,
+        wordNotificationEnabled: setting.wordNotificationEnabled,
+        wordNotificationFrequency: setting.wordNotificationFrequency.name,
+        wordNotificationHour: setting.wordNotificationHour,
+        reviewNotificationEnabled: setting.reviewNotificationEnabled,
+        motivationalNotificationEnabled:
+            setting.motivationalNotificationEnabled,
+        streakReminderEnabled: setting.streakReminderEnabled,
       ),
     );
   }

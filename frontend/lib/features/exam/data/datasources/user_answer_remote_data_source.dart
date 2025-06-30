@@ -58,7 +58,7 @@ abstract class UserAnswerRemoteDataSource {
   });
 
   @POST('/api/v1/user-answers/bulk')
-  Future<result.UserResultModel> submitAnswers({
-    @Body() required final result.AnswerModel request,
+  Future<result.SubmittedAnswerModel> submitAnswers({
+    @Body() required final result.SubmitAnswersRequestModel request,
   });
 }

@@ -145,20 +145,4 @@ class ExamAttemptRepositoryImpl implements ExamAttemptRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
-
-  @override
-  Future<Either<Failure, Map<String, dynamic>>> getExamLeaderboard(
-    final int examId,
-  ) async {
-    try {
-      final response = await remoteDataSource.getExamLeaderboard(
-        examId: examId,
-      );
-      return Right(response);
-    } on DioException catch (e) {
-      return Left(ServerFailure(message: e.message.toString()));
-    } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
-    }
-  }
 }

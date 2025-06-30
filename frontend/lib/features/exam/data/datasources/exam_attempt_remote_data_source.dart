@@ -57,9 +57,4 @@ abstract class ExamAttemptRemoteDataSource {
   Future<ExamAttemptModel> completeExamAttempt({
     @Path('id') required final int id,
   });
-
-  @GET('/api/v1/exams/{id}/leaderboard')
-  Future<Map<String, dynamic>> getExamLeaderboard({
-    @Path('id') required final int examId,
-  });
 }

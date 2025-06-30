@@ -2,9 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/services/biometric_service.dart';
 import '../../core/storage/secure_storage_service.dart';
+import '../../features/auth/presentation/screens/biometric_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/exam/domain/entities/exam.dart';
+import '../../features/exam/domain/entities/result.dart';
+import '../../features/exam/presentation/screens/exam_results_screen.dart';
 import '../../features/exam/presentation/screens/exam_screen.dart';
 import '../../features/grammars/presentation/screens/grammar_detail_screen.dart';
 import '../../features/grammars/presentation/screens/grammar_list_screen.dart';
@@ -12,16 +17,16 @@ import '../../features/help/presentation/screens/help_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/practice/presentation/screens/practice_screen.dart';
 import '../../features/progress/presentation/screens/progress_screen.dart';
+import '../../features/settings/presentation/screens/biometric_settings_screen.dart';
 import '../../features/settings/presentation/screens/setting_screen.dart';
 import '../../features/speaking/presentation/screens/speaking_detail_screen.dart';
 import '../../features/speaking/presentation/screens/speaking_screen.dart';
 import '../../features/vocabulary/presentation/screens/vocabulary_screen.dart';
 import '../../features/vocabulary/presentation/screens/word_detail_screen.dart';
-import '../../features/writing/presentation/screens/drafts_management_screen.dart';
 import '../../features/writing/presentation/screens/practice_writing_screen.dart';
-import '../../features/writing/presentation/screens/writing_detail_screen.dart';
 import '../../features/writing/presentation/screens/writing_screen.dart';
 import '../../features/writing/presentation/screens/writing_submission_success_screen.dart';
+import '../../i18n/strings.g.dart';
 import '../../injection_container.dart';
 
 part 'app_router.g.dart';
@@ -32,6 +37,8 @@ class AppRouter {
   static const String loginRoute = 'login';
 
   static const String registerRoute = 'register';
+
+  static const String biometricRoute = 'biometric';
 
   static const String forgotPasswordRoute = 'forgot-password';
 
@@ -49,6 +56,8 @@ class AppRouter {
 
   static const String settingsRoute = 'settings';
 
+  static const String biometricSettingsRoute = 'biometric-settings';
+
   static const String practiceRoute = 'practice';
 
   static const String progressRoute = 'progress';
@@ -60,6 +69,8 @@ class AppRouter {
   static const String writingRoute = 'writing';
 
   static const String examsRoute = 'exams';
+
+  static const String examResultsRoute = 'exam-results';
 
   static const String practiceWritingRoute = 'practice-writing';
 
@@ -101,6 +112,20 @@ class RegisterRoute extends GoRouteData with _$RegisterRoute {
   ) => const RegisterScreen();
 }
 
+@TypedGoRoute<BiometricRoute>(
+  path: '/${AppRouter.biometricRoute}',
+  name: AppRouter.biometricRoute,
+)
+class BiometricRoute extends GoRouteData with _$BiometricRoute {
+  const BiometricRoute();
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const BiometricScreen();
+}
+
 @TypedGoRoute<ForgotPasswordRoute>(
   path: '/${AppRouter.forgotPasswordRoute}',
   name: AppRouter.forgotPasswordRoute,
@@ -112,7 +137,9 @@ class ForgotPasswordRoute extends GoRouteData with _$ForgotPasswordRoute {
   Widget build(
     final BuildContext context,
     final GoRouterState state,
-  ) => const Scaffold(body: Center(child: Text('Forgot Password Screen')));
+  ) => Scaffold(
+    body: Center(child: Text(context.t.routes.forgotPasswordScreen)),
+  );
 }
 
 @TypedGoRoute<HomeRoute>(
@@ -219,6 +246,20 @@ class SettingsRoute extends GoRouteData with _$SettingsRoute {
   ) => const SettingScreen();
 }
 
+@TypedGoRoute<BiometricSettingsRoute>(
+  path: '/${AppRouter.biometricSettingsRoute}',
+  name: AppRouter.biometricSettingsRoute,
+)
+class BiometricSettingsRoute extends GoRouteData with _$BiometricSettingsRoute {
+  const BiometricSettingsRoute();
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const BiometricSettingsScreen();
+}
+
 @TypedGoRoute<PracticeRoute>(
   path: '/${AppRouter.practiceRoute}',
   name: AppRouter.practiceRoute,
@@ -309,6 +350,37 @@ class ExamRoute extends GoRouteData with _$ExamRoute {
   ) => ExamScreen(examId: examId);
 }
 
+@TypedGoRoute<ExamResultsRoute>(
+  path: '/${AppRouter.examResultsRoute}',
+  name: AppRouter.examResultsRoute,
+)
+class ExamResultsRoute extends GoRouteData with _$ExamResultsRoute {
+  const ExamResultsRoute();
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) {
+    final data = state.extra as Map<String, dynamic>?;
+    final submittedAnswer = data?['submittedAnswer'] as SubmittedAnswer?;
+    final exam = data?['exam'] as Exam?;
+
+    if (submittedAnswer == null || exam == null) {
+      return Scaffold(
+        body: Center(
+          child: Text(context.t.routes.invalidExamResultsData),
+        ),
+      );
+    }
+
+    return ExamResultsScreen(
+      submittedAnswer: submittedAnswer,
+      exam: exam,
+    );
+  }
+}
+
 @TypedGoRoute<PracticeWritingRoute>(
   path: '/${AppRouter.practiceWritingRoute}',
   name: AppRouter.practiceWritingRoute,
@@ -330,23 +402,6 @@ class PracticeWritingRoute extends GoRouteData with _$PracticeWritingRoute {
     prompt: prompt,
     promptId: promptId,
   );
-}
-
-@TypedGoRoute<WritingDetailRoute>(
-  path: '/${AppRouter.writingDetailRoute}/:promptId',
-  name: AppRouter.writingDetailRoute,
-)
-class WritingDetailRoute extends GoRouteData with _$WritingDetailRoute {
-  const WritingDetailRoute({
-    required this.promptId,
-  });
-
-  final int promptId;
-  @override
-  Widget build(
-    final BuildContext context,
-    final GoRouterState state,
-  ) => WritingDetailScreen(promptId: promptId);
 }
 
 @TypedGoRoute<WritingSubmissionSuccessRoute>(
@@ -376,41 +431,47 @@ class WritingSubmissionSuccessRoute extends GoRouteData
   );
 }
 
-@TypedGoRoute<DraftsManagementRoute>(
-  path: '/${AppRouter.draftsManagementRoute}',
-  name: AppRouter.draftsManagementRoute,
-)
-class DraftsManagementRoute extends GoRouteData with _$DraftsManagementRoute {
-  const DraftsManagementRoute();
-
-  @override
-  Widget build(
-    final BuildContext context,
-    final GoRouterState state,
-  ) => const DraftsManagementScreen();
-}
-
 final GoRouter _router = GoRouter(
   routes: $appRoutes,
   initialLocation: '/${AppRouter.loginRoute}',
   debugLogDiagnostics: kDebugMode,
   redirect: (final context, final state) async {
     final secureStorage = InjectionContainer.get<SecureStorageService>();
-    final token = await secureStorage.getAccessToken();
-    final isExpired = await secureStorage.isExpired();
-    if (token == null || token.isEmpty || isExpired) {
-      if (isExpired) {
+    final biometricService = InjectionContainer.get<BiometricService>();
+    final path = state.uri.toString();
+    final accessToken = await secureStorage.getAccessToken();
+    final refreshToken = await secureStorage.getRefreshToken();
+    final isRefreshTokenExpired = await secureStorage.isExpired();
+    if ((accessToken == null || accessToken.isEmpty) &&
+        (refreshToken == null ||
+            refreshToken.isEmpty ||
+            isRefreshTokenExpired)) {
+      if (isRefreshTokenExpired) {
         await secureStorage.clearAllTokens();
       }
       return '/${AppRouter.loginRoute}';
     }
-    final path = state.uri.toString();
-    switch (path) {
-      case '/${AppRouter.loginRoute}':
-      case '/${AppRouter.registerRoute}':
-      case '/${AppRouter.forgotPasswordRoute}':
-        return '/${AppRouter.homeRoute}';
+    if ((accessToken == null || accessToken.isEmpty) &&
+        refreshToken != null &&
+        refreshToken.isNotEmpty &&
+        !isRefreshTokenExpired) {
+      final canUseBiometric = await biometricService.canUseBiometricAuth();
+      if (canUseBiometric && path != '/${AppRouter.biometricRoute}') {
+        return '/${AppRouter.biometricRoute}';
+      } else if (!canUseBiometric && path != '/${AppRouter.loginRoute}') {
+        return '/${AppRouter.loginRoute}';
+      }
     }
+    if (accessToken != null && accessToken.isNotEmpty) {
+      switch (path) {
+        case '/${AppRouter.loginRoute}':
+        case '/${AppRouter.registerRoute}':
+        case '/${AppRouter.biometricRoute}':
+        case '/${AppRouter.forgotPasswordRoute}':
+          return '/${AppRouter.homeRoute}';
+      }
+    }
+
     return path;
   },
 );
