@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/toeic-app/internal/ai"
 	"github.com/toeic-app/internal/analyze"
 	"github.com/toeic-app/internal/backup"
 	"github.com/toeic-app/internal/cache"
@@ -63,9 +64,11 @@ type Server struct {
 	concurrencyManager *performance.ConcurrencyManager      // Advanced concurrency management
 	poolManager        *performance.ConnectionPoolManager   // Database connection pool management
 	concurrentHandler  *middleware.ConcurrentRequestHandler // Concurrent request handling
-
 	// Analyze service
 	analyzeService *analyze.Service // Text analysis service for writing enhancement
+
+	// AI Scoring service
+	aiScoringService *ai.ScoringService // AI-based writing scoring service
 
 	// Real-time upgrade notifications
 	wsManager      *websocket.Manager // WebSocket manager for real-time connections
@@ -197,7 +200,6 @@ func NewServer(config configPkg.Config, store db.Querier, dbConn *sql.DB) (*Serv
 	// Initialize WebSocket manager and upgrade service
 	wsManager := websocket.NewManager()
 	upgradeService := upgrade.NewService(wsManager)
-
 	// Initialize analyze service if enabled
 	var analyzeService *analyze.Service
 	if config.AnalyzeServiceEnabled {
@@ -207,6 +209,11 @@ func NewServer(config configPkg.Config, store db.Querier, dbConn *sql.DB) (*Serv
 	} else {
 		logger.Info("Analyze service disabled")
 	}
+
+	// Initialize AI scoring service
+	logger.Info("Initializing AI scoring service...")
+	aiScoringService := ai.NewScoringService(config.OpenAIAPIKey, config.OpenAIAPIURL)
+	logger.Info("AI scoring service initialized with OpenAI ChatGPT")
 	// Initialize the server
 	server := &Server{
 		config:              config,
@@ -220,6 +227,7 @@ func NewServer(config configPkg.Config, store db.Querier, dbConn *sql.DB) (*Serv
 		responseOptimizer:   performance.NewResponseOptimizer(),
 		backgroundProcessor: performance.NewBackgroundProcessor(config.BackgroundWorkerCount, config.BackgroundQueueSize),
 		analyzeService:      analyzeService,
+		aiScoringService:    aiScoringService,
 		wsManager:           wsManager,
 		upgradeService:      upgradeService,
 		cacheManager:        cacheManager,     // Add cache manager
@@ -769,8 +777,7 @@ func (server *Server) setupRouter() {
 						prompts.PUT("/:id", server.updateWritingPrompt)
 						prompts.DELETE("/:id", server.deleteWritingPrompt)
 					}
-				}
-				// User writing submissions routes
+				} // User writing submissions routes
 				submissions := writing.Group("/submissions")
 				{
 					submissions.POST("", server.createUserWriting)
@@ -778,6 +785,9 @@ func (server *Server) setupRouter() {
 					submissions.PUT("/:id", server.updateUserWriting)
 					submissions.DELETE("/:id", server.deleteUserWriting)
 				}
+
+				// AI scoring route
+				writing.POST("/score", server.scoreWriting)
 
 				// User-specific writing submissions
 				writing.GET("/users/:user_id/submissions", server.listUserWritingsByUserID)

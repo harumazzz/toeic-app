@@ -10257,6 +10257,81 @@
                 }
             }
         },
+        "/api/v1/writing/score": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Score a writing submission using AI to get TOEIC band assessment and detailed feedback",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Score writing submission using AI",
+                "parameters": [
+                    {
+                        "description": "Writing scoring request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.scoreWritingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Writing scored successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.scoreWritingResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "503": {
+                        "description": "AI scoring service unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/writing/submissions": {
             "post": {
                 "security": [
@@ -13200,6 +13275,64 @@
                 },
                 "schedule": {
                     "type": "string"
+                }
+            }
+        },
+        "api.scoreWritingRequest": {
+            "type": "object",
+            "required": [
+                "text"
+            ],
+            "properties": {
+                "prompt_id": {
+                    "type": "integer"
+                },
+                "submission_id": {
+                    "type": "integer"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.scoreWritingResponse": {
+            "type": "object",
+            "properties": {
+                "band": {
+                    "description": "TOEIC band level",
+                    "type": "string"
+                },
+                "confidence": {
+                    "description": "AI confidence score (0-1)",
+                    "type": "number"
+                },
+                "feedback": {
+                    "description": "Detailed feedback",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "processed_at": {
+                    "type": "string"
+                },
+                "prompt_id": {
+                    "type": "integer"
+                },
+                "score": {
+                    "description": "0-200 TOEIC writing score",
+                    "type": "integer"
+                },
+                "suggestions": {
+                    "description": "Improvement suggestions",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "text": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },

@@ -85,11 +85,16 @@ type Config struct {
 	CircuitBreakerThreshold int  `mapstructure:"CIRCUIT_BREAKER_THRESHOLD"` // Circuit breaker failure threshold
 	RequestTimeoutSeconds   int  `mapstructure:"REQUEST_TIMEOUT_SECONDS"`   // Request timeout in seconds
 	HealthCheckInterval     int  `mapstructure:"HEALTH_CHECK_INTERVAL"`     // Health check interval in seconds
-
 	// Analyze service configuration
 	AnalyzeServiceEnabled bool          `mapstructure:"ANALYZE_SERVICE_ENABLED"`
 	AnalyzeServiceURL     string        `mapstructure:"ANALYZE_SERVICE_URL"`
 	AnalyzeServiceTimeout time.Duration `mapstructure:"ANALYZE_SERVICE_TIMEOUT"`
+
+	// OpenAI AI Scoring configuration
+	OpenAIAPIKey  string        `mapstructure:"OPENAI_API_KEY"`
+	OpenAIAPIURL  string        `mapstructure:"OPENAI_API_URL"`
+	OpenAIModel   string        `mapstructure:"OPENAI_MODEL"`
+	OpenAITimeout time.Duration `mapstructure:"OPENAI_TIMEOUT"`
 
 	// Performance settings
 
@@ -269,11 +274,16 @@ func DefaultConfig() Config {
 	circuitBreakerThreshold := int(GetEnvAsInt("CIRCUIT_BREAKER_THRESHOLD", 10))
 	requestTimeoutSeconds := int(GetEnvAsInt("REQUEST_TIMEOUT_SECONDS", 30))
 	healthCheckInterval := int(GetEnvAsInt("HEALTH_CHECK_INTERVAL", 30))
-
 	// Get analyze service configuration
 	analyzeServiceEnabled := GetEnv("ANALYZE_SERVICE_ENABLED", "true") == "true"
 	analyzeServiceURL := GetEnv("ANALYZE_SERVICE_URL", "http://localhost:9000")
 	analyzeServiceTimeout := time.Duration(GetEnvAsInt("ANALYZE_SERVICE_TIMEOUT", 30)) * time.Second
+
+	// Get OpenAI AI Scoring configuration
+	openAIAPIKey := GetEnv("OPENAI_API_KEY", "")
+	openAIAPIURL := GetEnv("OPENAI_API_URL", "https://api.openai.com/v1/chat/completions")
+	openAIModel := GetEnv("OPENAI_MODEL", "gpt-4")
+	openAITimeout := time.Duration(GetEnvAsInt("OPENAI_TIMEOUT", 60)) * time.Second
 
 	// Get security configuration
 	tlsEnabled := GetEnv("TLS_ENABLED", "false") == "true"
@@ -374,11 +384,16 @@ func DefaultConfig() Config {
 		CircuitBreakerThreshold: circuitBreakerThreshold,
 		RequestTimeoutSeconds:   requestTimeoutSeconds,
 		HealthCheckInterval:     healthCheckInterval,
-
 		// Analyze service configuration
 		AnalyzeServiceEnabled: analyzeServiceEnabled,
 		AnalyzeServiceURL:     analyzeServiceURL,
 		AnalyzeServiceTimeout: analyzeServiceTimeout,
+
+		// OpenAI AI Scoring configuration
+		OpenAIAPIKey:  openAIAPIKey,
+		OpenAIAPIURL:  openAIAPIURL,
+		OpenAIModel:   openAIModel,
+		OpenAITimeout: openAITimeout,
 
 		// Security configuration
 		TLSEnabled:             tlsEnabled,

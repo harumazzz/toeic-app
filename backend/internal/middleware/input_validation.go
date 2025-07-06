@@ -14,6 +14,26 @@ import (
 	"github.com/toeic-app/internal/logger"
 )
 
+// shouldValidateRequestBody determines if a request body should be validated
+func shouldValidateRequestBody(c *gin.Context) bool {
+	// Skip validation for methods that typically don't have bodies
+	method := c.Request.Method
+	if method == "GET" || method == "HEAD" || method == "OPTIONS" {
+		return false
+	}
+
+	// For DELETE requests, only validate if there's actually a Content-Type indicating a body
+	if method == "DELETE" {
+		contentType := c.GetHeader("Content-Type")
+		return contentType != "" && (strings.Contains(contentType, "application/json") ||
+			strings.Contains(contentType, "application/x-www-form-urlencoded") ||
+			strings.Contains(contentType, "multipart/form-data"))
+	}
+
+	// For PUT, POST, PATCH - always validate as they typically have bodies
+	return true
+}
+
 // InputValidationConfig holds configuration for input validation
 type InputValidationConfig struct {
 	MaxJSONDepth        int
@@ -114,9 +134,9 @@ func EnhancedInputValidation(config InputValidationConfig) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
-		// Validate request body for JSON requests
-		if c.Request.Method != "GET" && c.Request.Method != "HEAD" {
+		// Validate request body for methods that typically have bodies
+		// Only validate if the request actually has content or expects JSON
+		if shouldValidateRequestBody(c) {
 			if err := validateRequestBody(c, config, forbiddenRegexes); err != nil {
 				logger.WarnWithFields(logger.Fields{
 					"component": "input_validation",
@@ -220,11 +240,34 @@ func validateRequestBody(c *gin.Context, config InputValidationConfig, forbidden
 	// Read the body
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
+		logger.WarnWithFields(logger.Fields{
+			"component": "input_validation",
+			"error":     err.Error(),
+			"path":      c.Request.URL.Path,
+			"method":    c.Request.Method,
+		}, "Failed to read request body")
 		return fmt.Errorf("failed to read request body: %w", err)
 	}
 
-	// Restore the body for further processing
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
+	// Restore the body for further processing - create a new reader
+	c.Request.Body = io.NopCloser(bytes.NewReader(body))
+
+	// If body is empty, no validation needed
+	if len(body) == 0 {
+		// For POST/PUT/PATCH requests, empty body might be suspicious
+		if c.Request.Method == "POST" || c.Request.Method == "PUT" || c.Request.Method == "PATCH" {
+			contentType := c.GetHeader("Content-Type")
+			if strings.Contains(contentType, "application/json") {
+				logger.DebugWithFields(logger.Fields{
+					"component":    "input_validation",
+					"path":         c.Request.URL.Path,
+					"method":       c.Request.Method,
+					"content_type": contentType,
+				}, "Empty JSON body detected")
+			}
+		}
+		return nil
+	}
 
 	// Check if it's JSON
 	contentType := c.GetHeader("Content-Type")
@@ -318,7 +361,6 @@ func validateString(s string, forbiddenRegexes []*regexp.Regexp) error {
 			return fmt.Errorf("forbidden pattern detected")
 		}
 	}
-
 	return nil
 }
 

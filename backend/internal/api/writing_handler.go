@@ -9,8 +9,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sqlc-dev/pqtype"
+	"github.com/toeic-app/internal/ai"
 	db "github.com/toeic-app/internal/db/sqlc"
 	"github.com/toeic-app/internal/logger"
+	"github.com/toeic-app/internal/token"
 )
 
 // WritingPromptResponse defines the structure for writing prompt information returned to clients
@@ -659,4 +661,203 @@ func (server *Server) deleteUserWriting(ctx *gin.Context) {
 	}
 
 	SuccessResponse(ctx, http.StatusOK, "User writing submission deleted successfully", nil)
+}
+
+// scoreWritingRequest defines the structure for AI scoring request
+type scoreWritingRequest struct {
+	SubmissionID *int32 `json:"submission_id,omitempty"` // If provided, update this submission
+	Text         string `json:"text"`                    // Text to score (required if no submission_id)
+}
+
+// scoreWritingResponse defines the response structure for AI scoring
+type scoreWritingResponse struct {
+	UserID      int32                  `json:"user_id"`
+	Score       int                    `json:"score"`       // 0-200 TOEIC writing score
+	Band        string                 `json:"band"`        // TOEIC band level
+	Feedback    map[string]interface{} `json:"feedback"`    // Detailed feedback
+	Suggestions []string               `json:"suggestions"` // Improvement suggestions
+	Confidence  float64                `json:"confidence"`  // AI confidence score (0-1)
+	ProcessedAt string                 `json:"processed_at"`
+	Text        string                 `json:"text"`
+	PromptID    *int32                 `json:"prompt_id,omitempty"`
+}
+
+// @Summary Score writing submission using AI
+// @Description Score a writing submission using AI to get TOEIC band assessment and detailed feedback. If submission_id is provided, the submission will be updated with AI scores.
+// @Tags writing
+// @Accept json
+// @Produce json
+// @Param request body scoreWritingRequest true "Writing scoring request"
+// @Success 200 {object} Response{data=scoreWritingResponse} "Writing scored successfully"
+// @Failure 400 {object} Response "Invalid request parameters"
+// @Failure 401 {object} Response "Unauthorized"
+// @Failure 503 {object} Response "AI scoring service unavailable"
+// @Failure 500 {object} Response "Server error"
+// @Security ApiKeyAuth
+// @Router /api/v1/writing/score [post]
+func (server *Server) scoreWriting(ctx *gin.Context) {
+	var req scoreWritingRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request parameters", err)
+		return
+	}
+
+	// Get user ID from authorization payload
+	payload, exists := ctx.Get(AuthorizationPayloadKey)
+	if !exists {
+		ErrorResponse(ctx, http.StatusUnauthorized, "Authorization payload not found", nil)
+		return
+	}
+
+	authPayload, ok := payload.(*token.Payload)
+	if !ok {
+		ErrorResponse(ctx, http.StatusUnauthorized, "Invalid authorization payload", nil)
+		return
+	}
+
+	var textToScore string
+	var existingSubmission *db.UserWriting
+	var promptID *int32
+
+	// If submission_id is provided, get the submission and check if it already has AI scores
+	if req.SubmissionID != nil {
+		submission, err := server.store.GetUserWriting(ctx, *req.SubmissionID)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				ErrorResponse(ctx, http.StatusNotFound, "Writing submission not found", err)
+				return
+			}
+			ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve writing submission", err)
+			return
+		}
+
+		// Check if user owns this submission
+		if submission.UserID != authPayload.ID {
+			ErrorResponse(ctx, http.StatusForbidden, "You can only score your own submissions", nil)
+			return
+		}
+
+		existingSubmission = &submission
+		textToScore = submission.SubmissionText
+
+		// Get prompt ID if available
+		if submission.PromptID.Valid {
+			promptID = &submission.PromptID.Int32
+		}
+
+		// Check if this submission already has AI scores - if yes, return cached result
+		if submission.AiScore.Valid && submission.AiFeedback.Valid {
+			logger.Info("Returning cached AI score for submission %d", *req.SubmissionID)
+
+			// Parse existing feedback
+			var feedbackMap map[string]interface{}
+			if err := json.Unmarshal(submission.AiFeedback.RawMessage, &feedbackMap); err != nil {
+				logger.Warn("Failed to parse existing AI feedback, regenerating score: %v", err)
+			} else {
+				// Return cached result
+				aiScore, _ := strconv.ParseFloat(submission.AiScore.String, 64)
+				response := scoreWritingResponse{
+					UserID:      authPayload.ID,
+					Score:       int(aiScore),
+					Band:        string(ai.BandLevel1), // You might want to store band separately
+					Feedback:    feedbackMap,
+					Suggestions: []string{}, // Extract from feedback if needed
+					Confidence:  0.9,        // High confidence for cached results
+					ProcessedAt: submission.EvaluatedAt.Time.Format(time.RFC3339),
+					Text:        textToScore,
+				}
+
+				SuccessResponse(ctx, http.StatusOK, "Cached AI score retrieved", response)
+				return
+			}
+		}
+	} else {
+		// If no submission_id, use the provided text
+		if req.Text == "" {
+			ErrorResponse(ctx, http.StatusBadRequest, "Either submission_id or text must be provided", nil)
+			return
+		}
+		textToScore = req.Text
+	}
+
+	// Check if AI scoring service is available
+	if server.aiScoringService == nil {
+		ErrorResponse(ctx, http.StatusServiceUnavailable, "AI scoring service not available", nil)
+		return
+	}
+
+	if !server.aiScoringService.IsHealthy() {
+		ErrorResponse(ctx, http.StatusServiceUnavailable, "AI scoring service is not healthy", nil)
+		return
+	}
+
+	// Create AI scoring request
+	aiReq := ai.AIScoreRequest{
+		Text:     textToScore,
+		PromptID: promptID,
+		UserID:   authPayload.ID,
+	}
+
+	// Score the writing using AI
+	aiResponse, err := server.aiScoringService.ScoreWriting(ctx, aiReq)
+	if err != nil {
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to score writing", err)
+		return
+	}
+
+	// Convert feedback to map for JSON response
+	feedbackMap := map[string]interface{}{
+		"grammar":       aiResponse.Feedback.Grammar,
+		"vocabulary":    aiResponse.Feedback.Vocabulary,
+		"organization":  aiResponse.Feedback.Organization,
+		"development":   aiResponse.Feedback.Development,
+		"task_response": aiResponse.Feedback.TaskResponse,
+		"language_use":  aiResponse.Feedback.LanguageUse,
+		"overall":       aiResponse.Feedback.Overall,
+	}
+
+	response := scoreWritingResponse{
+		UserID:      authPayload.ID,
+		Score:       aiResponse.Score,
+		Band:        string(aiResponse.Band),
+		Feedback:    feedbackMap,
+		Suggestions: aiResponse.Suggestions,
+		Confidence:  aiResponse.Confidence,
+		ProcessedAt: aiResponse.ProcessedAt.Format(time.RFC3339),
+		Text:        textToScore,
+	}
+
+	// If submission ID is provided, update the submission with AI score immediately
+	if req.SubmissionID != nil && existingSubmission != nil {
+		aiFeedbackJSON, _ := json.Marshal(feedbackMap)
+		aiScore := float64(aiResponse.Score)
+		evaluatedAt := time.Now()
+
+		updateParams := db.UpdateUserWritingParams{
+			ID:             *req.SubmissionID,
+			SubmissionText: existingSubmission.SubmissionText, // Keep existing text
+			AiFeedback: pqtype.NullRawMessage{
+				RawMessage: aiFeedbackJSON,
+				Valid:      true,
+			},
+			AiScore: sql.NullString{
+				String: strconv.FormatFloat(aiScore, 'f', 2, 64),
+				Valid:  true,
+			},
+			EvaluatedAt: sql.NullTime{
+				Time:  evaluatedAt,
+				Valid: true,
+			},
+		}
+
+		if _, err := server.store.UpdateUserWriting(ctx, updateParams); err != nil {
+			logger.Error("Failed to update writing submission %d with AI score: %v", *req.SubmissionID, err)
+			// Continue anyway and return the score, but log the error
+		} else {
+			logger.Info("Updated writing submission %d with AI score %d", *req.SubmissionID, aiResponse.Score)
+		}
+	}
+
+	logger.Info("Scored writing for user %d: Score=%d, Band=%s", authPayload.ID, aiResponse.Score, aiResponse.Band)
+	SuccessResponse(ctx, http.StatusOK, "Writing scored successfully", response)
 }

@@ -226,6 +226,11 @@ func (server *Server) listSpeakingSessionsByUserID(ctx *gin.Context) {
 		sessionResponses = append(sessionResponses, NewSpeakingSessionResponse(session))
 	}
 
+	// Ensure we return an empty array instead of null if no results
+	if sessionResponses == nil {
+		sessionResponses = []SpeakingSessionResponse{}
+	}
+
 	logger.Debug("Retrieved %d speaking sessions for user ID: %d", len(sessionResponses), userID)
 	SuccessResponse(ctx, http.StatusOK, "Speaking sessions retrieved successfully", sessionResponses)
 }
@@ -488,6 +493,11 @@ func (server *Server) listSpeakingTurnsBySessionID(ctx *gin.Context) {
 	var turnResponses []SpeakingTurnResponse
 	for _, turn := range turns {
 		turnResponses = append(turnResponses, NewSpeakingTurnResponse(turn))
+	}
+
+	// Ensure we return an empty array instead of null if no results
+	if turnResponses == nil {
+		turnResponses = []SpeakingTurnResponse{}
 	}
 
 	logger.Debug("Retrieved %d speaking turns for session ID: %d", len(turnResponses), sessionID)
