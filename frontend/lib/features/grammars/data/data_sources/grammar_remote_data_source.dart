@@ -14,7 +14,9 @@ GrammarRemoteDataSource grammarRemoteDataSource(final Ref ref) {
   return GrammarRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 abstract class GrammarRemoteDataSource {
   factory GrammarRemoteDataSource(
     final Dio dio,
@@ -60,3 +62,13 @@ abstract class GrammarRemoteDataSource {
   @GET('/api/v1/grammars/random')
   Future<GrammarModel> getRandomGrammar();
 }
+
+List<GrammarModel> deserializeGrammarModelList(
+  final List<dynamic> json,
+) => json
+    .map((final item) => GrammarModel.fromJson(item as Map<String, dynamic>))
+    .toList();
+
+GrammarModel deserializeGrammarModel(
+  final Map<String, dynamic> json,
+) => GrammarModel.fromJson(json);

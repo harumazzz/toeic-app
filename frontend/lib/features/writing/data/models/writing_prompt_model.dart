@@ -55,3 +55,7 @@ extension WritingPromptRequestExtension on WritingPromptRequest {
     difficultyLevel: difficultyLevel,
   );
 }
+
+Map<String, dynamic> serializeWritingPromptRequestModel(
+  final WritingPromptRequestModel object,
+) => object.toJson();

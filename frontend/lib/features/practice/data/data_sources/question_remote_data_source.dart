@@ -14,7 +14,9 @@ QuestionRemoteDataSource questionRemoteDataSource(final Ref ref) {
   return QuestionRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 abstract class QuestionRemoteDataSource {
   factory QuestionRemoteDataSource(
     final Dio dio,
@@ -30,3 +32,13 @@ abstract class QuestionRemoteDataSource {
     @Path('id') required final int questionId,
   });
 }
+
+QuestionModel deserializeQuestionModel(
+  final Map<String, dynamic> json,
+) => QuestionModel.fromJson(json);
+
+List<QuestionModel> deserializeQuestionModelList(
+  final List<dynamic> json,
+) => json
+    .map((final item) => QuestionModel.fromJson(item as Map<String, dynamic>))
+    .toList();

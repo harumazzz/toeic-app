@@ -14,9 +14,10 @@ ContentRemoteDataSource contentRemoteDataSource(final Ref ref) {
   return ContentRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 abstract class ContentRemoteDataSource {
-
   factory ContentRemoteDataSource(
     final Dio dio,
   ) = _ContentRemoteDataSource;
@@ -30,5 +31,14 @@ abstract class ContentRemoteDataSource {
   Future<List<ContentModel>> getContentsByParts({
     @Path('part_id') required final int partId,
   });
-
 }
+
+ContentModel deserializeContentModel(
+  final Map<String, dynamic> json,
+) => ContentModel.fromJson(json);
+
+List<ContentModel> deserializeContentModelList(
+  final List<dynamic> json,
+) => json
+    .map((final item) => ContentModel.fromJson(item as Map<String, dynamic>))
+    .toList();

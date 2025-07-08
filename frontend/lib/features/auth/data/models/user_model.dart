@@ -102,3 +102,11 @@ sealed class RegisterResponse with _$RegisterResponse {
     final Map<String, dynamic> json,
   ) => _$RegisterResponseFromJson(json);
 }
+
+Map<String, dynamic> serializeLoginRequest(
+  final LoginRequest object,
+) => object.toJson();
+
+Map<String, dynamic> serializeRegisterRequest(
+  final RegisterRequest object,
+) => object.toJson();

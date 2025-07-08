@@ -104,3 +104,7 @@ extension ExampleModelExtension on ExampleModel {
     example: example,
   );
 }
+
+Map<String, dynamic> serializeGetRelatedGrammarsRequest(
+  final GetRelatedGrammarsRequest object,
+) => object.toJson();

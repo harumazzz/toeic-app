@@ -21,6 +21,10 @@ sealed class TextAnalyzeRequestModel with _$TextAnalyzeRequestModel {
   Map<String, dynamic> toJson();
 }
 
+Map<String, dynamic> serializeTextAnalyzeRequestModel(
+  final TextAnalyzeRequestModel object,
+) => object.toJson();
+
 @freezed
 sealed class TextAnalyzeModel with _$TextAnalyzeModel {
   const factory TextAnalyzeModel({

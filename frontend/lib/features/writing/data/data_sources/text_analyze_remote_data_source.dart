@@ -16,13 +16,20 @@ TextAnalyzeRemoteDataSource textAnalyzeRemoteDataSource(
   return TextAnalyzeRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 abstract class TextAnalyzeRemoteDataSource {
-  factory TextAnalyzeRemoteDataSource(final Dio dio) =
-      _TextAnalyzeRemoteDataSource;
+  factory TextAnalyzeRemoteDataSource(
+    final Dio dio,
+  ) = _TextAnalyzeRemoteDataSource;
 
   @POST('/api/v1/analyze/text')
   Future<TextAnalyzeModel> analyzeText({
     @Body() required final TextAnalyzeRequestModel request,
   });
 }
+
+TextAnalyzeModel deserializeTextAnalyzeModel(
+  final Map<String, dynamic> json,
+) => TextAnalyzeModel.fromJson(json);

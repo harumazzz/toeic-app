@@ -15,7 +15,9 @@ ExamAttemptRemoteDataSource examAttemptRemoteDataSource(
   return ExamAttemptRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 abstract class ExamAttemptRemoteDataSource {
   factory ExamAttemptRemoteDataSource(
     final Dio dio,
@@ -58,3 +60,19 @@ abstract class ExamAttemptRemoteDataSource {
     @Path('id') required final int id,
   });
 }
+
+List<ExamAttemptModel> deserializeExamAttemptModelList(
+  final List<dynamic> json,
+) => json
+    .map(
+      (final item) => ExamAttemptModel.fromJson(item as Map<String, dynamic>),
+    )
+    .toList();
+
+ExamAttemptModel deserializeExamAttemptModel(
+  final Map<String, dynamic> json,
+) => ExamAttemptModel.fromJson(json);
+
+ExamStatsModel deserializeExamStatsModel(
+  final Map<String, dynamic> json,
+) => ExamStatsModel.fromJson(json);

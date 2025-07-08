@@ -90,3 +90,11 @@ extension UserWritingModelExtension on UserWritingModel {
     updatedAt: updatedAt,
   );
 }
+
+Map<String, dynamic> serializeUserWritingRequestModel(
+  final UserWritingRequestModel object,
+) => object.toJson();
+
+Map<String, dynamic> serializeUserWritingUpdateRequestModel(
+  final UserWritingUpdateRequestModel object,
+) => object.toJson();

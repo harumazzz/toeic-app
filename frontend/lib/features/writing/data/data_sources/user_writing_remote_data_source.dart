@@ -16,7 +16,9 @@ UserWritingRemoteDataSource userWritingRemoteDataSource(
   return UserWritingRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 abstract class UserWritingRemoteDataSource {
   factory UserWritingRemoteDataSource(
     final Dio dio,
@@ -53,3 +55,15 @@ abstract class UserWritingRemoteDataSource {
     @Path('id') required final int id,
   });
 }
+
+UserWritingModel deserializeUserWritingModel(
+  final Map<String, dynamic> json,
+) => UserWritingModel.fromJson(json);
+
+List<UserWritingModel> deserializeUserWritingModelList(
+  final List<dynamic> json,
+) => json
+    .map(
+      (final item) => UserWritingModel.fromJson(item as Map<String, dynamic>),
+    )
+    .toList();

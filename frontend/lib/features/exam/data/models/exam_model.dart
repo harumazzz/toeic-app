@@ -307,3 +307,11 @@ extension SelectedAnswerExtension on SelectedAnswer {
     selectedAnswer: selectedAnswer,
   );
 }
+
+Map<String, dynamic> serializeExamModelRequest(
+  final ExamModelRequest object,
+) => object.toJson();
+
+Map<String, dynamic> serializeUpdateExamAttemptModel(
+  final UpdateExamAttemptModel object,
+) => object.toJson();

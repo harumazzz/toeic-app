@@ -14,7 +14,9 @@ ProgressRemoteDataSource progressRemoteDataSource(final Ref ref) {
   return ProgressRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 abstract class ProgressRemoteDataSource {
   factory ProgressRemoteDataSource(
     final Dio dio,
@@ -57,3 +59,15 @@ abstract class ProgressRemoteDataSource {
     @Path('word_id') required final int wordId,
   });
 }
+
+WordProgressModel deserializeWordProgressModel(
+  final Map<String, dynamic> json,
+) => WordProgressModel.fromJson(json);
+
+List<WordProgressModel> deserializeWordProgressModelList(
+  final List<dynamic> json,
+) => json
+    .map(
+      (final item) => WordProgressModel.fromJson(item as Map<String, dynamic>),
+    )
+    .toList();

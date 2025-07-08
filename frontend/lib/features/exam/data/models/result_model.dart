@@ -338,3 +338,15 @@ extension ScoreExtension on Score {
     totalQuestions: totalQuestions,
   );
 }
+
+Map<String, dynamic> serializeUserAnswerRequestModel(
+  final UserAnswerRequestModel object,
+) => object.toJson();
+
+Map<String, dynamic> serializeUpdateUserAnswerRequestModel(
+  final UpdateUserAnswerRequestModel object,
+) => object.toJson();
+
+Map<String, dynamic> serializeSubmitAnswersRequestModel(
+  final SubmitAnswersRequestModel object,
+) => object.toJson();

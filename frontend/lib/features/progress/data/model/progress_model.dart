@@ -25,6 +25,10 @@ sealed class WordProgressRequestModel with _$WordProgressRequestModel {
   Map<String, dynamic> toJson();
 }
 
+Map<String, dynamic> serializeWordProgressRequestModel(
+  final WordProgressRequestModel object,
+) => object.toJson();
+
 @freezed
 sealed class ProgressModel with _$ProgressModel {
   const factory ProgressModel({

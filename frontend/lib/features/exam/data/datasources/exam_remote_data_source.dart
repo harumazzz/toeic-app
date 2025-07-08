@@ -15,7 +15,9 @@ ExamRemoteDataSource examRemoteDataSource(
   return ExamRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 abstract class ExamRemoteDataSource {
   factory ExamRemoteDataSource(
     final Dio dio,
@@ -26,3 +28,7 @@ abstract class ExamRemoteDataSource {
     @Path('id') required final int examId,
   });
 }
+
+ExamModel deserializeExamModel(
+  final Map<String, dynamic> json,
+) => ExamModel.fromJson(json);

@@ -14,14 +14,18 @@ AuthRemoteDataSource authRemoteDataSource(final Ref ref) {
   return AuthRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 abstract class AuthRemoteDataSource {
   factory AuthRemoteDataSource(
     final Dio dio,
   ) = _AuthRemoteDataSource;
 
   @POST('/api/auth/login')
-  Future<LoginResponse> login(@Body() final LoginRequest body);
+  Future<LoginResponse> login(
+    @Body() final LoginRequest body,
+  );
 
   @POST('/api/auth/register')
   Future<RegisterResponse> register(
@@ -34,3 +38,15 @@ abstract class AuthRemoteDataSource {
   @GET('/api/v1/users/me')
   Future<UserModel> getCurrentUser();
 }
+
+LoginResponse deserializeLoginResponse(
+  final Map<String, dynamic> json,
+) => LoginResponse.fromJson(json);
+
+UserModel deserializeUserModel(
+  final Map<String, dynamic> json,
+) => UserModel.fromJson(json);
+
+RegisterResponse deserializeRegisterResponse(
+  final Map<String, dynamic> json,
+) => RegisterResponse.fromJson(json);

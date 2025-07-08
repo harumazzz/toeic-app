@@ -14,9 +14,10 @@ ExampleRemoteDataSource exampleRemoteDataSource(final Ref ref) {
   return ExampleRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 abstract class ExampleRemoteDataSource {
-
   factory ExampleRemoteDataSource(
     final Dio dio,
   ) = _ExampleRemoteDataSource;
@@ -28,5 +29,14 @@ abstract class ExampleRemoteDataSource {
   Future<List<ExampleModel>> getExamplesByIds({
     @Body() required final ExampleRequest request,
   });
-
 }
+
+ExampleModel deserializeExampleModel(
+  final Map<String, dynamic> json,
+) => ExampleModel.fromJson(json);
+
+List<ExampleModel> deserializeExampleModelList(
+  final List<dynamic> json,
+) => json
+    .map((final e) => ExampleModel.fromJson(e as Map<String, dynamic>))
+    .toList();

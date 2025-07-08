@@ -17,7 +17,9 @@ UserAnswerRemoteDataSource userAnswerRemoteDataSource(
   return UserAnswerRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 abstract class UserAnswerRemoteDataSource {
   factory UserAnswerRemoteDataSource(
     final Dio dio,
@@ -62,3 +64,15 @@ abstract class UserAnswerRemoteDataSource {
     @Body() required final result.SubmitAnswersRequestModel request,
   });
 }
+
+UserAnswerResponseModel deserializeUserAnswerResponseModel(
+  final Map<String, dynamic> json,
+) => UserAnswerResponseModel.fromJson(json);
+
+UserAnswerModel deserializeUserAnswerModel(
+  final Map<String, dynamic> json,
+) => UserAnswerModel.fromJson(json);
+
+result.SubmittedAnswerModel deserializeSubmittedAnswerModel(
+  final Map<String, dynamic> json,
+) => result.SubmittedAnswerModel.fromJson(json);

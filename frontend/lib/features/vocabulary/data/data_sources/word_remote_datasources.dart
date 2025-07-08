@@ -14,7 +14,9 @@ WordRemoteDataSource wordRemoteDataSource(final Ref ref) {
   return WordRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 sealed class WordRemoteDataSource {
   factory WordRemoteDataSource(final Dio dio) = _WordRemoteDataSource;
 
@@ -36,3 +38,13 @@ sealed class WordRemoteDataSource {
     @Query('limit') required final int limit,
   });
 }
+
+WordModel deserializeWordModel(
+  final Map<String, dynamic> json,
+) => WordModel.fromJson(json);
+
+List<WordModel> deserializeWordModelList(
+  final List<dynamic> json,
+) => json
+    .map((final item) => WordModel.fromJson(item as Map<String, dynamic>))
+    .toList();

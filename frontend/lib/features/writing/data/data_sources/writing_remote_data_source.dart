@@ -14,7 +14,9 @@ WritingRemoteDataSource writingRemoteDataSource(final Ref ref) {
   return WritingRemoteDataSource(dio);
 }
 
-@RestApi()
+@RestApi(
+  parser: Parser.FlutterCompute,
+)
 abstract class WritingRemoteDataSource {
   factory WritingRemoteDataSource(
     final Dio dio,
@@ -43,3 +45,16 @@ abstract class WritingRemoteDataSource {
     @Path('id') required final int id,
   });
 }
+
+// Deserialize functions for retrofit FlutterCompute
+WritingPromptModel deserializeWritingPromptModel(
+  final Map<String, dynamic> json,
+) => WritingPromptModel.fromJson(json);
+
+List<WritingPromptModel> deserializeWritingPromptModelList(
+  final List<dynamic> json,
+) => json
+    .map(
+      (final item) => WritingPromptModel.fromJson(item as Map<String, dynamic>),
+    )
+    .toList();
