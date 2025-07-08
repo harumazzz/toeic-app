@@ -1,0 +1,227 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code
+*.go text eol=lf
+*.dart text eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.sass text eol=lf
+*.json text eol=lf
+*.xml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+
+# Configuration files
+*.conf text eol=lf
+*.config text eol=lf
+*.ini text eol=lf
+*.cfg text eol=lf
+.env text eol=lf
+.env.* text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+*.rst text eol=lf
+*.adoc text eol=lf
+
+# SQL files
+*.sql text eol=lf
+
+# Data files
+*.csv text eol=lf
+*.tsv text eol=lf
+*.data text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+*.fish text eol=lf
+
+# PowerShell scripts
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.psd1 text eol=crlf
+
+# Windows batch files
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Docker files
+Dockerfile text eol=lf
+*.dockerfile text eol=lf
+docker-compose*.yml text eol=lf
+.dockerignore text eol=lf
+
+# Makefiles
+Makefile text eol=lf
+makefile text eol=lf
+*.mk text eol=lf
+
+# Git files
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.gitmodules text eol=lf
+
+# CI/CD files
+.github/**/* text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Flutter/Dart specific
+pubspec.yaml text eol=lf
+pubspec.lock text eol=lf
+analysis_options.yaml text eol=lf
+*.g.dart text eol=lf linguist-generated=true
+*.freezed.dart text eol=lf linguist-generated=true
+*.gr.dart text eol=lf linguist-generated=true
+*.i18n.dart text eol=lf linguist-generated=true
+
+# Go specific
+go.mod text eol=lf
+go.sum text eol=lf
+*.go text eol=lf
+
+# Python specific
+requirements.txt text eol=lf
+*.py text eol=lf
+*.pyw text eol=lf
+*.pyi text eol=lf
+
+# Binary files
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.a binary
+*.lib binary
+*.o binary
+*.obj binary
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text eol=lf
+*.webp binary
+*.bmp binary
+*.tiff binary
+*.tif binary
+
+# Audio
+*.mp3 binary
+*.wav binary
+*.ogg binary
+*.flac binary
+*.aac binary
+*.m4a binary
+
+# Video
+*.mp4 binary
+*.avi binary
+*.mkv binary
+*.mov binary
+*.wmv binary
+*.flv binary
+*.webm binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+*.bz2 binary
+*.xz binary
+*.7z binary
+*.rar binary
+
+# Fonts
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+
+# Certificates and keys
+*.pem binary
+*.crt binary
+*.cer binary
+*.der binary
+*.key binary
+*.p12 binary
+*.pfx binary
+*.jks binary
+
+# Database files
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# Backup files
+*.backup binary
+*.bak binary
+*.tmp binary
+*.swp binary
+*.swo binary
+
+# macOS
+.DS_Store binary
+
+# Windows
+Thumbs.db binary
+ehthumbs.db binary
+Desktop.ini binary
+
+# IDE files
+*.iml text eol=lf
+*.ipr text eol=lf
+*.iws text eol=lf
+.idea/**/* text eol=lf
+.vscode/**/* text eol=lf
+*.code-workspace text eol=lf
+
+# Log files
+*.log text eol=lf
+
+# Lock files
+package-lock.json text eol=lf
+yarn.lock text eol=lf
+composer.lock text eol=lf
+Gemfile.lock text eol=lf
+Pipfile.lock text eol=lf
+poetry.lock text eol=lf
+
+# Justfile
+justfile text eol=lf
+Justfile text eol=lf
+
+# CMake
+CMakeLists.txt text eol=lf
+*.cmake text eol=lf
+*.cmake.in text eol=lf
+
+# Xcode
+*.pbxproj text eol=lf
+*.xcworkspacedata text eol=lf
+*.plist text eol=lf
+
+# Android
+*.gradle text eol=lf
+*.properties text eol=lf
+*.pro text eol=lf
+
+# Linguist overrides for generated files
+*.pb.go linguist-generated=true
+*.pb.gw.go linguist-generated=true
+docs/docs.go linguist-generated=true
+docs/swagger.yaml linguist-generated=true
+docs/swagger.json linguist-generated=true
+**/generated/** linguist-generated=true
