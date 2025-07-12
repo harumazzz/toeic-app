@@ -8,7 +8,7 @@ part 'submission_provider.g.dart';
 part 'submission_provider.freezed.dart';
 
 @freezed
-sealed class SubmissionState with _$SubmissionState {
+abstract class SubmissionState with _$SubmissionState {
   const factory SubmissionState.initial() = SubmissionInitial;
   const factory SubmissionState.loading() = SubmissionLoading;
   const factory SubmissionState.success(

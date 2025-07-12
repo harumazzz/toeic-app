@@ -38,7 +38,7 @@ class GetExam implements UseCase<Exam, int> {
 }
 
 @freezed
-sealed class GetExamsParams with _$GetExamsParams {
+abstract class GetExamsParams with _$GetExamsParams {
   const factory GetExamsParams({
     required final int limit,
     required final int offset,

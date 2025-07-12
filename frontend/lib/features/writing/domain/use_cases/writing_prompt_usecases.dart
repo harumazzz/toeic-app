@@ -69,7 +69,7 @@ class ListWritingPromptsUseCase
 }
 
 @freezed
-sealed class UpdateWritingPromptRequest with _$UpdateWritingPromptRequest {
+abstract class UpdateWritingPromptRequest with _$UpdateWritingPromptRequest {
   const factory UpdateWritingPromptRequest({
     required final int id,
     required final WritingPromptRequest request,
@@ -196,7 +196,7 @@ GetRandomWritingPromptUseCase getRandomWritingPromptUseCase(
 }
 
 @freezed
-sealed class RandomWritingPromptParams with _$RandomWritingPromptParams {
+abstract class RandomWritingPromptParams with _$RandomWritingPromptParams {
   const factory RandomWritingPromptParams({
     final String? difficultyLevel,
     final String? topic,

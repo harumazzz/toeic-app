@@ -13,7 +13,7 @@ part 'search_grammar.freezed.dart';
 part 'search_grammar.g.dart';
 
 @freezed
-sealed class SearchGrammarsParams with _$SearchGrammarsParams {
+abstract class SearchGrammarsParams with _$SearchGrammarsParams {
   const factory SearchGrammarsParams({
     required final String query,
     required final int limit,

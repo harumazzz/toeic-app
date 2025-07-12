@@ -6,7 +6,7 @@ part 'word_model.freezed.dart';
 part 'word_model.g.dart';
 
 @freezed
-sealed class WordModel with _$WordModel {
+abstract class WordModel with _$WordModel {
   const factory WordModel({
     @Default(null)
     @JsonKey(name: 'conjugation')
@@ -27,7 +27,7 @@ sealed class WordModel with _$WordModel {
 }
 
 @freezed
-sealed class WordStateModel with _$WordStateModel {
+abstract class WordStateModel with _$WordStateModel {
   const factory WordStateModel({
     required final String p,
     required final String w,
@@ -38,7 +38,7 @@ sealed class WordStateModel with _$WordStateModel {
 }
 
 @freezed
-sealed class SynonymData with _$SynonymData {
+abstract class SynonymData with _$SynonymData {
   const factory SynonymData({
     @JsonKey(name: 'kind') required final String kind,
     @JsonKey(name: 'content') required final List<ContentModel> content,
@@ -49,7 +49,7 @@ sealed class SynonymData with _$SynonymData {
 }
 
 @freezed
-sealed class ContentModel with _$ContentModel {
+abstract class ContentModel with _$ContentModel {
   const factory ContentModel({
     @JsonKey(name: 'anto') final List<String>? antonym,
     @JsonKey(name: 'syno') final List<String>? synonym,
@@ -60,7 +60,7 @@ sealed class ContentModel with _$ContentModel {
 }
 
 @freezed
-sealed class MeaningData with _$MeaningData {
+abstract class MeaningData with _$MeaningData {
   const factory MeaningData({
     @JsonKey(name: 'kind') final String? kind,
     @JsonKey(name: 'means') final List<MeanModel>? means,
@@ -71,7 +71,7 @@ sealed class MeaningData with _$MeaningData {
 }
 
 @freezed
-sealed class MeanModel with _$MeanModel {
+abstract class MeanModel with _$MeanModel {
   const factory MeanModel({
     @JsonKey(name: 'mean') final String? mean,
     @JsonKey(name: 'examples') final List<int>? examples,
@@ -82,7 +82,7 @@ sealed class MeanModel with _$MeanModel {
 }
 
 @freezed
-sealed class ConjugationData with _$ConjugationData {
+abstract class ConjugationData with _$ConjugationData {
   const factory ConjugationData({
     @JsonKey(name: 'htd') final WordStateModel? simplePresent,
     @JsonKey(name: 'qkd') final WordStateModel? simplePast,

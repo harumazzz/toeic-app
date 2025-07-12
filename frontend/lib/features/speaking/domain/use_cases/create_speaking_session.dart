@@ -20,9 +20,8 @@ CreateSpeakingSession createSpeakingSession(
   return CreateSpeakingSession(repository);
 }
 
-class CreateSpeakingSession implements 
-UseCase<Speaking, CreateSpeakingSessionRequest> {
-
+class CreateSpeakingSession
+    implements UseCase<Speaking, CreateSpeakingSessionRequest> {
   const CreateSpeakingSession(this.repository);
 
   final SpeakingRepository repository;
@@ -36,7 +35,8 @@ UseCase<Speaking, CreateSpeakingSessionRequest> {
 }
 
 @freezed
-sealed class CreateSpeakingSessionRequest with _$CreateSpeakingSessionRequest {
+abstract class CreateSpeakingSessionRequest
+    with _$CreateSpeakingSessionRequest {
   const factory CreateSpeakingSessionRequest({
     required final SpeakingRequest speakingRequest,
   }) = _CreateSpeakingSessionRequest;

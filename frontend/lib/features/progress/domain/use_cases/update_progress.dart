@@ -19,7 +19,7 @@ UpdateProgress updateProgress(final Ref ref) {
 }
 
 @freezed
-sealed class UpdateProgressParams with _$UpdateProgressParams {
+abstract class UpdateProgressParams with _$UpdateProgressParams {
   const factory UpdateProgressParams({
     required final int wordId,
     required final WordProgressRequest request,
@@ -27,7 +27,6 @@ sealed class UpdateProgressParams with _$UpdateProgressParams {
 }
 
 class UpdateProgress implements UseCase<WordProgress, UpdateProgressParams> {
-
   const UpdateProgress(this._progressRepository);
 
   final ProgressRepository _progressRepository;
@@ -39,5 +38,4 @@ class UpdateProgress implements UseCase<WordProgress, UpdateProgressParams> {
     wordId: params.wordId,
     request: params.request,
   );
-  
 }

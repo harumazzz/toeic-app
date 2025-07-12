@@ -19,7 +19,7 @@ GetWord getWord(final Ref ref) {
 }
 
 @freezed
-sealed class GetWordParams with _$GetWordParams {
+abstract class GetWordParams with _$GetWordParams {
   const factory GetWordParams({
     required final int id,
   }) = _GetWordParams;

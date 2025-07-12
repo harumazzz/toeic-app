@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'word.freezed.dart';
 
 @freezed
-sealed class Word with _$Word {
+abstract class Word with _$Word {
   const factory Word({
     final Conjugation? conjugation,
     required final String? descriptLevel,
@@ -19,7 +19,7 @@ sealed class Word with _$Word {
 }
 
 @freezed
-sealed class WordState with _$WordState {
+abstract class WordState with _$WordState {
   const factory WordState({
     required final String? p,
     required final String? w,
@@ -27,7 +27,7 @@ sealed class WordState with _$WordState {
 }
 
 @freezed
-sealed class Conjugation with _$Conjugation {
+abstract class Conjugation with _$Conjugation {
   const factory Conjugation({
     final WordState? simplePresent,
     final WordState? simplePast,
@@ -37,7 +37,7 @@ sealed class Conjugation with _$Conjugation {
 }
 
 @freezed
-sealed class Synonym with _$Synonym {
+abstract class Synonym with _$Synonym {
   const factory Synonym({
     required final String? kind,
     required final List<Content>? content,
@@ -45,7 +45,7 @@ sealed class Synonym with _$Synonym {
 }
 
 @freezed
-sealed class Content with _$Content {
+abstract class Content with _$Content {
   const factory Content({
     required final List<String>? antonym,
     required final List<String>? synonym,
@@ -53,7 +53,7 @@ sealed class Content with _$Content {
 }
 
 @freezed
-sealed class Meaning with _$Meaning {
+abstract class Meaning with _$Meaning {
   const factory Meaning({
     required final String? kind,
     required final List<Mean>? means,
@@ -61,7 +61,7 @@ sealed class Meaning with _$Meaning {
 }
 
 @freezed
-sealed class Mean with _$Mean {
+abstract class Mean with _$Mean {
   const factory Mean({
     required final String? mean,
     required final List<int>? examples,

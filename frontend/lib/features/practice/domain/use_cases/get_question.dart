@@ -1,5 +1,3 @@
-
-
 import 'package:dart_either/dart_either.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -27,21 +25,20 @@ GetQuestionsByContent getQuestionsByContent(final Ref ref) {
 }
 
 @freezed
-sealed class GetQuestionParams with _$GetQuestionParams {
+abstract class GetQuestionParams with _$GetQuestionParams {
   const factory GetQuestionParams({
     required final int questionId,
   }) = _GetQuestionParams;
 }
 
 @freezed
-sealed class GetQuestionsByContentParams with _$GetQuestionsByContentParams {
+abstract class GetQuestionsByContentParams with _$GetQuestionsByContentParams {
   const factory GetQuestionsByContentParams({
     required final int contentId,
   }) = _GetQuestionsByContentParams;
 }
 
 class GetQuestion implements UseCase<Question, GetQuestionParams> {
-
   const GetQuestion({required this.questionRepository});
 
   final QuestionRepository questionRepository;
@@ -50,13 +47,12 @@ class GetQuestion implements UseCase<Question, GetQuestionParams> {
   Future<Either<Failure, Question>> call(
     final GetQuestionParams params,
   ) async => questionRepository.getQuestionById(
-      questionId: params.questionId,
-    );
+    questionId: params.questionId,
+  );
 }
 
-class GetQuestionsByContent implements 
-UseCase<List<Question>, GetQuestionsByContentParams> {
-
+class GetQuestionsByContent
+    implements UseCase<List<Question>, GetQuestionsByContentParams> {
   const GetQuestionsByContent({required this.questionRepository});
 
   final QuestionRepository questionRepository;
@@ -65,6 +61,6 @@ UseCase<List<Question>, GetQuestionsByContentParams> {
   Future<Either<Failure, List<Question>>> call(
     final GetQuestionsByContentParams params,
   ) async => questionRepository.getQuestionsByContentId(
-      contentId: params.contentId,
-    );
+    contentId: params.contentId,
+  );
 }

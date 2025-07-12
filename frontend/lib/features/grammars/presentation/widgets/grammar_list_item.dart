@@ -9,10 +9,12 @@ class GrammarListItem extends StatelessWidget {
     super.key,
     required this.grammar,
     required this.onTap,
+    this.inkWellKey,
   });
 
   final Grammar grammar;
   final void Function() onTap;
+  final Key? inkWellKey;
 
   @override
   Widget build(final BuildContext context) => Card(
@@ -25,6 +27,7 @@ class GrammarListItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
     ),
     child: InkWell(
+      key: inkWellKey,
       borderRadius: BorderRadius.circular(14),
       onTap: onTap,
       child: Padding(

@@ -19,14 +19,13 @@ AddProgress addProgress(final Ref ref) {
 }
 
 @freezed
-sealed class AddProgressParams with _$AddProgressParams {
+abstract class AddProgressParams with _$AddProgressParams {
   const factory AddProgressParams({
     required final WordProgressRequest request,
   }) = _AddProgressParams;
 }
 
 class AddProgress implements UseCase<WordProgress, AddProgressParams> {
-
   const AddProgress(this._progressRepository);
 
   final ProgressRepository _progressRepository;
@@ -37,5 +36,4 @@ class AddProgress implements UseCase<WordProgress, AddProgressParams> {
   ) => _progressRepository.addNewProgress(
     request: params.request,
   );
-  
 }

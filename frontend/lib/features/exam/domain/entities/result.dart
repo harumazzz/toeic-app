@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'result.freezed.dart';
 
 @freezed
-sealed class UserResult with _$UserResult {
+abstract class UserResult with _$UserResult {
   const factory UserResult({
     required final List<Answer> answers,
     required final int attemptId,
@@ -15,7 +15,7 @@ sealed class UserResult with _$UserResult {
 }
 
 @freezed
-sealed class Answer with _$Answer {
+abstract class Answer with _$Answer {
   const factory Answer({
     required final String answerTime,
     required final int attemptId,
@@ -28,7 +28,7 @@ sealed class Answer with _$Answer {
 }
 
 @freezed
-sealed class FailedAnswer with _$FailedAnswer {
+abstract class FailedAnswer with _$FailedAnswer {
   const factory FailedAnswer({
     required final String error,
     required final int questionId,
@@ -37,7 +37,7 @@ sealed class FailedAnswer with _$FailedAnswer {
 }
 
 @freezed
-sealed class Score with _$Score {
+abstract class Score with _$Score {
   const factory Score({
     required final int attemptId,
     required final int calculatedScore,
@@ -47,7 +47,7 @@ sealed class Score with _$Score {
 }
 
 @freezed
-sealed class UserAnswerRequest with _$UserAnswerRequest {
+abstract class UserAnswerRequest with _$UserAnswerRequest {
   const factory UserAnswerRequest({
     required final int attemptId,
     required final int questionId,
@@ -56,14 +56,14 @@ sealed class UserAnswerRequest with _$UserAnswerRequest {
 }
 
 @freezed
-sealed class UpdateUserAnswerRequest with _$UpdateUserAnswerRequest {
+abstract class UpdateUserAnswerRequest with _$UpdateUserAnswerRequest {
   const factory UpdateUserAnswerRequest({
     required final String selectedAnswer,
   }) = _UpdateUserAnswerRequest;
 }
 
 @freezed
-sealed class SubmitAnswersRequest with _$SubmitAnswersRequest {
+abstract class SubmitAnswersRequest with _$SubmitAnswersRequest {
   const factory SubmitAnswersRequest({
     required final int attemptId,
     required final List<SubmitAnswer> answers,
@@ -71,7 +71,7 @@ sealed class SubmitAnswersRequest with _$SubmitAnswersRequest {
 }
 
 @freezed
-sealed class SubmitAnswer with _$SubmitAnswer {
+abstract class SubmitAnswer with _$SubmitAnswer {
   const factory SubmitAnswer({
     required final int questionId,
     required final String selectedAnswer,
@@ -79,7 +79,7 @@ sealed class SubmitAnswer with _$SubmitAnswer {
 }
 
 @freezed
-sealed class SubmittedAnswer with _$SubmittedAnswer {
+abstract class SubmittedAnswer with _$SubmittedAnswer {
   const factory SubmittedAnswer({
     required final List<SubmitAnswerResult> answers,
     required final int attemptId,
@@ -91,7 +91,7 @@ sealed class SubmittedAnswer with _$SubmittedAnswer {
 }
 
 @freezed
-sealed class SubmitAnswerResult with _$SubmitAnswerResult {
+abstract class SubmitAnswerResult with _$SubmitAnswerResult {
   const factory SubmitAnswerResult({
     required final String answerTime,
     required final int attemptId,
@@ -104,7 +104,7 @@ sealed class SubmitAnswerResult with _$SubmitAnswerResult {
 }
 
 @freezed
-sealed class FailedSubmitAnswer with _$FailedSubmitAnswer {
+abstract class FailedSubmitAnswer with _$FailedSubmitAnswer {
   const factory FailedSubmitAnswer({
     required final String error,
     required final int questionId,
@@ -113,7 +113,7 @@ sealed class FailedSubmitAnswer with _$FailedSubmitAnswer {
 }
 
 @freezed
-sealed class SubmitScore with _$SubmitScore {
+abstract class SubmitScore with _$SubmitScore {
   const factory SubmitScore({
     required final int attemptId,
     required final int calculatedScore,

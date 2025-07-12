@@ -4,7 +4,7 @@ part 'token_response.freezed.dart';
 part 'token_response.g.dart';
 
 @freezed
-sealed class RefreshTokenRequest with _$RefreshTokenRequest {
+abstract class RefreshTokenRequest with _$RefreshTokenRequest {
   const factory RefreshTokenRequest({
     @JsonKey(name: 'refresh_token') required final String refreshToken,
   }) = _RefreshTokenRequest;
@@ -18,7 +18,7 @@ sealed class RefreshTokenRequest with _$RefreshTokenRequest {
 }
 
 @freezed
-sealed class RefreshTokenResponse with _$RefreshTokenResponse {
+abstract class RefreshTokenResponse with _$RefreshTokenResponse {
   const factory RefreshTokenResponse({
     @JsonKey(name: 'access_token') required final String accessToken,
     @JsonKey(name: 'refresh_token') final String? refreshToken,
@@ -31,7 +31,7 @@ sealed class RefreshTokenResponse with _$RefreshTokenResponse {
 }
 
 @freezed
-sealed class TokenError with _$TokenError {
+abstract class TokenError with _$TokenError {
   const factory TokenError({
     @JsonKey(name: 'error') required final String error,
     @JsonKey(name: 'error_description') final String? errorDescription,

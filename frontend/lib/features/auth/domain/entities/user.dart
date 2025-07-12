@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'user.freezed.dart';
 
 @freezed
-sealed class User with _$User {
+abstract class User with _$User {
   const factory User({
     required final int id,
     required final String email,

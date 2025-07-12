@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'grammar.freezed.dart';
 
 @freezed
-sealed class Grammar with _$Grammar {
+abstract class Grammar with _$Grammar {
   const factory Grammar({
     final List<Content>? contents,
     required final String grammarKey,
@@ -16,7 +16,7 @@ sealed class Grammar with _$Grammar {
 }
 
 @freezed
-sealed class Content with _$Content {
+abstract class Content with _$Content {
   const factory Content({
     final List<ContentElement>? content,
     final String? subTitle,
@@ -24,7 +24,7 @@ sealed class Content with _$Content {
 }
 
 @freezed
-sealed class ContentElement with _$ContentElement {
+abstract class ContentElement with _$ContentElement {
   const factory ContentElement({
     final String? content,
     final List<Example>? examples,
@@ -33,7 +33,7 @@ sealed class ContentElement with _$ContentElement {
 }
 
 @freezed
-sealed class Example with _$Example {
+abstract class Example with _$Example {
   const factory Example({
     final String? example,
   }) = _Example;

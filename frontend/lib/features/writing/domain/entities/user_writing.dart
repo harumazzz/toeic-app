@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'user_writing.freezed.dart';
 
 @freezed
-sealed class UserWriting with _$UserWriting {
+abstract class UserWriting with _$UserWriting {
   const factory UserWriting({
     required final int id,
     required final int userId,
@@ -18,7 +18,7 @@ sealed class UserWriting with _$UserWriting {
 }
 
 @freezed
-sealed class UserWritingRequest with _$UserWritingRequest {
+abstract class UserWritingRequest with _$UserWritingRequest {
   const factory UserWritingRequest({
     required final int userId,
     final int? promptId,
@@ -29,7 +29,7 @@ sealed class UserWritingRequest with _$UserWritingRequest {
 }
 
 @freezed
-sealed class UserWritingUpdateRequest with _$UserWritingUpdateRequest {
+abstract class UserWritingUpdateRequest with _$UserWritingUpdateRequest {
   const factory UserWritingUpdateRequest({
     final String? submissionText,
     final Map<String, dynamic>? aiFeedback,

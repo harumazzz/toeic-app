@@ -1,5 +1,3 @@
-
-
 import 'package:dart_either/dart_either.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -22,9 +20,8 @@ GetSpeakingSession getSpeakingSession(
   return GetSpeakingSession(repository);
 }
 
-class GetSpeakingSession implements 
-UseCase<List<Speaking>, GetSpeakingSessionRequest> {
-
+class GetSpeakingSession
+    implements UseCase<List<Speaking>, GetSpeakingSessionRequest> {
   const GetSpeakingSession(this.repository);
 
   final SpeakingRepository repository;
@@ -33,12 +30,12 @@ UseCase<List<Speaking>, GetSpeakingSessionRequest> {
   Future<Either<Failure, List<Speaking>>> call(
     final GetSpeakingSessionRequest params,
   ) async => repository.getSpeakingSessions(
-      userId: params.userId,
-    );
+    userId: params.userId,
+  );
 }
 
 @freezed
-sealed class GetSpeakingSessionRequest with _$GetSpeakingSessionRequest {
+abstract class GetSpeakingSessionRequest with _$GetSpeakingSessionRequest {
   const factory GetSpeakingSessionRequest({
     required final int userId,
   }) = _GetSpeakingSessionRequest;

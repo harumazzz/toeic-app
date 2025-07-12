@@ -32,7 +32,7 @@ class CreateExamAttempt
 }
 
 @freezed
-sealed class CreateExamAttemptParams with _$CreateExamAttemptParams {
+abstract class CreateExamAttemptParams with _$CreateExamAttemptParams {
   const factory CreateExamAttemptParams({
     required final ExamRequest examAttempt,
   }) = _CreateExamAttemptParams;

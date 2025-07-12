@@ -6,7 +6,7 @@ part 'question_model.freezed.dart';
 part 'question_model.g.dart';
 
 @freezed
-sealed class QuestionModel with _$QuestionModel {
+abstract class QuestionModel with _$QuestionModel {
   const factory QuestionModel({
     @JsonKey(name: 'content_id') required final int contentId,
     @JsonKey(name: 'explanation') required final String explanation,

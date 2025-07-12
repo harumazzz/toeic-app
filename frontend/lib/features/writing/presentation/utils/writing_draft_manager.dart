@@ -99,10 +99,9 @@ class WritingDraftManager {
                 lastModified: DateTime.fromMillisecondsSinceEpoch(
                   draftData.timestamp,
                 ),
-                wordCount:
-                    draftData.content.trim().isEmpty
-                        ? 0
-                        : draftData.content.trim().split(RegExp(r'\s+')).length,
+                wordCount: draftData.content.trim().isEmpty
+                    ? 0
+                    : draftData.content.trim().split(RegExp(r'\s+')).length,
               ),
             );
           } catch (e) {
@@ -177,7 +176,7 @@ class WritingDraftManager {
 }
 
 @freezed
-sealed class WritingDraft with _$WritingDraft {
+abstract class WritingDraft with _$WritingDraft {
   const factory WritingDraft({
     required final String content,
     required final int timestamp,
@@ -189,7 +188,7 @@ sealed class WritingDraft with _$WritingDraft {
 }
 
 @freezed
-sealed class DraftInfo with _$DraftInfo {
+abstract class DraftInfo with _$DraftInfo {
   const factory DraftInfo({
     required final int promptId,
     required final String content,
@@ -217,13 +216,15 @@ extension DraftInfoExtension on DraftInfo {
       return '$days $dayText ${context.t.common.ago}';
     } else if (difference.inHours > 0) {
       final hours = difference.inHours;
-      final hourText =
-          hours == 1 ? context.t.common.hour : context.t.common.hours;
+      final hourText = hours == 1
+          ? context.t.common.hour
+          : context.t.common.hours;
       return '$hours $hourText ${context.t.common.ago}';
     } else if (difference.inMinutes > 0) {
       final minutes = difference.inMinutes;
-      final minuteText =
-          minutes == 1 ? context.t.common.minute : context.t.common.minutes;
+      final minuteText = minutes == 1
+          ? context.t.common.minute
+          : context.t.common.minutes;
       return '$minutes $minuteText ${context.t.common.ago}';
     } else {
       return context.t.common.justNow;

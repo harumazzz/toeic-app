@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'text_analyze.freezed.dart';
 
 @freezed
-sealed class TextAnalyzeRequest with _$TextAnalyzeRequest {
+abstract class TextAnalyzeRequest with _$TextAnalyzeRequest {
   const factory TextAnalyzeRequest({
     required final String minSynonymLevel,
     required final String text,
@@ -11,7 +11,7 @@ sealed class TextAnalyzeRequest with _$TextAnalyzeRequest {
 }
 
 @freezed
-sealed class TextAnalyze with _$TextAnalyze {
+abstract class TextAnalyze with _$TextAnalyze {
   const factory TextAnalyze({
     required final String? error,
     required final Result result,
@@ -22,14 +22,14 @@ sealed class TextAnalyze with _$TextAnalyze {
 }
 
 @freezed
-sealed class Result with _$Result {
+abstract class Result with _$Result {
   const factory Result({
     required final List<Word> words,
   }) = _Result;
 }
 
 @freezed
-sealed class Word with _$Word {
+abstract class Word with _$Word {
   const factory Word({
     required final int count,
     required final String level,
@@ -39,7 +39,7 @@ sealed class Word with _$Word {
 }
 
 @freezed
-sealed class Suggestion with _$Suggestion {
+abstract class Suggestion with _$Suggestion {
   const factory Suggestion({
     required final String definition,
     required final String level,

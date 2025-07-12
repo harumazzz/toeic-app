@@ -38,6 +38,7 @@ class HomeScreen extends ConsumerWidget {
                   AuthAuthenticated() ||
                   AuthUnauthenticated() ||
                   AuthError() => const _CustomModuleOpener(),
+                  _ => const HomeLoading(),
                 },
               ),
             ),
@@ -68,11 +69,12 @@ class _CustomModuleOpener extends StatelessWidget {
           child: Icon(
             Symbols.category,
             size: MediaQuery.sizeOf(context).width * 0.25,
-            color: Theme.of(
-              context,
-            ).colorScheme.onPrimaryContainer.withValues(
-              alpha: 0.84,
-            ),
+            color:
+                Theme.of(
+                  context,
+                ).colorScheme.onPrimaryContainer.withValues(
+                  alpha: 0.84,
+                ),
           ),
           onPressed: () async {
             Scaffold.of(context).openDrawer();

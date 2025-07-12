@@ -5,7 +5,7 @@ part 'user_model.freezed.dart';
 part 'user_model.g.dart';
 
 @freezed
-sealed class UserModel with _$UserModel {
+abstract class UserModel with _$UserModel {
   const factory UserModel({
     required final int id,
     required final String email,
@@ -26,7 +26,7 @@ extension UserModelExtension on UserModel {
 }
 
 @freezed
-sealed class LoginRequest with _$LoginRequest {
+abstract class LoginRequest with _$LoginRequest {
   const factory LoginRequest({
     required final String email,
     required final String password,
@@ -41,7 +41,7 @@ sealed class LoginRequest with _$LoginRequest {
 }
 
 @freezed
-sealed class SecurityConfig with _$SecurityConfig {
+abstract class SecurityConfig with _$SecurityConfig {
   const factory SecurityConfig({
     @JsonKey(name: 'secret_key') required final String secretKey,
     @JsonKey(name: 'security_level') required final int securityLevel,
@@ -58,7 +58,7 @@ sealed class SecurityConfig with _$SecurityConfig {
 }
 
 @freezed
-sealed class LoginResponse with _$LoginResponse {
+abstract class LoginResponse with _$LoginResponse {
   const factory LoginResponse({
     required final UserModel user,
     @JsonKey(name: 'access_token') required final String accessToken,
@@ -73,7 +73,7 @@ sealed class LoginResponse with _$LoginResponse {
 }
 
 @freezed
-sealed class RegisterRequest with _$RegisterRequest {
+abstract class RegisterRequest with _$RegisterRequest {
   const factory RegisterRequest({
     required final String email,
     required final String password,
@@ -89,7 +89,7 @@ sealed class RegisterRequest with _$RegisterRequest {
 }
 
 @freezed
-sealed class RegisterResponse with _$RegisterResponse {
+abstract class RegisterResponse with _$RegisterResponse {
   const factory RegisterResponse({
     required final UserModel user,
     @JsonKey(name: 'access_token') required final String accessToken,

@@ -14,7 +14,7 @@ part 'auth_provider.freezed.dart';
 part 'auth_provider.g.dart';
 
 @freezed
-sealed class AuthState with _$AuthState {
+abstract class AuthState with _$AuthState {
   const factory AuthState.initial() = AuthInitial;
 
   const factory AuthState.loading() = AuthLoading;

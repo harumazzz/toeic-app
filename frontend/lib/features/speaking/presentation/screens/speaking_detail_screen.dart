@@ -116,7 +116,6 @@ class SpeakingDetailScreen extends HookConsumerWidget {
             throw Exception(context.t.exceptions.speechRecognitionNotAvailable);
           }
           recognizedText.value = '';
-          // Generate a unique filename for the recording
           final timestamp = DateTime.now().millisecondsSinceEpoch;
           final path = 'speaking_recording_$timestamp.aac';
           await audioRecorder.start(

@@ -5,7 +5,7 @@ import '../../../vocabulary/domain/entities/word.dart';
 part 'progress.freezed.dart';
 
 @freezed
-sealed class CreateWordProgress with _$CreateWordProgress {
+abstract class CreateWordProgress with _$CreateWordProgress {
   const factory CreateWordProgress({
     required final int easeFactor,
     required final int intervalDays,
@@ -17,7 +17,7 @@ sealed class CreateWordProgress with _$CreateWordProgress {
 }
 
 @freezed
-sealed class Progress with _$Progress {
+abstract class Progress with _$Progress {
   const factory Progress({
     required final DateTime createdAt,
     required final int easeFactor,
@@ -32,7 +32,7 @@ sealed class Progress with _$Progress {
 }
 
 @freezed
-sealed class WordProgress with _$WordProgress {
+abstract class WordProgress with _$WordProgress {
   const factory WordProgress({
     required final Progress progress,
     required final Word word,
@@ -40,7 +40,7 @@ sealed class WordProgress with _$WordProgress {
 }
 
 @freezed
-sealed class WordProgressRequest with _$WordProgressRequest {
+abstract class WordProgressRequest with _$WordProgressRequest {
   const factory WordProgressRequest({
     required final int easeFactor,
     required final int intervalDays,

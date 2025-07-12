@@ -25,14 +25,14 @@ GetContentByParts getContentByParts(final Ref ref) {
 }
 
 @freezed
-sealed class GetContentParams with _$GetContentParams {
+abstract class GetContentParams with _$GetContentParams {
   const factory GetContentParams({
     required final int contentId,
   }) = _GetContentParams;
 }
 
 @freezed
-sealed class GetContentByPartsParams with _$GetContentByPartsParams {
+abstract class GetContentByPartsParams with _$GetContentByPartsParams {
   const factory GetContentByPartsParams({
     required final int partId,
   }) = _GetContentByPartsParams;
@@ -51,8 +51,8 @@ class GetContent implements UseCase<Content, GetContentParams> {
   );
 }
 
-class GetContentByParts implements 
-UseCase<List<Content>, GetContentByPartsParams> {
+class GetContentByParts
+    implements UseCase<List<Content>, GetContentByPartsParams> {
   const GetContentByParts(this._contentRepository);
 
   final ContentRepository _contentRepository;

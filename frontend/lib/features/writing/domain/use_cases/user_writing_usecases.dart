@@ -91,7 +91,7 @@ class ListUserWritingsByPromptIdUseCase
 }
 
 @freezed
-sealed class UpdateUserWritingParams with _$UpdateUserWritingParams {
+abstract class UpdateUserWritingParams with _$UpdateUserWritingParams {
   const factory UpdateUserWritingParams({
     required final int id,
     required final UserWritingUpdateRequest request,
@@ -139,7 +139,7 @@ class DeleteUserWritingUseCase implements UseCase<Success, int> {
 }
 
 @freezed
-sealed class SubmitWritingForEvaluationParams
+abstract class SubmitWritingForEvaluationParams
     with _$SubmitWritingForEvaluationParams {
   const factory SubmitWritingForEvaluationParams({
     required final int userId,
@@ -174,7 +174,7 @@ class SubmitWritingForEvaluationUseCase
 }
 
 @freezed
-sealed class AddAIFeedbackParams with _$AddAIFeedbackParams {
+abstract class AddAIFeedbackParams with _$AddAIFeedbackParams {
   const factory AddAIFeedbackParams({
     required final int submissionId,
     required final Map<String, dynamic> aiFeedback,
@@ -238,9 +238,10 @@ class GetUserWritingProgressUseCase
             ),
           );
         }
-        final sortedWritings = List<UserWriting>.from(writings)..sort(
-          (final a, final b) => a.submittedAt.compareTo(b.submittedAt),
-        );
+        final sortedWritings = List<UserWriting>.from(writings)
+          ..sort(
+            (final a, final b) => a.submittedAt.compareTo(b.submittedAt),
+          );
         final evaluatedWritings = sortedWritings.where(
           (final w) => w.aiScore != null,
         );
@@ -280,13 +281,12 @@ class GetUserWritingProgressUseCase
             latestScore: latestScore,
             improvementTrend: improvementTrend,
             recentSubmissions: [...sortedWritings.take(5)],
-            bestSubmission:
-                evaluatedWritings.isEmpty
-                    ? null
-                    : evaluatedWritings.reduce(
-                      (final a, final b) =>
-                          (a.aiScore ?? 0) > (b.aiScore ?? 0) ? a : b,
-                    ),
+            bestSubmission: evaluatedWritings.isEmpty
+                ? null
+                : evaluatedWritings.reduce(
+                    (final a, final b) =>
+                        (a.aiScore ?? 0) > (b.aiScore ?? 0) ? a : b,
+                  ),
           ),
         );
       },
@@ -295,7 +295,7 @@ class GetUserWritingProgressUseCase
 }
 
 @freezed
-sealed class ReviseWritingSubmissionParams
+abstract class ReviseWritingSubmissionParams
     with _$ReviseWritingSubmissionParams {
   const factory ReviseWritingSubmissionParams({
     required final int submissionId,
@@ -328,7 +328,7 @@ class ReviseWritingSubmissionUseCase
 }
 
 @freezed
-sealed class UserWritingProgress with _$UserWritingProgress {
+abstract class UserWritingProgress with _$UserWritingProgress {
   const factory UserWritingProgress({
     required final int userId,
     required final int totalSubmissions,

@@ -6,7 +6,7 @@ part 'setting_model.freezed.dart';
 part 'setting_model.g.dart';
 
 @freezed
-sealed class SettingModel with _$SettingModel {
+abstract class SettingModel with _$SettingModel {
   const factory SettingModel({
     required final String themeMode,
     required final String language,

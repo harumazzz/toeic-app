@@ -47,14 +47,12 @@ class WordDetailController extends _$WordDetailController {
       GetWordParams(id: wordId),
     );
     state = result.fold(
-      ifLeft:
-          (final e) => WordDetailState.error(
-            message: e.message,
-          ),
-      ifRight:
-          (final word) => WordDetailState.loaded(
-            word: word,
-          ),
+      ifLeft: (final e) => WordDetailState.error(
+        message: e.message,
+      ),
+      ifRight: (final word) => WordDetailState.loaded(
+        word: word,
+      ),
     );
   }
 }
@@ -85,10 +83,9 @@ class BookmarkWord extends _$BookmarkWord {
       GetProgressParams(wordId: word.id),
     );
     state = result.fold(
-      ifLeft:
-          (final e) => BookMarkWordState.error(
-            message: e.message,
-          ),
+      ifLeft: (final e) => BookMarkWordState.error(
+        message: e.message,
+      ),
       ifRight: (final progress) {
         if (progress != null) {
           return const BookMarkWordState.bookmarked();

@@ -6,7 +6,7 @@ part 'writing_prompt_model.freezed.dart';
 part 'writing_prompt_model.g.dart';
 
 @freezed
-sealed class WritingPromptModel with _$WritingPromptModel {
+abstract class WritingPromptModel with _$WritingPromptModel {
   const factory WritingPromptModel({
     required final int id,
     @JsonKey(name: 'user_id') final int? userId,
@@ -32,7 +32,7 @@ extension WritingPromptModelExtension on WritingPromptModel {
 }
 
 @freezed
-sealed class WritingPromptRequestModel with _$WritingPromptRequestModel {
+abstract class WritingPromptRequestModel with _$WritingPromptRequestModel {
   const factory WritingPromptRequestModel({
     @JsonKey(name: 'user_id') final int? userId,
     @JsonKey(name: 'prompt_text') required final String promptText,

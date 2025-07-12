@@ -6,7 +6,7 @@ part 'grammar_model.freezed.dart';
 part 'grammar_model.g.dart';
 
 @freezed
-sealed class GrammarModel with _$GrammarModel {
+abstract class GrammarModel with _$GrammarModel {
   const factory GrammarModel({
     @JsonKey(name: 'contents') final List<ContentModel>? contents,
     @JsonKey(name: 'grammar_key') required final String grammarKey,
@@ -23,7 +23,7 @@ sealed class GrammarModel with _$GrammarModel {
 }
 
 @freezed
-sealed class ContentModel with _$ContentModel {
+abstract class ContentModel with _$ContentModel {
   const factory ContentModel({
     @JsonKey(name: 'content') final List<ContentElementModel>? content,
     @JsonKey(name: 'sub_title') final String? subTitle,
@@ -35,7 +35,7 @@ sealed class ContentModel with _$ContentModel {
 }
 
 @freezed
-sealed class ContentElementModel with _$ContentElementModel {
+abstract class ContentElementModel with _$ContentElementModel {
   const factory ContentElementModel({
     @JsonKey(name: 'c') final String? content,
     @JsonKey(name: 'e') final List<ExampleModel>? examples,
@@ -48,7 +48,7 @@ sealed class ContentElementModel with _$ContentElementModel {
 }
 
 @freezed
-sealed class ExampleModel with _$ExampleModel {
+abstract class ExampleModel with _$ExampleModel {
   const factory ExampleModel({
     @JsonKey(name: 'e') final String? example,
   }) = _ExampleModel;
@@ -59,7 +59,7 @@ sealed class ExampleModel with _$ExampleModel {
 }
 
 @freezed
-sealed class GetRelatedGrammarsRequest with _$GetRelatedGrammarsRequest {
+abstract class GetRelatedGrammarsRequest with _$GetRelatedGrammarsRequest {
   const factory GetRelatedGrammarsRequest({
     @JsonKey(name: 'ids') required final List<int> ids,
   }) = _GetRelatedGrammarsRequest;

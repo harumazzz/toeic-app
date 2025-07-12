@@ -45,11 +45,10 @@ class SpeakingSessions extends _$SpeakingSessions {
       ),
     );
     result.fold(
-      ifLeft:
-          (final failure) =>
-              state = SpeakingState.error(message: failure.message),
-      ifRight:
-          (final sessions) => state = SpeakingState.loaded(sessions: sessions),
+      ifLeft: (final failure) =>
+          state = SpeakingState.error(message: failure.message),
+      ifRight: (final sessions) =>
+          state = SpeakingState.loaded(sessions: sessions),
     );
   }
 
@@ -68,11 +67,10 @@ class SpeakingSessions extends _$SpeakingSessions {
       GetSpeakingSessionRequest(userId: userId),
     );
     result.fold(
-      ifLeft:
-          (final failure) =>
-              state = SpeakingState.error(message: failure.message),
-      ifRight:
-          (final sessions) => state = SpeakingState.loaded(sessions: sessions),
+      ifLeft: (final failure) =>
+          state = SpeakingState.error(message: failure.message),
+      ifRight: (final sessions) =>
+          state = SpeakingState.loaded(sessions: sessions),
     );
   }
 }

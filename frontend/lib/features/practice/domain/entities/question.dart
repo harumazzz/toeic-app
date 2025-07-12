@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'question.freezed.dart';
 
 @freezed
-sealed class Question with _$Question {
+abstract class Question with _$Question {
   const factory Question({
     required final int contentId,
     required final int questionId,

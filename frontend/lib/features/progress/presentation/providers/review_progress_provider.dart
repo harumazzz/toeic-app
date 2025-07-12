@@ -43,10 +43,9 @@ class ReviewProgressNotifier extends _$ReviewProgressNotifier {
         );
 
     state = result.fold(
-      ifLeft:
-          (final failure) => ReviewProgressState.error(
-            failure.message,
-          ),
+      ifLeft: (final failure) => ReviewProgressState.error(
+        failure.message,
+      ),
       ifRight: ReviewProgressState.loaded,
     );
   }

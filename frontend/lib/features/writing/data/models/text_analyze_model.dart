@@ -6,7 +6,7 @@ part 'text_analyze_model.freezed.dart';
 part 'text_analyze_model.g.dart';
 
 @freezed
-sealed class TextAnalyzeRequestModel with _$TextAnalyzeRequestModel {
+abstract class TextAnalyzeRequestModel with _$TextAnalyzeRequestModel {
   const factory TextAnalyzeRequestModel({
     @JsonKey(name: 'async') required final bool textAnalyzeRequestModelAsync,
     @JsonKey(name: 'min_synonym_level') required final String minSynonymLevel,
@@ -26,7 +26,7 @@ Map<String, dynamic> serializeTextAnalyzeRequestModel(
 ) => object.toJson();
 
 @freezed
-sealed class TextAnalyzeModel with _$TextAnalyzeModel {
+abstract class TextAnalyzeModel with _$TextAnalyzeModel {
   const factory TextAnalyzeModel({
     @JsonKey(name: 'cached') required final bool? cached,
     @JsonKey(name: 'error') required final String? error,
@@ -42,7 +42,7 @@ sealed class TextAnalyzeModel with _$TextAnalyzeModel {
 }
 
 @freezed
-sealed class ResultModel with _$ResultModel {
+abstract class ResultModel with _$ResultModel {
   const factory ResultModel({
     @JsonKey(name: 'words') required final List<WordModel> words,
   }) = _ResultModel;
@@ -53,7 +53,7 @@ sealed class ResultModel with _$ResultModel {
 }
 
 @freezed
-sealed class WordModel with _$WordModel {
+abstract class WordModel with _$WordModel {
   const factory WordModel({
     @JsonKey(name: 'count') required final int count,
     @JsonKey(name: 'level') required final String level,
@@ -67,7 +67,7 @@ sealed class WordModel with _$WordModel {
 }
 
 @freezed
-sealed class SuggestionModel with _$SuggestionModel {
+abstract class SuggestionModel with _$SuggestionModel {
   const factory SuggestionModel({
     @JsonKey(name: 'definition') required final String definition,
     @JsonKey(name: 'level') required final String level,

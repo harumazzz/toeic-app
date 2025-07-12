@@ -6,7 +6,7 @@ part 'exam_model.freezed.dart';
 part 'exam_model.g.dart';
 
 @freezed
-sealed class ExamModel with _$ExamModel {
+abstract class ExamModel with _$ExamModel {
   const factory ExamModel({
     @JsonKey(name: 'exam_id') required final int examId,
     @JsonKey(name: 'time_limit_minutes') required final int timeLimitMinutes,

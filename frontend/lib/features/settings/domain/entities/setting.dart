@@ -21,7 +21,7 @@ enum WordNotificationFrequency {
 }
 
 @freezed
-sealed class Setting with _$Setting {
+abstract class Setting with _$Setting {
   const factory Setting({
     required final AppThemeMode themeMode,
     required final AppLanguage language,

@@ -13,7 +13,7 @@ part 'get_grammar.freezed.dart';
 part 'get_grammar.g.dart';
 
 @freezed
-sealed class GetGrammarParams with _$GetGrammarParams {
+abstract class GetGrammarParams with _$GetGrammarParams {
   const factory GetGrammarParams({
     required final int id,
   }) = _GetGrammarParams;

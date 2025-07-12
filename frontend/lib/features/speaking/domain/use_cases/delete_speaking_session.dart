@@ -34,7 +34,8 @@ class DeleteSpeakingSession
 }
 
 @freezed
-sealed class DeleteSpeakingSessionRequest with _$DeleteSpeakingSessionRequest {
+abstract class DeleteSpeakingSessionRequest
+    with _$DeleteSpeakingSessionRequest {
   const factory DeleteSpeakingSessionRequest({
     required final int id,
   }) = _DeleteSpeakingSessionRequest;

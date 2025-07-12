@@ -1,5 +1,3 @@
-
-
 import 'package:dart_either/dart_either.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -22,9 +20,8 @@ UpdateSpeakingSession updateSpeakingSession(
   return UpdateSpeakingSession(repository);
 }
 
-class UpdateSpeakingSession implements 
-UseCase<Speaking, UpdateSpeakingSessionRequest> {
-
+class UpdateSpeakingSession
+    implements UseCase<Speaking, UpdateSpeakingSessionRequest> {
   const UpdateSpeakingSession(this.repository);
 
   final SpeakingRepository repository;
@@ -39,7 +36,8 @@ UseCase<Speaking, UpdateSpeakingSessionRequest> {
 }
 
 @freezed
-sealed class UpdateSpeakingSessionRequest with _$UpdateSpeakingSessionRequest {
+abstract class UpdateSpeakingSessionRequest
+    with _$UpdateSpeakingSessionRequest {
   const factory UpdateSpeakingSessionRequest({
     required final int id,
     required final SpeakingRequest speakingRequest,

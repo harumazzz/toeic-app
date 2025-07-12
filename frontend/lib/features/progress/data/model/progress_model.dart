@@ -7,7 +7,7 @@ part 'progress_model.g.dart';
 part 'progress_model.freezed.dart';
 
 @freezed
-sealed class WordProgressRequestModel with _$WordProgressRequestModel {
+abstract class WordProgressRequestModel with _$WordProgressRequestModel {
   const factory WordProgressRequestModel({
     @JsonKey(name: 'ease_factor') required final int easeFactor,
     @JsonKey(name: 'interval_days') required final int intervalDays,
@@ -30,7 +30,7 @@ Map<String, dynamic> serializeWordProgressRequestModel(
 ) => object.toJson();
 
 @freezed
-sealed class ProgressModel with _$ProgressModel {
+abstract class ProgressModel with _$ProgressModel {
   const factory ProgressModel({
     @JsonKey(name: 'created_at') required final DateTime createdAt,
     @JsonKey(name: 'ease_factor') required final int easeFactor,
@@ -52,7 +52,7 @@ sealed class ProgressModel with _$ProgressModel {
 }
 
 @freezed
-sealed class WordProgressModel with _$WordProgressModel {
+abstract class WordProgressModel with _$WordProgressModel {
   const factory WordProgressModel({
     required final ProgressModel progress,
     required final WordModel word,

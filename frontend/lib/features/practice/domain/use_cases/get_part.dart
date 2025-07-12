@@ -25,45 +25,39 @@ GetPartsByExam getPartsByExam(final Ref ref) {
 }
 
 @freezed
-sealed class GetPartParams with _$GetPartParams {
+abstract class GetPartParams with _$GetPartParams {
   const factory GetPartParams({
     required final int partId,
   }) = _GetPartParams;
 }
 
 @freezed
-sealed class GetPartsByExamParams with _$GetPartsByExamParams {
+abstract class GetPartsByExamParams with _$GetPartsByExamParams {
   const factory GetPartsByExamParams({
     required final int examId,
   }) = _GetPartsByExamParams;
 }
 
 class GetPart implements UseCase<Part, GetPartParams> {
-
   const GetPart(this._partRepository);
 
   final PartRepository _partRepository;
 
   @override
-  Future<Either<Failure, Part>> call(
-    final GetPartParams params
-  ) => _partRepository.getPartById(
-    partId: params.partId,
-  );
-
+  Future<Either<Failure, Part>> call(final GetPartParams params) =>
+      _partRepository.getPartById(
+        partId: params.partId,
+      );
 }
 
 class GetPartsByExam implements UseCase<List<Part>, GetPartsByExamParams> {
-
   const GetPartsByExam(this._partRepository);
 
   final PartRepository _partRepository;
 
   @override
-  Future<Either<Failure, List<Part>>> call(
-    final GetPartsByExamParams params
-  ) => _partRepository.getPartsByExamId(
-    examId: params.examId,
-  );
-
+  Future<Either<Failure, List<Part>>> call(final GetPartsByExamParams params) =>
+      _partRepository.getPartsByExamId(
+        examId: params.examId,
+      );
 }

@@ -35,7 +35,7 @@ class GetSpeakingSessionById
 }
 
 @freezed
-sealed class GetSpeakingSessionByIdRequest
+abstract class GetSpeakingSessionByIdRequest
     with _$GetSpeakingSessionByIdRequest {
   const factory GetSpeakingSessionByIdRequest({
     required final int id,

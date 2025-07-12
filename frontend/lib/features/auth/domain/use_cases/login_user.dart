@@ -32,7 +32,7 @@ class LoginUser implements UseCase<User, LoginParams> {
 }
 
 @freezed
-sealed class LoginParams with _$LoginParams {
+abstract class LoginParams with _$LoginParams {
   const factory LoginParams({
     required final String email,
     required final String password,

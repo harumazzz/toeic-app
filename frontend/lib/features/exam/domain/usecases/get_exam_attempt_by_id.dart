@@ -32,7 +32,7 @@ class GetExamAttemptById
 }
 
 @freezed
-sealed class GetExamAttemptByIdParams with _$GetExamAttemptByIdParams {
+abstract class GetExamAttemptByIdParams with _$GetExamAttemptByIdParams {
   const factory GetExamAttemptByIdParams({
     required final int id,
   }) = _GetExamAttemptByIdParams;

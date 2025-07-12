@@ -5,7 +5,7 @@ part 'exam_model.freezed.dart';
 part 'exam_model.g.dart';
 
 @freezed
-sealed class ExamModel with _$ExamModel {
+abstract class ExamModel with _$ExamModel {
   const factory ExamModel({
     @JsonKey(name: 'exam_id') required final int examId,
     @JsonKey(name: 'exam_title') required final String examTitle,
@@ -18,7 +18,7 @@ sealed class ExamModel with _$ExamModel {
 }
 
 @freezed
-sealed class PartModel with _$PartModel {
+abstract class PartModel with _$PartModel {
   const factory PartModel({
     @JsonKey(name: 'part_id') required final int partId,
     required final String title,
@@ -30,7 +30,7 @@ sealed class PartModel with _$PartModel {
 }
 
 @freezed
-sealed class ContentModel with _$ContentModel {
+abstract class ContentModel with _$ContentModel {
   const factory ContentModel({
     @JsonKey(name: 'content_id') required final int contentId,
     @JsonKey(name: 'description') required final String description,
@@ -43,7 +43,7 @@ sealed class ContentModel with _$ContentModel {
 }
 
 @freezed
-sealed class QuestionModel with _$QuestionModel {
+abstract class QuestionModel with _$QuestionModel {
   const factory QuestionModel({
     @JsonKey(name: 'question_id') required final int questionId,
     @JsonKey(name: 'content_id') required final int contentId,
@@ -62,7 +62,7 @@ sealed class QuestionModel with _$QuestionModel {
 }
 
 @freezed
-sealed class UserAnswerModel with _$UserAnswerModel {
+abstract class UserAnswerModel with _$UserAnswerModel {
   const factory UserAnswerModel({
     @JsonKey(name: 'answer_time') required final String answerTime,
     @JsonKey(name: 'attempt_id') required final int attemptId,
@@ -83,7 +83,7 @@ sealed class UserAnswerModel with _$UserAnswerModel {
 }
 
 @freezed
-sealed class UserAnswerResponseModel with _$UserAnswerResponseModel {
+abstract class UserAnswerResponseModel with _$UserAnswerResponseModel {
   const factory UserAnswerResponseModel({
     required final List<UserAnswerModel> answers,
     @JsonKey(name: 'attempt_id') required final int attemptId,
@@ -96,7 +96,7 @@ sealed class UserAnswerResponseModel with _$UserAnswerResponseModel {
 }
 
 @freezed
-sealed class ExamAttemptModel with _$ExamAttemptModel {
+abstract class ExamAttemptModel with _$ExamAttemptModel {
   const factory ExamAttemptModel({
     @JsonKey(name: 'attempt_id') required final int attemptId,
     @JsonKey(name: 'created_at') required final String createdAt,
@@ -114,7 +114,7 @@ sealed class ExamAttemptModel with _$ExamAttemptModel {
 }
 
 @freezed
-sealed class ExamModelRequest with _$ExamModelRequest {
+abstract class ExamModelRequest with _$ExamModelRequest {
   const factory ExamModelRequest({
     @JsonKey(name: 'exam_id') required final int examId,
   }) = _ExamModelRequest;
@@ -128,7 +128,7 @@ sealed class ExamModelRequest with _$ExamModelRequest {
 }
 
 @freezed
-sealed class AnswerModel with _$AnswerModel {
+abstract class AnswerModel with _$AnswerModel {
   const factory AnswerModel({
     @JsonKey(name: 'answers') required final List<SelectedAnswerModel> answers,
     @JsonKey(name: 'attempt_id') required final int attemptId,
@@ -143,7 +143,7 @@ sealed class AnswerModel with _$AnswerModel {
 }
 
 @freezed
-sealed class SelectedAnswerModel with _$SelectedAnswerModel {
+abstract class SelectedAnswerModel with _$SelectedAnswerModel {
   const factory SelectedAnswerModel({
     @JsonKey(name: 'question_id') required final int questionId,
     @JsonKey(name: 'selected_answer') required final String selectedAnswer,
@@ -158,7 +158,7 @@ sealed class SelectedAnswerModel with _$SelectedAnswerModel {
 }
 
 @freezed
-sealed class ExamStatsModel with _$ExamStatsModel {
+abstract class ExamStatsModel with _$ExamStatsModel {
   const factory ExamStatsModel({
     @JsonKey(name: 'abandoned_attempts') required final int abandonedAttempts,
     @JsonKey(name: 'average_score') required final String averageScore,
@@ -176,7 +176,7 @@ sealed class ExamStatsModel with _$ExamStatsModel {
 }
 
 @freezed
-sealed class UpdateExamAttemptModel with _$UpdateExamAttemptModel {
+abstract class UpdateExamAttemptModel with _$UpdateExamAttemptModel {
   const factory UpdateExamAttemptModel({
     @JsonKey(name: 'score') required final String score,
     @JsonKey(name: 'status') required final String status,

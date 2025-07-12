@@ -32,7 +32,7 @@ class RegisterUser implements UseCase<User, RegisterParams> {
 }
 
 @freezed
-sealed class RegisterParams with _$RegisterParams {
+abstract class RegisterParams with _$RegisterParams {
   const factory RegisterParams({
     required final String email,
     required final String password,

@@ -10,7 +10,7 @@ part 'writing_prompt_provider.freezed.dart';
 part 'writing_prompt_provider.g.dart';
 
 @freezed
-sealed class WritingPromptState with _$WritingPromptState {
+abstract class WritingPromptState with _$WritingPromptState {
   const factory WritingPromptState.initial() = WritingPromptInitial;
   const factory WritingPromptState.loading() = WritingPromptLoading;
   const factory WritingPromptState.loaded({
@@ -33,14 +33,12 @@ class WritingPromptController extends _$WritingPromptController {
     final result = await getWritingPromptsUseCase(const NoParams());
 
     state = result.fold(
-      ifLeft:
-          (final failure) => WritingPromptState.error(
-            message: failure.message,
-          ),
-      ifRight:
-          (final prompts) => WritingPromptState.loaded(
-            prompts: prompts,
-          ),
+      ifLeft: (final failure) => WritingPromptState.error(
+        message: failure.message,
+      ),
+      ifRight: (final prompts) => WritingPromptState.loaded(
+        prompts: prompts,
+      ),
     );
   }
 
@@ -50,7 +48,7 @@ class WritingPromptController extends _$WritingPromptController {
 }
 
 @freezed
-sealed class SingleWritingPromptState with _$SingleWritingPromptState {
+abstract class SingleWritingPromptState with _$SingleWritingPromptState {
   const factory SingleWritingPromptState.initial() = SingleWritingPromptInitial;
   const factory SingleWritingPromptState.loading() = SingleWritingPromptLoading;
   const factory SingleWritingPromptState.loaded({
@@ -73,14 +71,12 @@ class SingleWritingPromptController extends _$SingleWritingPromptController {
     final result = await getWritingPromptUseCase(promptId);
 
     state = result.fold(
-      ifLeft:
-          (final failure) => SingleWritingPromptState.error(
-            message: failure.message,
-          ),
-      ifRight:
-          (final prompt) => SingleWritingPromptState.loaded(
-            prompt: prompt,
-          ),
+      ifLeft: (final failure) => SingleWritingPromptState.error(
+        message: failure.message,
+      ),
+      ifRight: (final prompt) => SingleWritingPromptState.loaded(
+        prompt: prompt,
+      ),
     );
   }
 

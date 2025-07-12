@@ -6,7 +6,7 @@ part 'result_model.freezed.dart';
 part 'result_model.g.dart';
 
 @freezed
-sealed class UserResultModel with _$UserResultModel {
+abstract class UserResultModel with _$UserResultModel {
   const factory UserResultModel({
     @JsonKey(name: 'answers') required final List<AnswerModel> answers,
     @JsonKey(name: 'attempt_id') required final int attemptId,
@@ -23,7 +23,7 @@ sealed class UserResultModel with _$UserResultModel {
 }
 
 @freezed
-sealed class AnswerModel with _$AnswerModel {
+abstract class AnswerModel with _$AnswerModel {
   const factory AnswerModel({
     @JsonKey(name: 'answer_time') required final String answerTime,
     @JsonKey(name: 'attempt_id') required final int attemptId,
@@ -43,7 +43,7 @@ sealed class AnswerModel with _$AnswerModel {
 }
 
 @freezed
-sealed class FailedAnswerModel with _$FailedAnswerModel {
+abstract class FailedAnswerModel with _$FailedAnswerModel {
   const factory FailedAnswerModel({
     @JsonKey(name: 'error') required final String error,
     @JsonKey(name: 'question_id') required final int questionId,
@@ -56,7 +56,7 @@ sealed class FailedAnswerModel with _$FailedAnswerModel {
 }
 
 @freezed
-sealed class ScoreModel with _$ScoreModel {
+abstract class ScoreModel with _$ScoreModel {
   const factory ScoreModel({
     @JsonKey(name: 'attempt_id') required final int attemptId,
     @JsonKey(name: 'calculated_score') required final int calculatedScore,
@@ -70,7 +70,7 @@ sealed class ScoreModel with _$ScoreModel {
 }
 
 @freezed
-sealed class UserAnswerRequestModel with _$UserAnswerRequestModel {
+abstract class UserAnswerRequestModel with _$UserAnswerRequestModel {
   const factory UserAnswerRequestModel({
     @JsonKey(name: 'attempt_id') required final int attemptId,
     @JsonKey(name: 'question_id') required final int questionId,
@@ -86,7 +86,8 @@ sealed class UserAnswerRequestModel with _$UserAnswerRequestModel {
 }
 
 @freezed
-sealed class UpdateUserAnswerRequestModel with _$UpdateUserAnswerRequestModel {
+abstract class UpdateUserAnswerRequestModel
+    with _$UpdateUserAnswerRequestModel {
   const factory UpdateUserAnswerRequestModel({
     @JsonKey(name: 'selected_answer') required final String selectedAnswer,
   }) = _UpdateUserAnswerRequestModel;
@@ -100,7 +101,7 @@ sealed class UpdateUserAnswerRequestModel with _$UpdateUserAnswerRequestModel {
 }
 
 @freezed
-sealed class SubmitAnswersRequestModel with _$SubmitAnswersRequestModel {
+abstract class SubmitAnswersRequestModel with _$SubmitAnswersRequestModel {
   const factory SubmitAnswersRequestModel({
     @JsonKey(name: 'attempt_id') required final int attemptId,
     @JsonKey(name: 'answers') required final List<SubmitAnswerModel> answers,
@@ -115,7 +116,7 @@ sealed class SubmitAnswersRequestModel with _$SubmitAnswersRequestModel {
 }
 
 @freezed
-sealed class SubmitAnswerModel with _$SubmitAnswerModel {
+abstract class SubmitAnswerModel with _$SubmitAnswerModel {
   const factory SubmitAnswerModel({
     @JsonKey(name: 'question_id') required final int questionId,
     @JsonKey(name: 'selected_answer') required final String selectedAnswer,
@@ -130,7 +131,7 @@ sealed class SubmitAnswerModel with _$SubmitAnswerModel {
 }
 
 @freezed
-sealed class SubmittedAnswerModel with _$SubmittedAnswerModel {
+abstract class SubmittedAnswerModel with _$SubmittedAnswerModel {
   const factory SubmittedAnswerModel({
     @JsonKey(name: 'answers')
     required final List<SubmitAnswerResultModel> answers,
@@ -148,7 +149,7 @@ sealed class SubmittedAnswerModel with _$SubmittedAnswerModel {
 }
 
 @freezed
-sealed class SubmitAnswerResultModel with _$SubmitAnswerResultModel {
+abstract class SubmitAnswerResultModel with _$SubmitAnswerResultModel {
   const factory SubmitAnswerResultModel({
     @JsonKey(name: 'answer_time') required final String answerTime,
     @JsonKey(name: 'attempt_id') required final int attemptId,
@@ -165,7 +166,7 @@ sealed class SubmitAnswerResultModel with _$SubmitAnswerResultModel {
 }
 
 @freezed
-sealed class FailedSubmitAnswerModel with _$FailedSubmitAnswerModel {
+abstract class FailedSubmitAnswerModel with _$FailedSubmitAnswerModel {
   const factory FailedSubmitAnswerModel({
     @JsonKey(name: 'error') required final String error,
     @JsonKey(name: 'question_id') required final int questionId,
@@ -178,7 +179,7 @@ sealed class FailedSubmitAnswerModel with _$FailedSubmitAnswerModel {
 }
 
 @freezed
-sealed class SubmitScoreModel with _$SubmitScoreModel {
+abstract class SubmitScoreModel with _$SubmitScoreModel {
   const factory SubmitScoreModel({
     @JsonKey(name: 'attempt_id') required final int attemptId,
     @JsonKey(name: 'calculated_score') required final int calculatedScore,

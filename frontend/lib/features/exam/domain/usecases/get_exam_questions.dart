@@ -33,7 +33,7 @@ class GetExamQuestions implements UseCase<Exam, GetExamQuestionsParams> {
 }
 
 @freezed
-sealed class GetExamQuestionsParams with _$GetExamQuestionsParams {
+abstract class GetExamQuestionsParams with _$GetExamQuestionsParams {
   const factory GetExamQuestionsParams({
     required final int examId,
   }) = _GetExamQuestionsParams;

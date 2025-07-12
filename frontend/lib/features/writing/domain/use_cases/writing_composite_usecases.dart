@@ -16,7 +16,7 @@ part 'writing_composite_usecases.g.dart';
 part 'writing_composite_usecases.freezed.dart';
 
 @freezed
-sealed class WritingPracticeSessionRequest
+abstract class WritingPracticeSessionRequest
     with _$WritingPracticeSessionRequest {
   const factory WritingPracticeSessionRequest({
     required final int userId,
@@ -123,23 +123,23 @@ class WritingPracticeSessionUseCase
     );
     return submissionResult.fold(
       ifLeft: Left.new,
-      ifRight:
-          (final userWriting) => Right(
-            WritingSessionResult(
-              prompt: selectedPrompt!,
-              submission: userWriting,
-              sessionStartTime: DateTime.now().subtract(
-                const Duration(minutes: 30),
-              ),
-              sessionEndTime: DateTime.now(),
-            ),
+      ifRight: (final userWriting) => Right(
+        WritingSessionResult(
+          prompt: selectedPrompt!,
+          submission: userWriting,
+          sessionStartTime: DateTime.now().subtract(
+            const Duration(minutes: 30),
           ),
+          sessionEndTime: DateTime.now(),
+        ),
+      ),
     );
   }
 }
 
 @freezed
-sealed class BatchEvaluateWritingsRequest with _$BatchEvaluateWritingsRequest {
+abstract class BatchEvaluateWritingsRequest
+    with _$BatchEvaluateWritingsRequest {
   const factory BatchEvaluateWritingsRequest({
     required final List<int> submissionIds,
     required final EvaluationCriteria evaluationCriteria,
@@ -283,7 +283,7 @@ class BatchEvaluateWritingsUseCase
 }
 
 @freezed
-sealed class WritingAnalyticsRequest with _$WritingAnalyticsRequest {
+abstract class WritingAnalyticsRequest with _$WritingAnalyticsRequest {
   const factory WritingAnalyticsRequest({
     final DateTimeRange? timeRange,
     final int? userId,
@@ -463,7 +463,7 @@ class WritingAnalyticsUseCase
 }
 
 @freezed
-sealed class WritingSessionResult with _$WritingSessionResult {
+abstract class WritingSessionResult with _$WritingSessionResult {
   const factory WritingSessionResult({
     required final WritingPrompt prompt,
     required final UserWriting submission,
@@ -477,7 +477,7 @@ extension WritingSessionResultExtension on WritingSessionResult {
 }
 
 @freezed
-sealed class EvaluationCriteria with _$EvaluationCriteria {
+abstract class EvaluationCriteria with _$EvaluationCriteria {
   const factory EvaluationCriteria({
     required final String targetLevel,
     required final List<String> focusAreas,
@@ -487,7 +487,7 @@ sealed class EvaluationCriteria with _$EvaluationCriteria {
 }
 
 @freezed
-sealed class BatchEvaluationResult with _$BatchEvaluationResult {
+abstract class BatchEvaluationResult with _$BatchEvaluationResult {
   const factory BatchEvaluationResult({
     required final int totalSubmissions,
     required final List<UserWriting> successfulEvaluations,
@@ -507,7 +507,7 @@ extension BatchEvaluationResultExtension on BatchEvaluationResult {
 }
 
 @freezed
-sealed class EvaluationFailure with _$EvaluationFailure {
+abstract class EvaluationFailure with _$EvaluationFailure {
   const factory EvaluationFailure({
     required final int submissionId,
     required final Failure failure,
@@ -515,7 +515,7 @@ sealed class EvaluationFailure with _$EvaluationFailure {
 }
 
 @freezed
-sealed class WritingAnalytics with _$WritingAnalytics {
+abstract class WritingAnalytics with _$WritingAnalytics {
   const factory WritingAnalytics({
     required final int totalPrompts,
     required final int totalSubmissions,
@@ -540,7 +540,7 @@ extension WritingAnalyticsExtension on WritingAnalytics {
 }
 
 @freezed
-sealed class DateTimeRange with _$DateTimeRange {
+abstract class DateTimeRange with _$DateTimeRange {
   const factory DateTimeRange({
     required final DateTime start,
     required final DateTime end,

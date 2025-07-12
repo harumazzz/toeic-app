@@ -6,7 +6,7 @@ part 'user_writing_model.freezed.dart';
 part 'user_writing_model.g.dart';
 
 @freezed
-sealed class UserWritingModel with _$UserWritingModel {
+abstract class UserWritingModel with _$UserWritingModel {
   const factory UserWritingModel({
     required final int id,
     @JsonKey(name: 'user_id') required final int userId,
@@ -24,7 +24,7 @@ sealed class UserWritingModel with _$UserWritingModel {
 }
 
 @freezed
-sealed class UserWritingRequestModel with _$UserWritingRequestModel {
+abstract class UserWritingRequestModel with _$UserWritingRequestModel {
   const factory UserWritingRequestModel({
     @JsonKey(name: 'user_id') required final int userId,
     @JsonKey(name: 'prompt_id') final int? promptId,
@@ -41,7 +41,7 @@ sealed class UserWritingRequestModel with _$UserWritingRequestModel {
 }
 
 @freezed
-sealed class UserWritingUpdateRequestModel
+abstract class UserWritingUpdateRequestModel
     with _$UserWritingUpdateRequestModel {
   const factory UserWritingUpdateRequestModel({
     @JsonKey(name: 'submission_text') final String? submissionText,

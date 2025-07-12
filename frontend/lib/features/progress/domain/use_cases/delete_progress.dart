@@ -18,14 +18,13 @@ DeleteProgress deleteProgress(final Ref ref) {
 }
 
 @freezed
-sealed class DeleteProgressParams with _$DeleteProgressParams {
+abstract class DeleteProgressParams with _$DeleteProgressParams {
   const factory DeleteProgressParams({
     required final int wordId,
   }) = _DeleteProgressParams;
 }
 
-class DeleteProgress implements UseCase<Success, DeleteProgressParams>  {
-
+class DeleteProgress implements UseCase<Success, DeleteProgressParams> {
   const DeleteProgress(this._progressRepository);
 
   final ProgressRepository _progressRepository;
@@ -36,6 +35,4 @@ class DeleteProgress implements UseCase<Success, DeleteProgressParams>  {
   ) => _progressRepository.deleteProgress(
     wordId: params.wordId,
   );
-  
-
 }

@@ -31,21 +31,21 @@ GetProgress getProgress(final Ref ref) {
 }
 
 @freezed
-sealed class GetReviewsProgressParams with _$GetReviewsProgressParams {
+abstract class GetReviewsProgressParams with _$GetReviewsProgressParams {
   const factory GetReviewsProgressParams({
     required final int limit,
   }) = _GetReviewsProgressParams;
 }
 
 @freezed
-sealed class GetWordProgressParams with _$GetWordProgressParams {
+abstract class GetWordProgressParams with _$GetWordProgressParams {
   const factory GetWordProgressParams({
     required final int wordId,
   }) = _GetWordProgressParams;
 }
 
 @freezed
-sealed class GetProgressParams with _$GetProgressParams {
+abstract class GetProgressParams with _$GetProgressParams {
   const factory GetProgressParams({
     required final int wordId,
   }) = _GetProgressParams;
@@ -72,7 +72,7 @@ GetWordProgressForLearn getWordProgressForLearn(final Ref ref) {
 }
 
 @freezed
-sealed class GetWordProgressForLearnParams
+abstract class GetWordProgressForLearnParams
     with _$GetWordProgressForLearnParams {
   const factory GetWordProgressForLearnParams({
     required final int limit,

@@ -19,7 +19,7 @@ GetAllWord getAllWord(final Ref ref) {
 }
 
 @freezed
-sealed class GetAllWordParams with _$GetAllWordParams {
+abstract class GetAllWordParams with _$GetAllWordParams {
   const factory GetAllWordParams({
     required final int offset,
     required final int limit,

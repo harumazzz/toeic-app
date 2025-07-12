@@ -3,9 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/network/dio_client.dart';
-import '../../domain/entities/exam.dart';
 import '../models/exam_model.dart';
-import '../models/result_model.dart' as result;
+import '../models/result_model.dart';
 
 part 'user_answer_remote_data_source.g.dart';
 
@@ -30,7 +29,7 @@ abstract class UserAnswerRemoteDataSource {
 
   @POST('/api/v1/user-answers')
   Future<UserAnswerModel> createUserAnswer({
-    @Body() required final result.UserAnswerRequestModel userAnswer,
+    @Body() required final UserAnswerRequestModel userAnswer,
   });
 
   @GET('/api/v1/user-answers/{id}')
@@ -41,7 +40,7 @@ abstract class UserAnswerRemoteDataSource {
   @PUT('/api/v1/user-answers/{id}')
   Future<UserAnswerModel> updateUserAnswer({
     @Path('id') required final int id,
-    @Body() required final result.UpdateUserAnswerRequestModel userAnswer,
+    @Body() required final UpdateUserAnswerRequestModel userAnswer,
   });
 
   @DELETE('/api/v1/user-answers/{id}')
@@ -60,8 +59,8 @@ abstract class UserAnswerRemoteDataSource {
   });
 
   @POST('/api/v1/user-answers/bulk')
-  Future<result.SubmittedAnswerModel> submitAnswers({
-    @Body() required final result.SubmitAnswersRequestModel request,
+  Future<SubmittedAnswerModel> submitAnswers({
+    @Body() required final SubmitAnswersRequestModel request,
   });
 }
 

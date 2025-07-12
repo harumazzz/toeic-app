@@ -34,7 +34,7 @@ class CreateUserAnswer implements UseCase<UserAnswer, CreateUserAnswerParams> {
 }
 
 @freezed
-sealed class CreateUserAnswerParams with _$CreateUserAnswerParams {
+abstract class CreateUserAnswerParams with _$CreateUserAnswerParams {
   const factory CreateUserAnswerParams({
     required final UserAnswerRequest userAnswer,
   }) = _CreateUserAnswerParams;

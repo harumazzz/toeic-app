@@ -10,7 +10,7 @@ part 'grammar_provider.freezed.dart';
 part 'grammar_provider.g.dart';
 
 @freezed
-sealed class GrammarState with _$GrammarState {
+abstract class GrammarState with _$GrammarState {
   const factory GrammarState({
     @Default([]) final List<Grammar> grammars,
     @Default(false) final bool isLoading,
@@ -20,7 +20,7 @@ sealed class GrammarState with _$GrammarState {
 }
 
 @freezed
-sealed class GrammarDetailState with _$GrammarDetailState {
+abstract class GrammarDetailState with _$GrammarDetailState {
   const factory GrammarDetailState({
     @Default(null) final Grammar? grammar,
     @Default([]) final List<Grammar> relatedGrammars,
@@ -53,21 +53,16 @@ class GrammarList extends _$GrammarList {
     );
 
     result.fold(
-      ifLeft:
-          (final failure) =>
-              state = state.copyWith(
-                isLoading: false,
-                isSuccess: false,
-                error: failure.message,
-              ),
-      ifRight:
-          (final grammars) =>
-              state = state.copyWith(
-                isLoading: false,
-                isSuccess: true,
-                grammars:
-                    offset == 0 ? grammars : [...state.grammars, ...grammars],
-              ),
+      ifLeft: (final failure) => state = state.copyWith(
+        isLoading: false,
+        isSuccess: false,
+        error: failure.message,
+      ),
+      ifRight: (final grammars) => state = state.copyWith(
+        isLoading: false,
+        isSuccess: true,
+        grammars: offset == 0 ? grammars : [...state.grammars, ...grammars],
+      ),
     );
   }
 
@@ -91,21 +86,16 @@ class GrammarList extends _$GrammarList {
     );
 
     result.fold(
-      ifLeft:
-          (final failure) =>
-              state = state.copyWith(
-                isLoading: false,
-                isSuccess: false,
-                error: failure.message,
-              ),
-      ifRight:
-          (final grammars) =>
-              state = state.copyWith(
-                isLoading: false,
-                isSuccess: true,
-                grammars:
-                    offset == 0 ? grammars : [...state.grammars, ...grammars],
-              ),
+      ifLeft: (final failure) => state = state.copyWith(
+        isLoading: false,
+        isSuccess: false,
+        error: failure.message,
+      ),
+      ifRight: (final grammars) => state = state.copyWith(
+        isLoading: false,
+        isSuccess: true,
+        grammars: offset == 0 ? grammars : [...state.grammars, ...grammars],
+      ),
     );
   }
 
@@ -129,21 +119,16 @@ class GrammarList extends _$GrammarList {
     );
 
     result.fold(
-      ifLeft:
-          (final failure) =>
-              state = state.copyWith(
-                isLoading: false,
-                isSuccess: false,
-                error: failure.message,
-              ),
-      ifRight:
-          (final grammars) =>
-              state = state.copyWith(
-                isLoading: false,
-                isSuccess: true,
-                grammars:
-                    offset == 0 ? grammars : [...state.grammars, ...grammars],
-              ),
+      ifLeft: (final failure) => state = state.copyWith(
+        isLoading: false,
+        isSuccess: false,
+        error: failure.message,
+      ),
+      ifRight: (final grammars) => state = state.copyWith(
+        isLoading: false,
+        isSuccess: true,
+        grammars: offset == 0 ? grammars : [...state.grammars, ...grammars],
+      ),
     );
   }
 
@@ -167,21 +152,16 @@ class GrammarList extends _$GrammarList {
     );
 
     result.fold(
-      ifLeft:
-          (final failure) =>
-              state = state.copyWith(
-                isLoading: false,
-                isSuccess: false,
-                error: failure.message,
-              ),
-      ifRight:
-          (final grammars) =>
-              state = state.copyWith(
-                isLoading: false,
-                isSuccess: true,
-                grammars:
-                    offset == 0 ? grammars : [...state.grammars, ...grammars],
-              ),
+      ifLeft: (final failure) => state = state.copyWith(
+        isLoading: false,
+        isSuccess: false,
+        error: failure.message,
+      ),
+      ifRight: (final grammars) => state = state.copyWith(
+        isLoading: false,
+        isSuccess: true,
+        grammars: offset == 0 ? grammars : [...state.grammars, ...grammars],
+      ),
     );
   }
 }
@@ -199,13 +179,11 @@ class GrammarDetail extends _$GrammarDetail {
     );
 
     result.fold(
-      ifLeft:
-          (final failure) =>
-              state = state.copyWith(
-                isLoading: false,
-                isSuccess: false,
-                error: failure.message,
-              ),
+      ifLeft: (final failure) => state = state.copyWith(
+        isLoading: false,
+        isSuccess: false,
+        error: failure.message,
+      ),
       ifRight: (final grammar) async {
         state = state.copyWith(
           isLoading: false,
@@ -226,16 +204,12 @@ class GrammarDetail extends _$GrammarDetail {
     );
 
     result.fold(
-      ifLeft:
-          (final failure) =>
-              state = state.copyWith(
-                error: failure.message,
-              ),
-      ifRight:
-          (final grammars) =>
-              state = state.copyWith(
-                relatedGrammars: grammars,
-              ),
+      ifLeft: (final failure) => state = state.copyWith(
+        error: failure.message,
+      ),
+      ifRight: (final grammars) => state = state.copyWith(
+        relatedGrammars: grammars,
+      ),
     );
   }
 }

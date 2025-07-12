@@ -9,7 +9,7 @@ part 'attempt_provider.freezed.dart';
 part 'attempt_provider.g.dart';
 
 @freezed
-sealed class AttemptState with _$AttemptState {
+abstract class AttemptState with _$AttemptState {
   const factory AttemptState.initial() = AttemptInitial;
   const factory AttemptState.loading() = AttemptLoading;
   const factory AttemptState.loaded(

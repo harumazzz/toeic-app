@@ -35,7 +35,7 @@ class CreateSpeakingTurn
 }
 
 @freezed
-sealed class CreateSpeakingTurnRequest with _$CreateSpeakingTurnRequest {
+abstract class CreateSpeakingTurnRequest with _$CreateSpeakingTurnRequest {
   const factory CreateSpeakingTurnRequest({
     required final SpeakingTurnRequest speakingTurnRequest,
   }) = _CreateSpeakingTurnRequest;

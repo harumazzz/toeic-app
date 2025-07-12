@@ -22,6 +22,14 @@ void main() {
     mockUserWritingRepository = MockUserWritingRepository();
   });
 
+  setUpAll(() {
+    registerFallbackValue(
+      const UserWritingRequest(userId: 0, submissionText: ''),
+    );
+    registerFallbackValue(const UserWritingUpdateRequest());
+    registerFallbackValue(const WritingPromptRequest(promptText: ''));
+  });
+
   group('WritingRepository', () {
     // Test data
     const tWritingPromptId = 1;
@@ -931,7 +939,7 @@ void main() {
           );
 
           // assert
-          expect(result, const Right(null));
+          expect(result, const Right(Success()));
           verify(
             () =>
                 mockUserWritingRepository.deleteUserWriting(id: tUserWritingId),

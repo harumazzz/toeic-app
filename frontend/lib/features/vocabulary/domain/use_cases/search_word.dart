@@ -19,7 +19,7 @@ SearchWord searchWord(final Ref ref) {
 }
 
 @freezed
-sealed class SearchWordParams with _$SearchWordParams {
+abstract class SearchWordParams with _$SearchWordParams {
   const factory SearchWordParams({
     required final String query,
     required final int offset,

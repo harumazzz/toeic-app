@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'exam.freezed.dart';
 
 @freezed
-sealed class Exam with _$Exam {
+abstract class Exam with _$Exam {
   const factory Exam({
     required final int examId,
     required final String examTitle,
@@ -13,7 +13,7 @@ sealed class Exam with _$Exam {
 }
 
 @freezed
-sealed class Part with _$Part {
+abstract class Part with _$Part {
   const factory Part({
     required final int partId,
     required final String title,
@@ -22,7 +22,7 @@ sealed class Part with _$Part {
 }
 
 @freezed
-sealed class Content with _$Content {
+abstract class Content with _$Content {
   const factory Content({
     required final int contentId,
     required final String description,
@@ -32,7 +32,7 @@ sealed class Content with _$Content {
 }
 
 @freezed
-sealed class Question with _$Question {
+abstract class Question with _$Question {
   const factory Question({
     required final int questionId,
     required final int contentId,
@@ -47,7 +47,7 @@ sealed class Question with _$Question {
 }
 
 @freezed
-sealed class UserAnswer with _$UserAnswer {
+abstract class UserAnswer with _$UserAnswer {
   const factory UserAnswer({
     required final String answerTime,
     required final int attemptId,
@@ -64,7 +64,7 @@ sealed class UserAnswer with _$UserAnswer {
 }
 
 @freezed
-sealed class UserAnswerResponse with _$UserAnswerResponse {
+abstract class UserAnswerResponse with _$UserAnswerResponse {
   const factory UserAnswerResponse({
     required final List<UserAnswer> answers,
     required final int attemptId,
@@ -74,7 +74,7 @@ sealed class UserAnswerResponse with _$UserAnswerResponse {
 }
 
 @freezed
-sealed class ExamAttempt with _$ExamAttempt {
+abstract class ExamAttempt with _$ExamAttempt {
   const factory ExamAttempt({
     required final int attemptId,
     required final String createdAt,
@@ -89,7 +89,7 @@ sealed class ExamAttempt with _$ExamAttempt {
 }
 
 @freezed
-sealed class Answer with _$Answer {
+abstract class Answer with _$Answer {
   const factory Answer({
     required final List<SelectedAnswer> answers,
     required final int attemptId,
@@ -97,7 +97,7 @@ sealed class Answer with _$Answer {
 }
 
 @freezed
-sealed class SelectedAnswer with _$SelectedAnswer {
+abstract class SelectedAnswer with _$SelectedAnswer {
   const factory SelectedAnswer({
     required final int questionId,
     required final String selectedAnswer,
@@ -105,14 +105,14 @@ sealed class SelectedAnswer with _$SelectedAnswer {
 }
 
 @freezed
-sealed class ExamRequest with _$ExamRequest {
+abstract class ExamRequest with _$ExamRequest {
   const factory ExamRequest({
     required final int examId,
   }) = _ExamRequest;
 }
 
 @freezed
-sealed class ExamStats with _$ExamStats {
+abstract class ExamStats with _$ExamStats {
   const factory ExamStats({
     required final int abandonedAttempts,
     required final String averageScore,
@@ -125,7 +125,7 @@ sealed class ExamStats with _$ExamStats {
 }
 
 @freezed
-sealed class UpdateExamAttempt with _$UpdateExamAttempt {
+abstract class UpdateExamAttempt with _$UpdateExamAttempt {
   const factory UpdateExamAttempt({
     required final String score,
     required final String status,

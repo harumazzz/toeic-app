@@ -25,7 +25,6 @@ GetExamplesByIds getExamplesByIds(final Ref ref) {
 }
 
 class GetExamples implements UseCase<List<Example>, NoParams> {
-
   const GetExamples(this.exampleRepository);
 
   final ExampleRepository exampleRepository;
@@ -34,28 +33,25 @@ class GetExamples implements UseCase<List<Example>, NoParams> {
   Future<Either<Failure, List<Example>>> call(
     final NoParams params,
   ) => exampleRepository.getExamples();
-  
 }
 
 @freezed
-sealed class GetExamplesByIdsParams with _$GetExamplesByIdsParams {
+abstract class GetExamplesByIdsParams with _$GetExamplesByIdsParams {
   const factory GetExamplesByIdsParams({
     required final List<int> ids,
   }) = _GetExamplesByIdsParams;
 }
 
-class GetExamplesByIds implements 
-UseCase<List<Example>, GetExamplesByIdsParams> {
-
+class GetExamplesByIds
+    implements UseCase<List<Example>, GetExamplesByIdsParams> {
   const GetExamplesByIds(this.exampleRepository);
 
   final ExampleRepository exampleRepository;
 
   @override
   Future<Either<Failure, List<Example>>> call(
-    final GetExamplesByIdsParams params
+    final GetExamplesByIdsParams params,
   ) => exampleRepository.getExamplesByIds(
     ids: params.ids,
   );
-
 }

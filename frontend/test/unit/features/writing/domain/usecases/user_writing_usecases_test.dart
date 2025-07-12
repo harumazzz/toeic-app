@@ -22,6 +22,13 @@ void main() {
     mockUserWritingRepository = MockUserWritingRepository();
   });
 
+  setUpAll(() {
+    registerFallbackValue(
+      const UserWritingRequest(userId: 0, submissionText: ''),
+    );
+    registerFallbackValue(const UserWritingUpdateRequest());
+  });
+
   group('CreateUserWritingUseCase', () {
     late CreateUserWritingUseCase usecase;
 

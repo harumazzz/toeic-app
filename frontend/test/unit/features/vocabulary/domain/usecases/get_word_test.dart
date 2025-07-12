@@ -12,6 +12,10 @@ void main() {
   late GetWord usecase;
   late MockWordRepository mockWordRepository;
 
+  setUpAll(() {
+    registerFallbackValue(const GetWordParams(id: 1));
+  });
+
   setUp(() {
     mockWordRepository = MockWordRepository();
     usecase = GetWord(mockWordRepository);

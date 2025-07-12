@@ -13,7 +13,7 @@ part 'get_grammars.freezed.dart';
 part 'get_grammars.g.dart';
 
 @freezed
-sealed class GetGrammarsParams with _$GetGrammarsParams {
+abstract class GetGrammarsParams with _$GetGrammarsParams {
   const factory GetGrammarsParams({
     required final int limit,
     required final int offset,
@@ -21,7 +21,7 @@ sealed class GetGrammarsParams with _$GetGrammarsParams {
 }
 
 @freezed
-sealed class GetGrammarsByLevelParams with _$GetGrammarsByLevelParams {
+abstract class GetGrammarsByLevelParams with _$GetGrammarsByLevelParams {
   const factory GetGrammarsByLevelParams({
     required final int level,
     required final int limit,
@@ -30,7 +30,7 @@ sealed class GetGrammarsByLevelParams with _$GetGrammarsByLevelParams {
 }
 
 @freezed
-sealed class GetGrammarsByTagParams with _$GetGrammarsByTagParams {
+abstract class GetGrammarsByTagParams with _$GetGrammarsByTagParams {
   const factory GetGrammarsByTagParams({
     required final int tag,
     required final int limit,
@@ -109,7 +109,7 @@ GetRelatedGrammars getRelatedGrammars(final Ref ref) {
 }
 
 @freezed
-sealed class GetRelatedGrammarsParams with _$GetRelatedGrammarsParams {
+abstract class GetRelatedGrammarsParams with _$GetRelatedGrammarsParams {
   const factory GetRelatedGrammarsParams({
     required final List<int> ids,
   }) = _GetRelatedGrammarsParams;

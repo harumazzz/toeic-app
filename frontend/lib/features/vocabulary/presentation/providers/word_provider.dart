@@ -52,11 +52,10 @@ class WordController extends _$WordController {
       ),
     );
     state = result.fold(
-      ifLeft:
-          (final e) => WordState.error(
-            words: currentWords,
-            message: e.message,
-          ),
+      ifLeft: (final e) => WordState.error(
+        words: currentWords,
+        message: e.message,
+      ),
       ifRight: (final words) {
         final isFinished = words.isEmpty;
         return WordState.loaded(
@@ -98,20 +97,18 @@ class WordController extends _$WordController {
     );
 
     state = result.fold(
-      ifLeft:
-          (final e) => WordState.error(
-            words: currentWords,
-            message: e.message,
-          ),
+      ifLeft: (final e) => WordState.error(
+        words: currentWords,
+        message: e.message,
+      ),
       ifRight: (final List<Word> words) {
         final isFinished = words.isEmpty;
         return WordState.loaded(
-          words:
-              offset > 0
-                  ? [
-                    ...HashSet<Word>.from([...currentWords, ...words]),
-                  ]
-                  : words,
+          words: offset > 0
+              ? [
+                  ...HashSet<Word>.from([...currentWords, ...words]),
+                ]
+              : words,
           isFinished: isFinished,
         );
       },

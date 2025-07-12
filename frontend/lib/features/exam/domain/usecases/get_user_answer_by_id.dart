@@ -32,7 +32,7 @@ class GetUserAnswerById
 }
 
 @freezed
-sealed class GetUserAnswerByIdParams with _$GetUserAnswerByIdParams {
+abstract class GetUserAnswerByIdParams with _$GetUserAnswerByIdParams {
   const factory GetUserAnswerByIdParams({
     required final int id,
   }) = _GetUserAnswerByIdParams;
