@@ -38,7 +38,7 @@ void main() {
       when(() => mockDio.options).thenReturn(BaseOptions());
       // Mock the fetch method that the generated code uses
       when(() => mockDio.fetch<List<dynamic>>(any())).thenAnswer((
-        invocation,
+        final invocation,
       ) async {
         final requestOptions =
             invocation.positionalArguments[0] as RequestOptions;
@@ -49,7 +49,7 @@ void main() {
         );
       });
       when(() => mockDio.fetch<Map<String, dynamic>>(any())).thenAnswer((
-        invocation,
+        final invocation,
       ) async {
         final requestOptions =
             invocation.positionalArguments[0] as RequestOptions;
@@ -294,7 +294,7 @@ void main() {
 
           // act
           final result = await dataSource.getRelatedGrammars(
-            ids: GetRelatedGrammarsRequest(ids: tIds),
+            ids: const GetRelatedGrammarsRequest(ids: tIds),
           );
 
           // assert

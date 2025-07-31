@@ -57,7 +57,8 @@ class GrammarListItem extends StatelessWidget {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty<Grammar>('grammar', grammar))
-      ..add(ObjectFlagProperty<void Function()>.has('onTap', onTap));
+      ..add(ObjectFlagProperty<void Function()>.has('onTap', onTap))
+      ..add(DiagnosticsProperty<Key?>('inkWellKey', inkWellKey));
   }
 }
 

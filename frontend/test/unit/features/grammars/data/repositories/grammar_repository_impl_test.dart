@@ -87,7 +87,7 @@ void main() {
           );
           expect(
             result.toString(),
-            Right<Failure, List<Grammar>>(tGrammars).toString(),
+            const Right<Failure, List<Grammar>>(tGrammars).toString(),
           );
         },
       );
@@ -99,7 +99,7 @@ void main() {
       const tOffset = 0;
 
       test(
-        'should return List<Grammar> when the call to remote data source is successful',
+        'should return List<Grammar>',
         () async {
           // arrange
           when(
@@ -127,7 +127,7 @@ void main() {
           );
           expect(
             result.toString(),
-            Right<Failure, List<Grammar>>(tGrammars).toString(),
+            const Right<Failure, List<Grammar>>(tGrammars).toString(),
           );
         },
       );
@@ -139,7 +139,7 @@ void main() {
       const tOffset = 0;
 
       test(
-        'should return List<Grammar> when the call to remote data source is successful',
+        'should return List<Grammar>',
         () async {
           // arrange
           when(
@@ -167,7 +167,7 @@ void main() {
           );
           expect(
             result.toString(),
-            Right<Failure, List<Grammar>>(tGrammars).toString(),
+            const Right<Failure, List<Grammar>>(tGrammars).toString(),
           );
         },
       );
@@ -177,7 +177,7 @@ void main() {
       const tId = 1;
 
       test(
-        'should return Grammar when the call to remote data source is successful',
+        'should return Grammar',
         () async {
           // arrange
           when(
@@ -193,7 +193,7 @@ void main() {
           verify(() => mockRemoteDataSource.getGrammarById(id: tId));
           expect(
             result.toString(),
-            Right<Failure, Grammar>(tGrammar).toString(),
+            const Right<Failure, Grammar>(tGrammar).toString(),
           );
         },
       );
@@ -201,7 +201,7 @@ void main() {
 
     group('getRandomGrammar', () {
       test(
-        'should return Grammar when the call to remote data source is successful',
+        'should return Grammar',
         () async {
           // arrange
           when(
@@ -215,7 +215,7 @@ void main() {
           verify(() => mockRemoteDataSource.getRandomGrammar());
           expect(
             result.toString(),
-            Right<Failure, Grammar>(tGrammar).toString(),
+            const Right<Failure, Grammar>(tGrammar).toString(),
           );
         },
       );
@@ -227,7 +227,7 @@ void main() {
       const tOffset = 0;
 
       test(
-        'should return List<Grammar> when the call to remote data source is successful',
+        'should return List<Grammar>',
         () async {
           // arrange
           when(
@@ -255,7 +255,7 @@ void main() {
           );
           expect(
             result.toString(),
-            Right<Failure, List<Grammar>>(tGrammars).toString(),
+            const Right<Failure, List<Grammar>>(tGrammars).toString(),
           );
         },
       );
@@ -285,7 +285,7 @@ void main() {
           );
           expect(
             result.toString(),
-            Right<Failure, List<Grammar>>(tGrammars).toString(),
+            const Right<Failure, List<Grammar>>(tGrammars).toString(),
           );
         },
       );

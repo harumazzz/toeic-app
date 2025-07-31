@@ -1,4 +1,5 @@
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,6 +10,7 @@ import 'features/settings/domain/entities/setting.dart';
 import 'features/settings/presentation/providers/setting_init_provider.dart';
 import 'features/settings/presentation/providers/theme_provider.dart'
     hide ThemeMode;
+import 'firebase_options.dart';
 import 'i18n/strings.g.dart';
 import 'injection_container.dart';
 import 'shared/routes/app_router.dart';
@@ -20,6 +22,9 @@ Future<void> main(
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
   await NotificationService.initialize();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     ProviderScope(
       child: TranslationProvider(

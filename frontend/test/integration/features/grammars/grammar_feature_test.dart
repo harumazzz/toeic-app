@@ -17,11 +17,13 @@ import 'package:mocktail/mocktail.dart';
 
 class MockGetGrammars extends Mock implements GetGrammars {}
 
+
 class MockGetGrammarsByLevel extends Mock implements GetGrammarsByLevel {}
 
 class MockGetGrammarsByTag extends Mock implements GetGrammarsByTag {}
 
 class MockSearchGrammar extends Mock implements SearchGrammar {}
+
 
 class MockGetGrammar extends Mock implements GetGrammar {}
 
@@ -67,7 +69,7 @@ class _TestGrammarListScreenState extends ConsumerState<TestGrammarListScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final state = ref.watch(grammarListProvider);
 
     return Scaffold(
@@ -197,13 +199,13 @@ void main() {
         routes: [
           GoRoute(
             path: '/',
-            builder: (context, state) => TranslationProvider(
+            builder: (final context, final state) => TranslationProvider(
               child: const TestGrammarListScreen(),
             ),
           ),
           GoRoute(
             path: '/grammar-detail/:grammarId',
-            builder: (context, state) => TranslationProvider(
+            builder: (final context, final state) => TranslationProvider(
               child: GrammarDetailScreen(
                 grammarId: int.parse(state.pathParameters['grammarId'] ?? '1'),
               ),
@@ -227,13 +229,13 @@ void main() {
         routes: [
           GoRoute(
             path: '/',
-            builder: (context, state) => TranslationProvider(
+            builder: (final context, final state) => TranslationProvider(
               child: const TestGrammarListScreen(),
             ),
           ),
           GoRoute(
             path: '/grammar-detail/:grammarId',
-            builder: (context, state) => TranslationProvider(
+            builder: (final context, final state) => TranslationProvider(
               child: GrammarDetailScreen(
                 grammarId: int.parse(state.pathParameters['grammarId'] ?? '1'),
               ),

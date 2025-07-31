@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -146,8 +147,7 @@ class BiometricSettingsScreen extends HookConsumerWidget {
 
               // Status cards
               if (isSupported.value != null) ...[
-                _buildStatusCard(
-                  context,
+                _StatusCard(
                   title: t.biometric.deviceSupport,
                   subtitle: isSupported.value!
                       ? t.biometric.deviceSupportedMessage
@@ -160,8 +160,7 @@ class BiometricSettingsScreen extends HookConsumerWidget {
 
                 const SizedBox(height: 12),
 
-                _buildStatusCard(
-                  context,
+                _StatusCard(
                   title: t.biometric.biometricsAvailable,
                   subtitle: hasAvailable.value!
                       ? t.biometric.biometricsAvailableMessage
@@ -276,13 +275,37 @@ class BiometricSettingsScreen extends HookConsumerWidget {
     );
   }
 
-  Widget _buildStatusCard(
-    final BuildContext context, {
-    required final String title,
-    required final String subtitle,
-    required final IconData icon,
-    required final Color iconColor,
-  }) => Card(
+  IconData _getBiometricIcon(final BiometricType type) {
+    switch (type) {
+      case BiometricType.face:
+        return Symbols.face_unlock;
+      case BiometricType.fingerprint:
+        return Symbols.fingerprint;
+      case BiometricType.iris:
+        return Symbols.visibility;
+      case BiometricType.strong:
+      case BiometricType.weak:
+        return Symbols.security;
+    }
+  }
+}
+
+class _StatusCard extends StatelessWidget {
+  const _StatusCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.iconColor,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color iconColor;
+
+  @override
+  Widget build(final BuildContext context) => Card(
     child: Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -320,17 +343,13 @@ class BiometricSettingsScreen extends HookConsumerWidget {
     ),
   );
 
-  IconData _getBiometricIcon(final BiometricType type) {
-    switch (type) {
-      case BiometricType.face:
-        return Symbols.face_unlock;
-      case BiometricType.fingerprint:
-        return Symbols.fingerprint;
-      case BiometricType.iris:
-        return Symbols.visibility;
-      case BiometricType.strong:
-      case BiometricType.weak:
-        return Symbols.security;
-    }
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('title', title))
+      ..add(StringProperty('subtitle', subtitle))
+      ..add(DiagnosticsProperty<IconData>('icon', icon))
+      ..add(ColorProperty('iconColor', iconColor));
   }
 }

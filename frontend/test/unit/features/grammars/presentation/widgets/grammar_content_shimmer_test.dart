@@ -126,7 +126,6 @@ void main() {
       // assert
       final containers = tester.widgetList<Container>(find.byType(Container));
 
-      // Should have containers with different widths to simulate different content lengths
       final widths = containers
           .map((final container) => container.constraints?.maxWidth)
           .where((final width) => width != null)

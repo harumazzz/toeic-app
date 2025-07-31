@@ -6,7 +6,7 @@ part 'example_model.freezed.dart';
 part 'example_model.g.dart';
 
 @freezed
-sealed class ExampleModel with _$ExampleModel {
+abstract class ExampleModel with _$ExampleModel {
   const factory ExampleModel({
     @JsonKey(name: 'id') required final int id,
     @JsonKey(name: 'meaning') required final String meaning,
@@ -19,7 +19,7 @@ sealed class ExampleModel with _$ExampleModel {
 }
 
 @freezed
-sealed class ExampleRequest with _$ExampleRequest {
+abstract class ExampleRequest with _$ExampleRequest {
   const factory ExampleRequest({
     @JsonKey(name: 'ids') required final List<int> ids,
   }) = _ExampleRequest;

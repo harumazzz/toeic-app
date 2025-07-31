@@ -21,6 +21,7 @@ import '../../features/settings/presentation/screens/biometric_settings_screen.d
 import '../../features/settings/presentation/screens/setting_screen.dart';
 import '../../features/speaking/presentation/screens/speaking_detail_screen.dart';
 import '../../features/speaking/presentation/screens/speaking_screen.dart';
+import '../../features/speaking/presentation/screens/toeic_practice_screen.dart';
 import '../../features/vocabulary/presentation/screens/vocabulary_screen.dart';
 import '../../features/vocabulary/presentation/screens/word_detail_screen.dart';
 import '../../features/writing/presentation/screens/practice_writing_screen.dart';
@@ -65,6 +66,8 @@ class AppRouter {
   static const String speakingRoute = 'speaking';
 
   static const String speakingDetailRoute = 'speaking-detail';
+
+  static const String toeicPracticeRoute = 'toeic-practice';
 
   static const String writingRoute = 'writing';
 
@@ -318,6 +321,20 @@ class SpeakingDetailRoute extends GoRouteData with _$SpeakingDetailRoute {
     final BuildContext context,
     final GoRouterState state,
   ) => SpeakingDetailScreen(sessionId: sessionId);
+}
+
+@TypedGoRoute<ToeicPracticeRoute>(
+  path: '/${AppRouter.toeicPracticeRoute}',
+  name: AppRouter.toeicPracticeRoute,
+)
+class ToeicPracticeRoute extends GoRouteData with _$ToeicPracticeRoute {
+  const ToeicPracticeRoute();
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final GoRouterState state,
+  ) => const ToeicPracticeScreen();
 }
 
 @TypedGoRoute<WritingRoute>(

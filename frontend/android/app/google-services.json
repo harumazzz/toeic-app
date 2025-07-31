@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "876124647158",
+    "project_id": "toeic-project-ict",
+    "storage_bucket": "toeic-project-ict.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876124647158:android:0852b2d0dc9173fa55c6d7",
+        "android_client_info": {
+          "package_name": "com.haruma.toeic.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCm9cr7SI-RiIv4AoLbfO8GaIF8Gz9TOVk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876124647158:android:5025f63daffb043655c6d7",
+        "android_client_info": {
+          "package_name": "com.haruma.toeic.learn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCm9cr7SI-RiIv4AoLbfO8GaIF8Gz9TOVk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

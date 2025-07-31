@@ -35,10 +35,9 @@ void main() {
       final tester,
     ) async {
       // arrange
-      bool onTapCalled = false;
       final widget = GrammarListItem(
         grammar: tGrammar,
-        onTap: () => onTapCalled = true,
+        onTap: () {},
       );
 
       // act
@@ -56,10 +55,9 @@ void main() {
       final tester,
     ) async {
       // arrange
-      bool onTapCalled = false;
       final widget = GrammarListItem(
         grammar: tGrammarWithoutTags,
-        onTap: () => onTapCalled = true,
+        onTap: () {},
       );
 
       // act
@@ -85,10 +83,9 @@ void main() {
         tag: [],
       );
 
-      bool onTapCalled = false;
       final widget = GrammarListItem(
         grammar: grammarWithEmptyTags,
-        onTap: () => onTapCalled = true,
+        onTap: () {},
       );
 
       // act
@@ -105,7 +102,7 @@ void main() {
     testWidgets('should call onTap when tapped', (final tester) async {
       // arrange
       bool onTapCalled = false;
-      final inkWellKey = const Key('grammarListItemInkWell');
+      const inkWellKey = Key('grammarListItemInkWell');
       final widget = GrammarListItem(
         grammar: tGrammar,
         onTap: () => onTapCalled = true,
@@ -123,11 +120,10 @@ void main() {
 
     testWidgets('should have correct card styling', (final tester) async {
       // arrange
-      bool onTapCalled = false;
-      final inkWellKey = const Key('grammarListItemInkWell');
+      const inkWellKey = Key('grammarListItemInkWell');
       final widget = GrammarListItem(
         grammar: tGrammar,
-        onTap: () => onTapCalled = true,
+        onTap: () {},
         inkWellKey: inkWellKey,
       );
 
@@ -150,10 +146,9 @@ void main() {
       final tester,
     ) async {
       // arrange
-      bool onTapCalled = false;
       final widget = GrammarListItem(
         grammar: tGrammar,
-        onTap: () => onTapCalled = true,
+        onTap: () {},
       );
 
       // act
@@ -172,10 +167,9 @@ void main() {
       final tester,
     ) async {
       // arrange
-      bool onTapCalled = false;
       final widget = GrammarListItem(
         grammar: tGrammar,
-        onTap: () => onTapCalled = true,
+        onTap: () {},
       );
 
       // act
@@ -196,15 +190,13 @@ void main() {
       const grammarWithLongTitle = Grammar(
         id: 4,
         grammarKey: 'conditional-sentences',
-        title:
-            'This is a very long grammar title that should be truncated when it exceeds the maximum number of lines allowed',
+        title: 'This is a very long grammar title',
         level: 3,
       );
-
-      bool onTapCalled = false;
+      
       final widget = GrammarListItem(
         grammar: grammarWithLongTitle,
-        onTap: () => onTapCalled = true,
+        onTap: () {},
       );
 
       // act
@@ -231,10 +223,9 @@ void main() {
         tag: ['advanced', 'complex', 'conditional', 'subjunctive', 'formal'],
       );
 
-      bool onTapCalled = false;
       final widget = GrammarListItem(
         grammar: grammarWithManyTags,
-        onTap: () => onTapCalled = true,
+        onTap: () {},
       );
 
       // act
@@ -248,13 +239,14 @@ void main() {
       expect(find.text('formal'), findsOneWidget);
     });
 
-    testWidgets('should have proper layout structure', (final tester) async {
+    testWidgets('should have proper layout structure', (
+      final tester,
+    ) async {
       // arrange
-      bool onTapCalled = false;
-      final inkWellKey = const Key('grammarListItemInkWell');
+      const inkWellKey = Key('grammarListItemInkWell');
       final widget = GrammarListItem(
         grammar: tGrammar,
-        onTap: () => onTapCalled = true,
+        onTap: () {},
         inkWellKey: inkWellKey,
       );
 

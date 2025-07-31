@@ -57,7 +57,7 @@ void main() {
       );
 
       test(
-        'should return ServerFailure when the call to remote data source throws DioException',
+        'should return ServerFailure',
         () async {
           // arrange
           final dioException = DioException(
