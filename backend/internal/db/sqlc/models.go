@@ -102,6 +102,31 @@ type Grammar struct {
 	Contents   json.RawMessage `json:"contents"`
 }
 
+type LearningAttempt struct {
+	ID               int32          `json:"id"`
+	SessionID        int32          `json:"session_id"`
+	WordID           int32          `json:"word_id"`
+	AttemptType      string         `json:"attempt_type"`
+	UserAnswer       sql.NullString `json:"user_answer"`
+	CorrectAnswer    string         `json:"correct_answer"`
+	IsCorrect        bool           `json:"is_correct"`
+	ResponseTimeMs   sql.NullInt32  `json:"response_time_ms"`
+	DifficultyRating sql.NullInt32  `json:"difficulty_rating"`
+	CreatedAt        time.Time      `json:"created_at"`
+}
+
+type LearningSession struct {
+	ID             int32                 `json:"id"`
+	UserID         int32                 `json:"user_id"`
+	StudySetID     sql.NullInt32         `json:"study_set_id"`
+	SessionType    string                `json:"session_type"`
+	StartedAt      time.Time             `json:"started_at"`
+	CompletedAt    sql.NullTime          `json:"completed_at"`
+	TotalQuestions sql.NullInt32         `json:"total_questions"`
+	CorrectAnswers sql.NullInt32         `json:"correct_answers"`
+	SessionData    pqtype.NullRawMessage `json:"session_data"`
+}
+
 type Part struct {
 	PartID int32  `json:"part_id"`
 	ExamID int32  `json:"exam_id"`
@@ -161,6 +186,22 @@ type SpeakingTurn struct {
 	Timestamp          time.Time             `json:"timestamp"`
 	AiEvaluation       pqtype.NullRawMessage `json:"ai_evaluation"`
 	AiScore            sql.NullString        `json:"ai_score"`
+}
+
+type StudySet struct {
+	ID          int32          `json:"id"`
+	UserID      int32          `json:"user_id"`
+	Name        string         `json:"name"`
+	Description sql.NullString `json:"description"`
+	IsPublic    sql.NullBool   `json:"is_public"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+}
+
+type StudySetWord struct {
+	StudySetID int32     `json:"study_set_id"`
+	WordID     int32     `json:"word_id"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type User struct {
@@ -225,6 +266,19 @@ type UserWriting struct {
 	SubmittedAt    time.Time             `json:"submitted_at"`
 	EvaluatedAt    sql.NullTime          `json:"evaluated_at"`
 	UpdatedAt      time.Time             `json:"updated_at"`
+}
+
+type VocabularyStat struct {
+	ID                  int32         `json:"id"`
+	UserID              int32         `json:"user_id"`
+	WordID              int32         `json:"word_id"`
+	TotalAttempts       sql.NullInt32 `json:"total_attempts"`
+	CorrectAttempts     sql.NullInt32 `json:"correct_attempts"`
+	TotalResponseTimeMs sql.NullInt64 `json:"total_response_time_ms"`
+	MasteryLevel        sql.NullInt32 `json:"mastery_level"`
+	LastAttemptAt       sql.NullTime  `json:"last_attempt_at"`
+	CreatedAt           time.Time     `json:"created_at"`
+	UpdatedAt           time.Time     `json:"updated_at"`
 }
 
 type Word struct {

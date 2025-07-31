@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../../../core/services/tts_service.dart';
 import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../domain/entities/text_analyze.dart';
@@ -43,6 +44,12 @@ class WritingSubmissionSuccessScreen extends HookConsumerWidget {
       return null;
     }, [content]);
 
+    Future<void> playContent(final String contentText) async {
+      if (contentText.trim().isNotEmpty) {
+        await TTSService.speak(text: contentText);
+      }
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -64,13 +71,15 @@ class WritingSubmissionSuccessScreen extends HookConsumerWidget {
                       width: 120,
                       height: 120,
                       decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.1),
+                        color: theme.colorScheme.tertiary.withValues(
+                          alpha: 0.1,
+                        ),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Symbols.check_circle,
                         size: 80,
-                        color: Colors.green,
+                        color: theme.colorScheme.tertiary,
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -129,6 +138,17 @@ class WritingSubmissionSuccessScreen extends HookConsumerWidget {
                                   style: theme.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
+                                ),
+                                const Spacer(),
+                                IconButton(
+                                  onPressed: () => playContent(content),
+                                  icon: Icon(
+                                    Symbols.volume_up,
+                                    color: theme.colorScheme.primary,
+                                    size: 18,
+                                  ),
+                                  tooltip: 'Play your writing',
+                                  visualDensity: VisualDensity.compact,
                                 ),
                               ],
                             ),
@@ -608,18 +628,20 @@ class _WordRecommendation extends StatelessWidget {
   }
 
   Color _getLevelColor(final String level, final ThemeData theme) {
+    final colorScheme = theme.colorScheme;
+
     switch (level.toUpperCase()) {
       case 'A1':
       case 'A2':
-        return Colors.green;
+        return colorScheme.tertiary; // Green equivalent
       case 'B1':
       case 'B2':
-        return Colors.orange;
+        return colorScheme.secondary; // Orange equivalent
       case 'C1':
       case 'C2':
-        return Colors.red;
+        return colorScheme.error; // Red equivalent
       default:
-        return theme.colorScheme.primary;
+        return colorScheme.primary;
     }
   }
 

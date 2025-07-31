@@ -99,16 +99,14 @@ WHERE is_unlocked = true AND is_active = true;
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_word_progress_incomplete ON user_word_progress(user_id, word_id, difficulty_level)
 WHERE mastery_level < 3 OR next_review_at <= NOW();
 
--- Recent activities for dashboard
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_recent_activities ON (
-    SELECT 'exam' as activity_type, user_id, start_time as activity_time, exam_id as reference_id
-    FROM exam_attempts 
-    WHERE start_time >= NOW() - INTERVAL '30 days'
-    UNION ALL
-    SELECT 'writing' as activity_type, user_id, submitted_at as activity_time, writing_id as reference_id
-    FROM writings 
-    WHERE submitted_at >= NOW() - INTERVAL '30 days'
-);
+-- Recent activities indexes for dashboard queries
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_exam_attempts_recent 
+ON exam_attempts(user_id, start_time) 
+WHERE start_time >= NOW() - INTERVAL '30 days';
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_writings_recent 
+ON writings(user_id, submitted_at) 
+WHERE submitted_at >= NOW() - INTERVAL '30 days';
 
 -- 9. Covering Indexes for Frequent Queries
 -- User profile information with roles

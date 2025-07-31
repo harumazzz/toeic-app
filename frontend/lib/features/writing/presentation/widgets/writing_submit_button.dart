@@ -17,6 +17,7 @@ class WritingSubmitButton extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return SizedBox(
       width: double.infinity,
@@ -24,13 +25,13 @@ class WritingSubmitButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: theme.primaryColor,
-          foregroundColor: Colors.white,
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          disabledBackgroundColor: theme.colorScheme.onSurface.withValues(
+          disabledBackgroundColor: colorScheme.onSurface.withValues(
             alpha: 0.12,
           ),
         ),
@@ -42,14 +43,14 @@ class WritingSubmitButton extends StatelessWidget {
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 )
                 : Text(
                   text ?? context.t.writing.submitWriting,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
+                    color: colorScheme.onPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

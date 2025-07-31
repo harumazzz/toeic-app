@@ -13,42 +13,46 @@ class QuickStatsRow extends StatelessWidget {
 
   final Word word;
   @override
-  Widget build(final BuildContext context) => Card(
-    color: Theme.of(context).colorScheme.surfaceContainerHigh,
-    child: Padding(
-      padding: const EdgeInsets.all(6),
-      child: Row(
-        children: [
-          Expanded(
-            child: StatCard(
-              icon: Symbols.trending_up,
-              label: context.t.tooltip.frequency,
-              value: word.freq.toString(),
-              color: Colors.blue,
+  Widget build(final BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return Card(
+      color: colorScheme.surfaceContainerHigh,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Row(
+          children: [
+            Expanded(
+              child: StatCard(
+                icon: Symbols.trending_up,
+                label: context.t.tooltip.frequency,
+                value: word.freq.toString(),
+                color: colorScheme.primary,
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: StatCard(
-              icon: Symbols.list_alt,
-              label: 'Meanings',
-              value: word.means?.length.toString() ?? '0',
-              color: Colors.green,
+            const SizedBox(width: 8),
+            Expanded(
+              child: StatCard(
+                icon: Symbols.list_alt,
+                label: 'Meanings',
+                value: word.means?.length.toString() ?? '0',
+                color: colorScheme.secondary,
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: StatCard(
-              icon: Symbols.swap_horiz,
-              label: context.t.tooltip.synonyms,
-              value: word.snym?.length.toString() ?? '0',
-              color: Colors.orange,
+            const SizedBox(width: 8),
+            Expanded(
+              child: StatCard(
+                icon: Symbols.swap_horiz,
+                label: context.t.tooltip.synonyms,
+                value: word.snym?.length.toString() ?? '0',
+                color: colorScheme.tertiary,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {

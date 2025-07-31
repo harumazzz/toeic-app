@@ -5,10 +5,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../core/services/toast_service.dart';
+import '../../../../core/services/tts_service.dart';
 import '../../../../i18n/strings.g.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/text_analyze.dart';
 import '../../domain/entities/user_writing.dart';
+import '../../domain/entities/writing_feedback.dart';
 import '../providers/user_writing_provider.dart';
 
 class WritingViewScreen extends HookConsumerWidget {
@@ -237,6 +239,7 @@ class _WritingMetadataContent extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: _getScoreColor(
+                      context,
                       writing.aiScore!,
                     ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
@@ -244,7 +247,7 @@ class _WritingMetadataContent extends StatelessWidget {
                   child: Text(
                     '${writing.aiScore!.toStringAsFixed(1)}/10',
                     style: theme.textTheme.titleSmall?.copyWith(
-                      color: _getScoreColor(writing.aiScore!),
+                      color: _getScoreColor(context, writing.aiScore!),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -279,14 +282,16 @@ class _WritingMetadataContent extends StatelessWidget {
     );
   }
 
-  Color _getScoreColor(final double score) {
+  Color _getScoreColor(final BuildContext context, final double score) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     if (score >= 8.0) {
-      return Colors.green;
+      return colorScheme.tertiary; // Green equivalent
     }
     if (score >= 6.0) {
-      return Colors.orange;
+      return colorScheme.secondary; // Orange equivalent
     }
-    return Colors.red;
+    return colorScheme.error; // Red equivalent
   }
 
   String _formatDateTime(final DateTime date) =>
@@ -401,6 +406,17 @@ class _WritingContentContent extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              const Spacer(),
+              IconButton(
+                onPressed: () => _playWritingContent(writing.submissionText),
+                icon: Icon(
+                  Symbols.volume_up,
+                  color: theme.primaryColor,
+                  size: 20,
+                ),
+                tooltip: 'Play your writing',
+                visualDensity: VisualDensity.compact,
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -426,6 +442,12 @@ class _WritingContentContent extends StatelessWidget {
     );
   }
 
+  Future<void> _playWritingContent(final String text) async {
+    if (text.trim().isNotEmpty) {
+      await TTSService.speak(text: text);
+    }
+  }
+
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -435,7 +457,7 @@ class _WritingContentContent extends StatelessWidget {
 
 class AiFeedbackCard extends StatelessWidget {
   const AiFeedbackCard({required this.feedback, super.key});
-  final Map<String, dynamic> feedback;
+  final WritingFeedback feedback;
 
   @override
   Widget build(final BuildContext context) =>
@@ -445,14 +467,14 @@ class AiFeedbackCard extends StatelessWidget {
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(
-      DiagnosticsProperty<Map<String, dynamic>>('feedback', feedback),
+      DiagnosticsProperty<WritingFeedback>('feedback', feedback),
     );
   }
 }
 
 class _AiFeedbackContent extends StatelessWidget {
   const _AiFeedbackContent({required this.feedback});
-  final Map<String, dynamic> feedback;
+  final WritingFeedback feedback;
 
   @override
   Widget build(final BuildContext context) {
@@ -493,141 +515,161 @@ class _AiFeedbackContent extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              const Spacer(),
+              IconButton(
+                onPressed: () => _playFeedback(feedback),
+                icon: Icon(
+                  Symbols.volume_up,
+                  color: theme.primaryColor,
+                  size: 20,
+                ),
+                tooltip: 'Play AI feedback',
+                visualDensity: VisualDensity.compact,
+              ),
             ],
           ),
           const SizedBox(height: 16),
-          ...feedback.entries.map(
-            (final entry) => _buildFeedbackSection(
-              context,
-              entry.key,
-              entry.value,
-            ),
+          FeedbackItem(
+            label: 'Overall Score',
+            value: feedback.overallScore.toString(),
           ),
+          if (feedback.feedback != null && feedback.feedback!.isNotEmpty)
+            FeedbackItem(label: 'Feedback', value: feedback.feedback!),
+          if (feedback.grammarScore != null)
+            FeedbackItem(
+              label: 'Grammar Score',
+              value: feedback.grammarScore.toString(),
+            ),
+          if (feedback.grammarFeedback != null &&
+              feedback.grammarFeedback!.isNotEmpty)
+            FeedbackItem(
+              label: 'Grammar Feedback',
+              value: feedback.grammarFeedback!,
+            ),
+          if (feedback.vocabularyScore != null)
+            FeedbackItem(
+              label: 'Vocabulary Score',
+              value: feedback.vocabularyScore.toString(),
+            ),
+          if (feedback.vocabularyFeedback != null &&
+              feedback.vocabularyFeedback!.isNotEmpty)
+            FeedbackItem(
+              label: 'Vocabulary Feedback',
+              value: feedback.vocabularyFeedback!,
+            ),
+          if (feedback.organizationScore != null)
+            FeedbackItem(
+              label: 'Organization Score',
+              value: feedback.organizationScore.toString(),
+            ),
+          if (feedback.organizationFeedback != null &&
+              feedback.organizationFeedback!.isNotEmpty)
+            FeedbackItem(
+              label: 'Organization Feedback',
+              value: feedback.organizationFeedback!,
+            ),
+          if (feedback.contentScore != null)
+            FeedbackItem(
+              label: 'Content Score',
+              value: feedback.contentScore.toString(),
+            ),
+          if (feedback.contentFeedback != null &&
+              feedback.contentFeedback!.isNotEmpty)
+            FeedbackItem(
+              label: 'Content Feedback',
+              value: feedback.contentFeedback!,
+            ),
+          if (feedback.taskAchievementScore != null)
+            FeedbackItem(
+              label: 'Task Achievement Score',
+              value: feedback.taskAchievementScore.toString(),
+            ),
+          if (feedback.suggestions != null && feedback.suggestions!.isNotEmpty)
+            FeedbackList(title: 'Suggestions', items: feedback.suggestions!),
+          if (feedback.strengths != null && feedback.strengths!.isNotEmpty)
+            FeedbackList(title: 'Strengths', items: feedback.strengths!),
+          if (feedback.areasForImprovement != null &&
+              feedback.areasForImprovement!.isNotEmpty)
+            FeedbackList(
+              title: 'Areas for Improvement',
+              items: feedback.areasForImprovement!,
+            ),
+          if (feedback.toeicBand != null && feedback.toeicBand!.isNotEmpty)
+            FeedbackItem(label: 'TOEIC Band', value: feedback.toeicBand!),
+          if (feedback.estimatedScore != null)
+            FeedbackItem(
+              label: 'Estimated Score',
+              value: feedback.estimatedScore.toString(),
+            ),
+          if (feedback.confidenceLevel != null)
+            FeedbackItem(
+              label: 'Confidence Level',
+              value: '${(feedback.confidenceLevel! * 100).toStringAsFixed(1)}%',
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildFeedbackSection(
-    final BuildContext context,
-    final String key,
-    final dynamic value,
-  ) {
-    final theme = Theme.of(context);
+  Future<void> _playFeedback(final WritingFeedback feedback) async {
+    final feedbackTexts = <String>[];
 
-    if (value is Map<String, dynamic>) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              _formatFeedbackKey(key),
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: theme.primaryColor,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ...value.entries.map(
-              (final subEntry) => Padding(
-                padding: const EdgeInsets.only(left: 16, bottom: 4),
-                child: _buildFeedbackItem(
-                  context,
-                  subEntry.key,
-                  subEntry.value,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: _buildFeedbackItem(context, key, value),
+    // Collect all feedback text
+    if (feedback.feedback != null && feedback.feedback!.isNotEmpty) {
+      feedbackTexts.add('Overall feedback: ${feedback.feedback!}');
+    }
+
+    if (feedback.grammarFeedback != null &&
+        feedback.grammarFeedback!.isNotEmpty) {
+      feedbackTexts.add('Grammar feedback: ${feedback.grammarFeedback!}');
+    }
+
+    if (feedback.vocabularyFeedback != null &&
+        feedback.vocabularyFeedback!.isNotEmpty) {
+      feedbackTexts.add('Vocabulary feedback: ${feedback.vocabularyFeedback!}');
+    }
+
+    if (feedback.organizationFeedback != null &&
+        feedback.organizationFeedback!.isNotEmpty) {
+      feedbackTexts.add(
+        'Organization feedback: ${feedback.organizationFeedback!}',
       );
     }
-  }
 
-  Widget _buildFeedbackItem(
-    final BuildContext context,
-    final String key,
-    final dynamic value,
-  ) {
-    final theme = Theme.of(context);
+    if (feedback.contentFeedback != null &&
+        feedback.contentFeedback!.isNotEmpty) {
+      feedbackTexts.add('Content feedback: ${feedback.contentFeedback!}');
+    }
 
-    if (value is List) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${_formatFeedbackKey(key)}:',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          ...value.map(
-            (final item) => Padding(
-              padding: const EdgeInsets.only(left: 8, top: 2),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Symbols.terminal,
-                    size: 16,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      item.toString(),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.7,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
-    } else {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${_formatFeedbackKey(key)}: ',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value.toString(),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-          ),
-        ],
+    // Add suggestions if available
+    if (feedback.suggestions != null && feedback.suggestions!.isNotEmpty) {
+      feedbackTexts.add('Suggestions: ${feedback.suggestions!.join(', ')}');
+    }
+
+    // Add strengths if available
+    if (feedback.strengths != null && feedback.strengths!.isNotEmpty) {
+      feedbackTexts.add('Your strengths: ${feedback.strengths!.join(', ')}');
+    }
+
+    // Add areas for improvement if available
+    if (feedback.areasForImprovement != null &&
+        feedback.areasForImprovement!.isNotEmpty) {
+      feedbackTexts.add(
+        'Areas for improvement: ${feedback.areasForImprovement!.join(', ')}',
       );
     }
-  }
 
-  String _formatFeedbackKey(final String key) => key
-      .split('_')
-      .map((final word) => word[0].toUpperCase() + word.substring(1))
-      .join(' ');
+    if (feedbackTexts.isNotEmpty) {
+      final fullText = feedbackTexts.join(' ');
+      await TTSService.speak(text: fullText);
+    }
+  }
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(
-      DiagnosticsProperty<Map<String, dynamic>>('feedback', feedback),
+      DiagnosticsProperty<WritingFeedback>('feedback', feedback),
     );
   }
 }
@@ -1094,5 +1136,169 @@ class _StatItem extends StatelessWidget {
       ..add(DiagnosticsProperty<IconData>('icon', icon))
       ..add(StringProperty('label', label))
       ..add(StringProperty('value', value));
+  }
+}
+
+class FeedbackItem extends StatelessWidget {
+  const FeedbackItem({
+    required this.label,
+    required this.value,
+    super.key,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
+    final isTextFeedback = label.toLowerCase().contains('feedback');
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$label: ',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+          ),
+          if (isTextFeedback && value.length > 10)
+            IconButton(
+              onPressed: () => _playFeedbackItem(value),
+              icon: Icon(
+                Symbols.volume_up,
+                color: theme.primaryColor,
+                size: 16,
+              ),
+              tooltip: 'Play $label',
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints(
+                minWidth: 24,
+                minHeight: 24,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _playFeedbackItem(final String text) async {
+    if (text.trim().isNotEmpty) {
+      await TTSService.speak(text: text);
+    }
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('label', label))
+      ..add(StringProperty('value', value));
+  }
+}
+
+class FeedbackList extends StatelessWidget {
+  const FeedbackList({
+    required this.title,
+    required this.items,
+    super.key,
+  });
+
+  final String title;
+  final List<String> items;
+
+  @override
+  Widget build(final BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                '$title:',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () => _playFeedbackList(title, items),
+                icon: Icon(
+                  Symbols.volume_up,
+                  color: theme.primaryColor,
+                  size: 16,
+                ),
+                tooltip: 'Play $title',
+                visualDensity: VisualDensity.compact,
+                constraints: const BoxConstraints(
+                  minWidth: 24,
+                  minHeight: 24,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          ...items.map(
+            (final item) => Padding(
+              padding: const EdgeInsets.only(left: 8, top: 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Symbols.terminal,
+                    size: 16,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _playFeedbackList(
+    final String title,
+    final List<String> items,
+  ) async {
+    if (items.isNotEmpty) {
+      final text = '$title: ${items.join(', ')}';
+      await TTSService.speak(text: text);
+    }
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('title', title))
+      ..add(IterableProperty<String>('items', items));
   }
 }

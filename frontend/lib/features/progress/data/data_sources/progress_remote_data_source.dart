@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -71,3 +72,7 @@ List<WordProgressModel> deserializeWordProgressModelList(
       (final item) => WordProgressModel.fromJson(item as Map<String, dynamic>),
     )
     .toList();
+
+ProgressModel? deserializeProgressModel(
+  final Map<String, dynamic>? json,
+) => json != null ? ProgressModel.fromJson(json) : null;

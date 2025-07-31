@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../core/services/toast_service.dart';
+import '../../../../core/services/tts_service.dart';
 import '../../../../i18n/strings.g.dart';
 import '../../../../shared/routes/app_router.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -95,6 +96,12 @@ class PracticeWritingScreen extends HookConsumerWidget {
         }
       } finally {
         isLoading.value = false;
+      }
+    }
+
+    Future<void> playPrompt(final String promptText) async {
+      if (promptText.trim().isNotEmpty) {
+        await TTSService.speak(text: promptText);
       }
     }
 
@@ -213,9 +220,44 @@ class PracticeWritingScreen extends HookConsumerWidget {
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  prompt!,
-                  style: Theme.of(context).textTheme.titleMedium,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Symbols.assignment,
+                          color: Theme.of(context).primaryColor,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Writing Prompt',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: () => playPrompt(prompt!),
+                          icon: Icon(
+                            Symbols.volume_up,
+                            color: Theme.of(context).primaryColor,
+                            size: 18,
+                          ),
+                          tooltip: 'Play prompt',
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      prompt!,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
                 ),
               ),
             Expanded(

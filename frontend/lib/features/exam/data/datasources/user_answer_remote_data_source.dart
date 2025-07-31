@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -72,6 +73,18 @@ UserAnswerModel deserializeUserAnswerModel(
   final Map<String, dynamic> json,
 ) => UserAnswerModel.fromJson(json);
 
-result.SubmittedAnswerModel deserializeSubmittedAnswerModel(
+SubmittedAnswerModel deserializeSubmittedAnswerModel(
   final Map<String, dynamic> json,
-) => result.SubmittedAnswerModel.fromJson(json);
+) => SubmittedAnswerModel.fromJson(json);
+
+Map<String, dynamic> serializeUserAnswerRequestModel(
+  final UserAnswerRequestModel userAnswer,
+) => userAnswer.toJson();
+
+Map<String, dynamic> serializeUpdateUserAnswerRequestModel(
+  final UpdateUserAnswerRequestModel userAnswer,
+) => userAnswer.toJson();
+
+Map<String, dynamic> serializeSubmitAnswersRequestModel(
+  final SubmitAnswersRequestModel request,
+) => request.toJson();

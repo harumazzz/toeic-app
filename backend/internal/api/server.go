@@ -684,6 +684,38 @@ func (server *Server) setupRouter() {
 				words.POST("", server.createWord)
 				words.PUT("/:id", server.updateWord)
 				words.DELETE("/:id", server.deleteWord)
+			}
+
+			// Study Sets routes
+			studySets := authRoutes.Group("/study-sets")
+			{
+				studySets.POST("", server.createStudySet)
+				studySets.GET("", server.listUserStudySets)
+				studySets.GET("/public", server.listPublicStudySets)
+				studySets.GET("/:id", server.getStudySet)
+				studySets.PUT("/:id", server.updateStudySet)
+				studySets.DELETE("/:id", server.deleteStudySet)
+				studySets.POST("/:id/words", server.addWordToStudySet)
+				studySets.DELETE("/:id/words/:word_id", server.removeWordFromStudySet)
+			}
+
+			// Learning Sessions routes
+			learning := authRoutes.Group("/learning")
+			{
+				learning.POST("/sessions", server.startLearningSession)
+				learning.GET("/sessions/:id", server.getLearningSession)
+				learning.POST("/sessions/:id/attempts", server.submitLearningAttempt)
+				learning.POST("/sessions/:id/complete", server.completeLearningSession)
+			}
+
+			// Vocabulary Statistics routes
+			vocabulary := authRoutes.Group("/vocabulary")
+			{
+				vocabulary.GET("/stats", server.listUserVocabularyStats)
+				vocabulary.GET("/progress", server.getUserLearningProgress)
+				vocabulary.GET("/mastery-distribution", server.getUserMasteryDistribution)
+				vocabulary.GET("/review", server.getWordsNeedingReview)
+				vocabulary.PUT("/words/:word_id/mastery", server.updateWordMastery)
 			} // Protected Grammar routes (e.g., for admin management)
 			grammarsProtected := authRoutes.Group("/grammars")
 			{
@@ -851,6 +883,14 @@ func (server *Server) setupRouter() {
 					analyze.GET("/stats", server.getAnalyzeServiceStats)
 					analyze.POST("/cache/clear", server.clearAnalyzeServiceCache)
 					analyze.GET("/cache", server.getCachedAnalysis)
+				}
+			}
+
+			// AI routes for speaking practice and other AI-powered features
+			if server.aiScoringService != nil {
+				ai := authRoutes.Group("/ai")
+				{
+					ai.POST("/generate-speaking-response", server.generateSpeakingResponse)
 				}
 			}
 		}

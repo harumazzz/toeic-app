@@ -301,6 +301,26 @@ definitions:
       selected_answer:
         type: string
     type: object
+  api.FlashcardQuestion:
+    properties:
+      level:
+        type: integer
+      meaning:
+        type: string
+      pronunciation:
+        type: string
+      word:
+        type: string
+      word_id:
+        type: integer
+    type: object
+  api.FlashcardSessionData:
+    properties:
+      questions:
+        items:
+          $ref: '#/definitions/api.FlashcardQuestion'
+        type: array
+    type: object
   api.GrammarContent:
     properties:
       content:
@@ -419,6 +439,96 @@ definitions:
       username:
         type: string
     type: object
+  api.LearningAttemptResponse:
+    properties:
+      attempt_type:
+        type: string
+      correct_answer:
+        type: string
+      created_at:
+        type: string
+      difficulty_rating:
+        type: integer
+      id:
+        type: integer
+      is_correct:
+        type: boolean
+      response_time_ms:
+        type: integer
+      session_id:
+        type: integer
+      user_answer:
+        type: string
+      word:
+        type: string
+      word_id:
+        type: integer
+    type: object
+  api.LearningProgressResponse:
+    properties:
+      average_mastery:
+        type: number
+      mastered_words:
+        type: integer
+      overall_accuracy:
+        type: number
+      total_attempts:
+        type: integer
+      total_correct:
+        type: integer
+      total_study_time_hours:
+        type: number
+      total_study_time_ms:
+        type: integer
+      total_words_studied:
+        type: integer
+    type: object
+  api.LearningSessionResponse:
+    properties:
+      completed_at:
+        type: string
+      correct_answers:
+        type: integer
+      id:
+        type: integer
+      session_data:
+        $ref: '#/definitions/api.SessionData'
+      session_type:
+        type: string
+      started_at:
+        type: string
+      study_set_id:
+        type: integer
+      total_questions:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  api.MasteryDistribution:
+    properties:
+      mastery_level:
+        type: integer
+      word_count:
+        type: integer
+    type: object
+  api.MatchPair:
+    properties:
+      meaning:
+        type: string
+      position:
+        type: integer
+      word:
+        type: string
+      word_id:
+        type: integer
+    type: object
+  api.MatchSessionData:
+    properties:
+      pairs:
+        items:
+          $ref: '#/definitions/api.MatchPair'
+        type: array
+    type: object
   api.MeanModel:
     properties:
       examples:
@@ -499,6 +609,21 @@ definitions:
       uptime:
         type: string
     type: object
+  api.MultipleChoiceQuestion:
+    properties:
+      correct_answer:
+        type: string
+      options:
+        items:
+          type: string
+        type: array
+      pronunciation:
+        type: string
+      word:
+        type: string
+      word_id:
+        type: integer
+    type: object
   api.PartResponse:
     properties:
       exam_id:
@@ -575,6 +700,13 @@ definitions:
       true_answer:
         type: string
     type: object
+  api.QuizSessionData:
+    properties:
+      questions:
+        items:
+          $ref: '#/definitions/api.MultipleChoiceQuestion'
+        type: array
+    type: object
   api.Response:
     properties:
       data: {}
@@ -639,6 +771,50 @@ definitions:
         description: Duration as string for Swagger compatibility
         type: string
     type: object
+  api.SessionConfig:
+    properties:
+      allow_partial:
+        description: Whether to allow partial credit for typing
+        type: boolean
+      case_sensitive:
+        description: Whether typing answers are case sensitive
+        type: boolean
+      show_hints:
+        description: Whether to show hints
+        type: boolean
+      shuffle_answers:
+        description: Whether to shuffle multiple choice answers
+        type: boolean
+      time_limit:
+        description: Time limit in seconds
+        type: integer
+    type: object
+  api.SessionData:
+    properties:
+      final_stats:
+        $ref: '#/definitions/api.SessionStats'
+      flashcard:
+        $ref: '#/definitions/api.FlashcardSessionData'
+      match:
+        $ref: '#/definitions/api.MatchSessionData'
+      quiz:
+        $ref: '#/definitions/api.QuizSessionData'
+      type:
+        $ref: '#/definitions/api.TypeSessionData'
+    type: object
+  api.SessionStats:
+    properties:
+      accuracy_percentage:
+        type: number
+      avg_difficulty:
+        type: number
+      avg_response_time:
+        type: number
+      correct_attempts:
+        type: integer
+      total_attempts:
+        type: integer
+    type: object
   api.SpeakingSessionResponse:
     properties:
       end_time:
@@ -673,6 +849,48 @@ definitions:
       timestamp:
         type: string
     type: object
+  api.StudySetResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_public:
+        type: boolean
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+      word_count:
+        type: integer
+    type: object
+  api.StudySetWithWordsResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_public:
+        type: boolean
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+      word_count:
+        type: integer
+      words:
+        items:
+          $ref: '#/definitions/api.WordResponse'
+        type: array
+    type: object
   api.SynonymData:
     properties:
       content:
@@ -681,6 +899,13 @@ definitions:
         type: array
       kind:
         type: string
+    type: object
+  api.TypeSessionData:
+    properties:
+      questions:
+        items:
+          $ref: '#/definitions/api.FlashcardQuestion'
+        type: array
     type: object
   api.UpdateRoleRequest:
     properties:
@@ -825,6 +1050,82 @@ definitions:
       user_id:
         type: integer
     type: object
+  api.VocabularyStatsResponse:
+    properties:
+      accuracy_percentage:
+        type: number
+      avg_response_time_ms:
+        type: number
+      correct_attempts:
+        type: integer
+      created_at:
+        type: string
+      last_attempt_at:
+        type: string
+      mastery_level:
+        type: integer
+      total_attempts:
+        type: integer
+      total_response_time_ms:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+      word:
+        type: string
+      word_id:
+        type: integer
+    type: object
+  api.WordForReviewResponse:
+    properties:
+      accuracy_percentage:
+        type: number
+      avg_response_time_ms:
+        type: number
+      conjugation:
+        $ref: '#/definitions/api.ConjugationData'
+      correct_attempts:
+        type: integer
+      created_at:
+        type: string
+      descript_level:
+        type: string
+      freq:
+        type: number
+      id:
+        type: integer
+      last_attempt_at:
+        type: string
+      level:
+        type: integer
+      mastery_level:
+        type: integer
+      means:
+        items:
+          $ref: '#/definitions/api.MeaningData'
+        type: array
+      pronounce:
+        type: string
+      short_mean:
+        type: string
+      snym:
+        items:
+          $ref: '#/definitions/api.SynonymData'
+        type: array
+      total_attempts:
+        type: integer
+      total_response_time_ms:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+      word:
+        type: string
+      word_id:
+        type: integer
+    type: object
   api.WordProgressResponse:
     properties:
       conjugation:
@@ -955,6 +1256,14 @@ definitions:
     - description
     - title
     - version
+    type: object
+  api.addWordToStudySetRequest:
+    properties:
+      word_id:
+        minimum: 1
+        type: integer
+    required:
+    - word_id
     type: object
   api.analyzeMultipleTextsRequest:
     properties:
@@ -1183,6 +1492,11 @@ definitions:
     required:
     - score
     type: object
+  api.completeSessionRequest:
+    properties:
+      final_stats:
+        $ref: '#/definitions/api.SessionStats'
+    type: object
   api.createContentRequest:
     properties:
       description:
@@ -1255,6 +1569,26 @@ definitions:
     - related
     - tag
     - title
+    type: object
+  api.createLearningSessionRequest:
+    properties:
+      session_config:
+        $ref: '#/definitions/api.SessionConfig'
+      session_type:
+        enum:
+        - flashcard
+        - match
+        - quiz
+        - type
+        type: string
+      study_set_id:
+        type: integer
+      word_limit:
+        maximum: 50
+        minimum: 1
+        type: integer
+    required:
+    - session_type
     type: object
   api.createPartRequest:
     properties:
@@ -1330,6 +1664,19 @@ definitions:
     required:
     - session_id
     - speaker_type
+    type: object
+  api.createStudySetRequest:
+    properties:
+      description:
+        type: string
+      is_public:
+        type: boolean
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - name
     type: object
   api.createUserAnswerRequest:
     properties:
@@ -1610,14 +1957,12 @@ definitions:
     type: object
   api.scoreWritingRequest:
     properties:
-      prompt_id:
-        type: integer
       submission_id:
+        description: If provided, update this submission
         type: integer
       text:
+        description: Text to score (required if no submission_id)
         type: string
-    required:
-    - text
     type: object
   api.scoreWritingResponse:
     properties:
@@ -1647,6 +1992,25 @@ definitions:
         type: string
       user_id:
         type: integer
+    type: object
+  api.submitLearningAttemptRequest:
+    properties:
+      attempt_type:
+        type: string
+      difficulty_rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+      response_time_ms:
+        type: integer
+      user_answer:
+        type: string
+      word_id:
+        minimum: 1
+        type: integer
+    required:
+    - attempt_type
+    - word_id
     type: object
   api.subscriptionRequest:
     properties:
@@ -1727,6 +2091,15 @@ definitions:
     required:
     - id
     type: object
+  api.updateMasteryRequest:
+    properties:
+      mastery_level:
+        maximum: 10
+        minimum: 1
+        type: integer
+    required:
+    - mastery_level
+    type: object
   api.updatePartRequest:
     properties:
       exam_id:
@@ -1779,6 +2152,19 @@ definitions:
         type: string
       timestamp:
         type: string
+    type: object
+  api.updateStudySetRequest:
+    properties:
+      description:
+        type: string
+      is_public:
+        type: boolean
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - name
     type: object
   api.updateUserAnswerRequest:
     properties:
@@ -5893,6 +6279,191 @@ paths:
       summary: Test message translation
       tags:
       - i18n
+  /api/v1/learning/sessions:
+    post:
+      consumes:
+      - application/json
+      description: Start a new vocabulary learning session
+      parameters:
+      - description: Session configuration
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.createLearningSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Learning session started successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.LearningSessionResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to start learning session
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Start a new learning session
+      tags:
+      - learning
+  /api/v1/learning/sessions/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get details of a learning session
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Learning session retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.LearningSessionResponse'
+              type: object
+        "400":
+          description: Invalid session ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Session not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve learning session
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get learning session
+      tags:
+      - learning
+  /api/v1/learning/sessions/{id}/attempts:
+    post:
+      consumes:
+      - application/json
+      description: Submit an answer for a word in a learning session
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Learning attempt details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.submitLearningAttemptRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Learning attempt submitted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.LearningAttemptResponse'
+              type: object
+        "400":
+          description: Invalid request body or session ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Session not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to submit learning attempt
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Submit learning attempt
+      tags:
+      - learning
+  /api/v1/learning/sessions/{id}/complete:
+    post:
+      consumes:
+      - application/json
+      description: Mark a learning session as completed
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Session completion data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.completeSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Learning session completed successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.LearningSessionResponse'
+              type: object
+        "400":
+          description: Invalid request body or session ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Session not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to complete learning session
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Complete learning session
+      tags:
+      - learning
   /api/v1/part-contents/{part_id}:
     get:
       consumes:
@@ -6861,6 +7432,352 @@ paths:
       summary: List speaking sessions by user ID
       tags:
       - speaking
+  /api/v1/study-sets:
+    get:
+      consumes:
+      - application/json
+      description: List study sets created by the current user
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Study sets retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.StudySetResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve study sets
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List user's study sets
+      tags:
+      - study-sets
+    post:
+      consumes:
+      - application/json
+      description: Create a new study set for vocabulary learning
+      parameters:
+      - description: Study set details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.createStudySetRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Study set created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.StudySetResponse'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to create study set
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new study set
+      tags:
+      - study-sets
+  /api/v1/study-sets/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing study set
+      parameters:
+      - description: Study Set ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Study set deleted successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid study set ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Study set not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to delete study set
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a study set
+      tags:
+      - study-sets
+    get:
+      consumes:
+      - application/json
+      description: Get a study set by ID with its words
+      parameters:
+      - description: Study Set ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Study set retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.StudySetWithWordsResponse'
+              type: object
+        "400":
+          description: Invalid study set ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Study set not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve study set
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a study set
+      tags:
+      - study-sets
+    put:
+      consumes:
+      - application/json
+      description: Update an existing study set
+      parameters:
+      - description: Study Set ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Study set details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateStudySetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Study set updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.StudySetResponse'
+              type: object
+        "400":
+          description: Invalid request body or study set ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Study set not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update study set
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a study set
+      tags:
+      - study-sets
+  /api/v1/study-sets/{id}/words:
+    post:
+      consumes:
+      - application/json
+      description: Add a word to an existing study set
+      parameters:
+      - description: Study Set ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Word to add
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.addWordToStudySetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Word added to study set successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid request body or study set ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Study set not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to add word to study set
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Add word to study set
+      tags:
+      - study-sets
+  /api/v1/study-sets/{id}/words/{word_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a word from an existing study set
+      parameters:
+      - description: Study Set ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Word ID
+        in: path
+        name: word_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Word removed from study set successfully
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Invalid study set ID or word ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Study set not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to remove word from study set
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove word from study set
+      tags:
+      - study-sets
+  /api/v1/study-sets/public:
+    get:
+      consumes:
+      - application/json
+      description: List publicly available study sets
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Public study sets retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.StudySetResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve public study sets
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List public study sets
+      tags:
+      - study-sets
   /api/v1/upgrade/check:
     post:
       consumes:
@@ -8008,6 +8925,212 @@ paths:
       summary: Get current user profile
       tags:
       - users
+  /api/v1/vocabulary/mastery-distribution:
+    get:
+      consumes:
+      - application/json
+      description: Get distribution of words across different mastery levels
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Mastery distribution retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.MasteryDistribution'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve mastery distribution
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get mastery level distribution
+      tags:
+      - vocabulary-stats
+  /api/v1/vocabulary/progress:
+    get:
+      consumes:
+      - application/json
+      description: Get overall vocabulary learning progress for the current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Learning progress retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.LearningProgressResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve learning progress
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get overall learning progress
+      tags:
+      - vocabulary-stats
+  /api/v1/vocabulary/review:
+    get:
+      consumes:
+      - application/json
+      description: Get words that need review based on mastery level
+      parameters:
+      - default: 5
+        description: Mastery threshold
+        in: query
+        name: mastery_threshold
+        type: integer
+      - default: 20
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Words for review retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.WordForReviewResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve words for review
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get words needing review
+      tags:
+      - vocabulary-stats
+  /api/v1/vocabulary/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get vocabulary learning statistics for the current user
+      parameters:
+      - default: 20
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Vocabulary statistics retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.VocabularyStatsResponse'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to retrieve vocabulary statistics
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get vocabulary statistics for current user
+      tags:
+      - vocabulary-stats
+  /api/v1/vocabulary/words/{word_id}/mastery:
+    put:
+      consumes:
+      - application/json
+      description: Update the mastery level for a specific word
+      parameters:
+      - description: Word ID
+        in: path
+        name: word_id
+        required: true
+        type: integer
+      - description: Mastery level update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.updateMasteryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Word mastery updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.VocabularyStatsResponse'
+              type: object
+        "400":
+          description: Invalid request body or word ID
+          schema:
+            $ref: '#/definitions/api.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Word not found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Failed to update word mastery
+          schema:
+            $ref: '#/definitions/api.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update word mastery level
+      tags:
+      - vocabulary-stats
   /api/v1/words:
     get:
       consumes:
@@ -8476,7 +9599,8 @@ paths:
       consumes:
       - application/json
       description: Score a writing submission using AI to get TOEIC band assessment
-        and detailed feedback
+        and detailed feedback. If submission_id is provided, the submission will be
+        updated with AI scores.
       parameters:
       - description: Writing scoring request
         in: body

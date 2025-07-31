@@ -478,18 +478,20 @@ Color _getLevelColor(
   final BuildContext context,
   final int level,
 ) {
+  final colorScheme = Theme.of(context).colorScheme;
+  
   switch (level) {
     case 1:
-      return Colors.green;
+      return colorScheme.tertiary; // Green equivalent
     case 2:
-      return Colors.blue;
+      return colorScheme.primary; // Blue equivalent
     case 3:
-      return Colors.orange;
+      return colorScheme.secondary; // Orange equivalent
     case 4:
-      return Colors.red;
+      return colorScheme.error; // Red equivalent
     case 5:
-      return Colors.purple;
+      return colorScheme.tertiaryContainer; // Purple equivalent
     default:
-      return Theme.of(context).colorScheme.primary;
+      return colorScheme.primary;
   }
 }

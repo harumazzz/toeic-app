@@ -10,6 +10,70 @@ import '../../../../core/services/toast_service.dart';
 import '../../../../i18n/strings.g.dart';
 import '../../../../injection_container.dart';
 
+class StatusCard extends StatelessWidget {
+  const StatusCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.iconColor,
+    super.key,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color iconColor;
+
+  @override
+  Widget build(final BuildContext context) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: iconColor,
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('title', title))
+      ..add(StringProperty('subtitle', subtitle))
+      ..add(DiagnosticsProperty<IconData>('icon', icon))
+      ..add(ColorProperty('iconColor', iconColor));
+  }
+}
+
 class BiometricSettingsScreen extends HookConsumerWidget {
   const BiometricSettingsScreen({super.key});
 
@@ -147,28 +211,40 @@ class BiometricSettingsScreen extends HookConsumerWidget {
 
               // Status cards
               if (isSupported.value != null) ...[
-                _StatusCard(
-                  title: t.biometric.deviceSupport,
-                  subtitle: isSupported.value!
-                      ? t.biometric.deviceSupportedMessage
-                      : t.biometric.deviceNotSupportedMessage,
-                  icon: isSupported.value!
-                      ? Symbols.check_circle
-                      : Symbols.cancel,
-                  iconColor: isSupported.value! ? Colors.green : Colors.red,
-                ),
+                Builder(
+                  builder: (final context) {
+                    final colorScheme = Theme.of(context).colorScheme;
+                    return StatusCard(
+                      title: t.biometric.deviceSupport,
+                      subtitle: isSupported.value!
+                          ? t.biometric.deviceSupportedMessage
+                          : t.biometric.deviceNotSupportedMessage,
+                      icon: isSupported.value!
+                          ? Symbols.check_circle
+                          : Symbols.cancel,
+                      iconColor: isSupported.value!
+                          ? colorScheme.tertiary
+                          : colorScheme.error,
+                    );
+                  },
 
                 const SizedBox(height: 12),
-
-                _StatusCard(
-                  title: t.biometric.biometricsAvailable,
-                  subtitle: hasAvailable.value!
-                      ? t.biometric.biometricsAvailableMessage
-                      : t.biometric.biometricsNotAvailableMessage,
-                  icon: hasAvailable.value!
-                      ? Symbols.check_circle
-                      : Symbols.cancel,
-                  iconColor: hasAvailable.value! ? Colors.green : Colors.red,
+                Builder(
+                  builder: (final context) {
+                    final colorScheme = Theme.of(context).colorScheme;
+                    return StatusCard(
+                      title: t.biometric.biometricsAvailable,
+                      subtitle: hasAvailable.value!
+                          ? t.biometric.biometricsAvailableMessage
+                          : t.biometric.biometricsNotAvailableMessage,
+                      icon: hasAvailable.value!
+                          ? Symbols.check_circle
+                          : Symbols.cancel,
+                      iconColor: hasAvailable.value!
+                          ? colorScheme.tertiary
+                          : colorScheme.error,
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 24),
@@ -237,35 +313,40 @@ class BiometricSettingsScreen extends HookConsumerWidget {
               if (isSupported.value == false ||
                   hasAvailable.value == false) ...[
                 const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.orange.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Symbols.warning,
-                        color: Colors.orange,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          isSupported.value == false
-                              ? t.biometric.deviceNotSupportedMessage
-                              : t.biometric.setupInstructions,
-                          style: TextStyle(
-                            color: Colors.orange.shade700,
-                            fontWeight: FontWeight.w500,
-                          ),
+                Builder(
+                  builder: (final context) {
+                    final colorScheme = Theme.of(context).colorScheme;
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: colorScheme.secondary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: colorScheme.secondary.withValues(alpha: 0.3),
                         ),
                       ),
-                    ],
-                  ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Symbols.warning,
+                            color: colorScheme.secondary,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              isSupported.value == false
+                                  ? t.biometric.deviceNotSupportedMessage
+                                  : t.biometric.setupInstructions,
+                              style: TextStyle(
+                                color: colorScheme.secondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ],
             ],
@@ -287,69 +368,5 @@ class BiometricSettingsScreen extends HookConsumerWidget {
       case BiometricType.weak:
         return Symbols.security;
     }
-  }
-}
-
-class _StatusCard extends StatelessWidget {
-  const _StatusCard({
-    super.key,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.iconColor,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color iconColor;
-
-  @override
-  Widget build(final BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            color: iconColor,
-            size: 24,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(StringProperty('title', title))
-      ..add(StringProperty('subtitle', subtitle))
-      ..add(DiagnosticsProperty<IconData>('icon', icon))
-      ..add(ColorProperty('iconColor', iconColor));
   }
 }

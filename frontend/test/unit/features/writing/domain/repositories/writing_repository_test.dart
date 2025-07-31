@@ -4,6 +4,7 @@ import 'package:dart_either/dart_either.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learn/core/error/failures.dart';
 import 'package:learn/features/writing/domain/entities/user_writing.dart';
+import 'package:learn/features/writing/domain/entities/writing_feedback.dart';
 import 'package:learn/features/writing/domain/entities/writing_prompt.dart';
 import 'package:learn/features/writing/domain/repositories/user_writing_repository.dart';
 import 'package:learn/features/writing/domain/repositories/writing_repository.dart';
@@ -70,11 +71,12 @@ void main() {
       promptId: tPromptId,
       submissionText:
           'My favorite hobby is reading because it expands my knowledge and vocabulary. I enjoy reading fiction and non-fiction books during my free time.',
-      aiFeedback: {
-        'grammar': 'Good',
-        'vocabulary': 'Excellent',
-        'coherence': 'Very good',
-      },
+      aiFeedback: WritingFeedback(
+        overallScore: 8,
+        grammarFeedback: 'Good',
+        vocabularyFeedback: 'Excellent',
+        organizationFeedback: 'Very good',
+      ),
       aiScore: 8.5,
     );
 
@@ -84,11 +86,12 @@ void main() {
       promptId: tPromptId,
       submissionText:
           'My favorite hobby is reading because it expands my knowledge and vocabulary. I enjoy reading fiction and non-fiction books during my free time.',
-      aiFeedback: {
-        'grammar': 'Good',
-        'vocabulary': 'Excellent',
-        'coherence': 'Very good',
-      },
+      aiFeedback: const WritingFeedback(
+        overallScore: 8,
+        grammarFeedback: 'Good',
+        vocabularyFeedback: 'Excellent',
+        organizationFeedback: 'Very good',
+      ),
       aiScore: 8.5,
       submittedAt: DateTime(2024, 1, 17, 16, 45),
       evaluatedAt: DateTime(2024, 1, 17, 16, 50),
@@ -98,11 +101,12 @@ void main() {
     final tUserWritingUpdateRequest = UserWritingUpdateRequest(
       submissionText:
           'My favorite hobby is reading because it significantly expands my knowledge, vocabulary, and perspective on life.',
-      aiFeedback: {
-        'grammar': 'Excellent',
-        'vocabulary': 'Outstanding',
-        'coherence': 'Excellent',
-      },
+      aiFeedback: const WritingFeedback(
+        overallScore: 9,
+        grammarFeedback: 'Excellent',
+        vocabularyFeedback: 'Outstanding',
+        organizationFeedback: 'Excellent',
+      ),
       aiScore: 9.2,
       evaluatedAt: DateTime(2024, 1, 18, 10, 15),
     );
@@ -114,11 +118,12 @@ void main() {
         userId: tUserId,
         promptId: tPromptId,
         submissionText: 'Another writing submission for testing purposes.',
-        aiFeedback: {
-          'grammar': 'Fair',
-          'vocabulary': 'Good',
-          'coherence': 'Good',
-        },
+        aiFeedback: const WritingFeedback(
+          overallScore: 7,
+          grammarFeedback: 'Fair',
+          vocabularyFeedback: 'Good',
+          organizationFeedback: 'Good',
+        ),
         aiScore: 7,
         submittedAt: DateTime(2024, 1, 18, 9, 30),
         evaluatedAt: DateTime(2024, 1, 18, 9, 35),
@@ -1096,7 +1101,7 @@ void main() {
               userId: tUserId,
               promptId: tPromptId,
               submissionText: '', // Empty submission text
-              aiFeedback: {'test': 'feedback'},
+              aiFeedback: WritingFeedback(overallScore: 5),
               aiScore: 5,
             );
             const tFailure = ServerFailure(

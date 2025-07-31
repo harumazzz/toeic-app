@@ -3,15 +3,55 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sqlc-dev/pqtype"
+	"github.com/toeic-app/internal/ai"
 	db "github.com/toeic-app/internal/db/sqlc"
 	"github.com/toeic-app/internal/logger"
 )
+
+// CustomTime wraps time.Time to handle flexible datetime parsing
+type CustomTime struct {
+	time.Time
+}
+
+// UnmarshalJSON implements json.Unmarshaler interface for flexible datetime parsing
+func (ct *CustomTime) UnmarshalJSON(data []byte) error {
+	// Remove quotes from JSON string
+	s := strings.Trim(string(data), "\"")
+	
+	// List of time formats to try
+	formats := []string{
+		time.RFC3339,           // "2006-01-02T15:04:05Z07:00"
+		time.RFC3339Nano,       // "2006-01-02T15:04:05.999999999Z07:00"
+		"2006-01-02T15:04:05",  // Without timezone
+		"2006-01-02T15:04:05.999999", // With microseconds, without timezone
+		"2006-01-02T15:04:05.999999999", // With nanoseconds, without timezone
+	}
+	
+	var err error
+	for _, format := range formats {
+		ct.Time, err = time.Parse(format, s)
+		if err == nil {
+			// If parsed successfully but no timezone info, assume UTC
+			if ct.Time.Location() == time.UTC && !strings.Contains(s, "Z") && !strings.Contains(s, "+") && !strings.Contains(s, "-") {
+				// Only for formats without timezone info
+				if !strings.Contains(format, "Z") && !strings.Contains(format, "07:00") {
+					ct.Time = ct.Time.UTC()
+				}
+			}
+			return nil
+		}
+	}
+	
+	return fmt.Errorf("unable to parse time %q", s)
+}
 
 // SpeakingSessionResponse defines the structure for speaking session information returned to clients
 type SpeakingSessionResponse struct {
@@ -99,10 +139,10 @@ func NewSpeakingTurnResponse(turn db.SpeakingTurn) SpeakingTurnResponse {
 
 // createSpeakingSessionRequest defines the structure for creating a new speaking session
 type createSpeakingSessionRequest struct {
-	UserID       int32      `json:"user_id" binding:"required,min=1"`
-	SessionTopic *string    `json:"session_topic,omitempty"`
-	StartTime    *time.Time `json:"start_time,omitempty"`
-	EndTime      *time.Time `json:"end_time,omitempty"`
+	UserID       int32        `json:"user_id" binding:"required,min=1"`
+	SessionTopic *string      `json:"session_topic,omitempty"`
+	StartTime    *CustomTime  `json:"start_time,omitempty"`
+	EndTime      *CustomTime  `json:"end_time,omitempty"`
 }
 
 // @Summary     Create a new speaking session
@@ -133,13 +173,13 @@ func (server *Server) createSpeakingSession(ctx *gin.Context) {
 
 	startTime := time.Now()
 	if req.StartTime != nil {
-		startTime = *req.StartTime
+		startTime = req.StartTime.Time
 	}
 
 	var endTime sql.NullTime
 	if req.EndTime != nil {
 		endTime = sql.NullTime{
-			Time:  *req.EndTime,
+			Time:  req.EndTime.Time,
 			Valid: true,
 		}
 	}
@@ -237,9 +277,9 @@ func (server *Server) listSpeakingSessionsByUserID(ctx *gin.Context) {
 
 // updateSpeakingSessionRequest defines the structure for updating an existing speaking session
 type updateSpeakingSessionRequest struct {
-	SessionTopic *string    `json:"session_topic,omitempty"`
-	StartTime    *time.Time `json:"start_time,omitempty"`
-	EndTime      *time.Time `json:"end_time,omitempty"`
+	SessionTopic *string      `json:"session_topic,omitempty"`
+	StartTime    *CustomTime  `json:"start_time,omitempty"`
+	EndTime      *CustomTime  `json:"end_time,omitempty"`
 }
 
 // @Summary     Update a speaking session
@@ -295,11 +335,11 @@ func (server *Server) updateSpeakingSession(ctx *gin.Context) {
 		}
 	}
 	if req.StartTime != nil {
-		arg.StartTime = *req.StartTime
+		arg.StartTime = req.StartTime.Time
 	}
 	if req.EndTime != nil {
 		arg.EndTime = sql.NullTime{
-			Time:  *req.EndTime,
+			Time:  req.EndTime.Time,
 			Valid: true,
 		}
 	}
@@ -349,7 +389,7 @@ type createSpeakingTurnRequest struct {
 	SpeakerType        string          `json:"speaker_type" binding:"required"`
 	TextSpoken         *string         `json:"text_spoken,omitempty"`
 	AudioRecordingPath *string         `json:"audio_recording_path,omitempty"`
-	Timestamp          *time.Time      `json:"timestamp,omitempty"`
+	Timestamp          *CustomTime     `json:"timestamp,omitempty"`
 	AIEvaluation       json.RawMessage `json:"ai_evaluation,omitempty" swaggertype:"object"`
 	AIScore            *float64        `json:"ai_score,omitempty"`
 }
@@ -390,7 +430,7 @@ func (server *Server) createSpeakingTurn(ctx *gin.Context) {
 
 	timestamp := time.Now()
 	if req.Timestamp != nil {
-		timestamp = *req.Timestamp
+		timestamp = req.Timestamp.Time
 	}
 
 	var aiEvaluation pqtype.NullRawMessage
@@ -510,7 +550,7 @@ type updateSpeakingTurnRequest struct {
 	AudioRecordingPath *string         `json:"audio_recording_path,omitempty"`
 	AIEvaluation       json.RawMessage `json:"ai_evaluation,omitempty" swaggertype:"object"`
 	AIScore            *float64        `json:"ai_score,omitempty"`
-	Timestamp          *time.Time      `json:"timestamp,omitempty"`
+	Timestamp          *CustomTime     `json:"timestamp,omitempty"`
 }
 
 // @Summary     Update a speaking turn
@@ -586,7 +626,7 @@ func (server *Server) updateSpeakingTurn(ctx *gin.Context) {
 		}
 	}
 	if req.Timestamp != nil {
-		arg.Timestamp = *req.Timestamp
+		arg.Timestamp = req.Timestamp.Time
 	}
 
 	turn, err := server.store.UpdateSpeakingTurn(ctx, arg)
@@ -624,4 +664,67 @@ func (server *Server) deleteSpeakingTurn(ctx *gin.Context) {
 
 	logger.Debug("Deleted speaking turn with ID: %d", turnID)
 	SuccessResponse(ctx, http.StatusOK, "Speaking turn deleted successfully", nil)
+}
+
+// GenerateSpeakingResponse request structure
+type GenerateSpeakingRequest struct {
+	UserMessage         string `json:"user_message" binding:"required"`
+	ConversationContext string `json:"conversation_context"`
+	Difficulty          string `json:"difficulty"`
+}
+
+// GenerateSpeakingResponse response structure
+type GenerateSpeakingResponseData struct {
+	Response    string `json:"response"`
+	ProcessedAt string `json:"processed_at"`
+}
+
+// @Summary     Generate AI speaking response
+// @Description Generate an AI response for speaking practice based on user input and conversation context
+// @Tags        ai
+// @Accept      json
+// @Produce     json
+// @Param       request body GenerateSpeakingRequest true "Speaking response generation request"
+// @Success     200 {object} Response{data=GenerateSpeakingResponseData} "Speaking response generated successfully"
+// @Failure     400 {object} Response "Invalid request parameters"
+// @Failure     401 {object} Response "Unauthorized"
+// @Failure     503 {object} Response "AI service unavailable"
+// @Failure     500 {object} Response "Server error"
+// @Security    ApiKeyAuth
+// @Router      /api/v1/ai/generate-speaking-response [post]
+func (server *Server) generateSpeakingResponse(ctx *gin.Context) {
+	var req GenerateSpeakingRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ErrorResponse(ctx, http.StatusBadRequest, "Invalid request parameters", err)
+		return
+	}
+
+	// Check if AI scoring service is available
+	if server.aiScoringService == nil {
+		ErrorResponse(ctx, http.StatusServiceUnavailable, "AI service is not configured", nil)
+		return
+	}
+
+	// Create AI request
+	aiReq := ai.AISpeakingRequest{
+		UserMessage:         req.UserMessage,
+		ConversationContext: req.ConversationContext,
+		Difficulty:          req.Difficulty,
+	}
+
+	// Generate AI response
+	aiResponse, err := server.aiScoringService.GenerateSpeakingResponse(ctx, aiReq)
+	if err != nil {
+		logger.Error("Failed to generate AI speaking response: %v", err)
+		ErrorResponse(ctx, http.StatusInternalServerError, "Failed to generate AI response", err)
+		return
+	}
+
+	response := GenerateSpeakingResponseData{
+		Response:    aiResponse.Response,
+		ProcessedAt: aiResponse.ProcessedAt.Format(time.RFC3339),
+	}
+
+	logger.Debug("Generated AI speaking response successfully")
+	SuccessResponse(ctx, http.StatusOK, "Speaking response generated successfully", response)
 }

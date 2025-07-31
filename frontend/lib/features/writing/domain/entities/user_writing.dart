@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'writing_feedback.dart';
+
 part 'user_writing.freezed.dart';
 
 @freezed
@@ -9,7 +11,7 @@ abstract class UserWriting with _$UserWriting {
     required final int userId,
     final int? promptId,
     required final String submissionText,
-    final Map<String, dynamic>? aiFeedback,
+    final WritingFeedback? aiFeedback,
     final double? aiScore,
     required final DateTime submittedAt,
     final DateTime? evaluatedAt,
@@ -23,7 +25,7 @@ abstract class UserWritingRequest with _$UserWritingRequest {
     required final int userId,
     final int? promptId,
     required final String submissionText,
-    final Map<String, dynamic>? aiFeedback,
+    final WritingFeedback? aiFeedback,
     final double? aiScore,
   }) = _UserWritingRequest;
 }
@@ -32,7 +34,7 @@ abstract class UserWritingRequest with _$UserWritingRequest {
 abstract class UserWritingUpdateRequest with _$UserWritingUpdateRequest {
   const factory UserWritingUpdateRequest({
     final String? submissionText,
-    final Map<String, dynamic>? aiFeedback,
+    final WritingFeedback? aiFeedback,
     final double? aiScore,
     final DateTime? evaluatedAt,
   }) = _UserWritingUpdateRequest;

@@ -500,6 +500,16 @@
     "ai": "AI",
     "user": "User",
     "playingRecordedAudio": "Playing recorded audio...",
+    "speechRecognitionPermissionRequired": "Speech recognition permission is required for this feature",
+    "audioRecordingPermissionRequired": "Audio recording permission is required for this feature. Please enable microphone access in settings.",
+    "noSpeechDetectedCanStillPractice": "No speech detected. Recording saved but speech-to-text failed. You can still practice!",
+    "audioRecordingSpeechNotRecognized": "[Audio Recording - Speech not recognized]",
+    "audioRecording": "[Audio Recording]",
+    "userMadeRecordingButSpeechNotRecognized": "User made an audio recording but speech was not recognized.",
+    "listening": "Listening...",
+    "speakerTypeUser": "user",
+    "speakerTypeAi": "ai",
+    "scoreOutOf100": "Score: {score}/100"
     "toeicPractice": {
       "title": "TOEIC Practice",
       "part1Title": "Part 1 - Describe Pictures",

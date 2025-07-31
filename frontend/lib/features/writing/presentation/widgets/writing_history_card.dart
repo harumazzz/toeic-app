@@ -92,6 +92,7 @@ class WritingHistoryCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: _getScoreColor(
+                            context,
                             writing.aiScore!,
                           ).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
@@ -99,7 +100,7 @@ class WritingHistoryCard extends StatelessWidget {
                         child: Text(
                           '${writing.aiScore!.toStringAsFixed(1)}/10',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: _getScoreColor(writing.aiScore!),
+                            color: _getScoreColor(context, writing.aiScore!),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -225,14 +226,16 @@ class WritingHistoryCard extends StatelessWidget {
     );
   }
 
-  Color _getScoreColor(final double score) {
+  Color _getScoreColor(final BuildContext context, final double score) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     if (score >= 8.0) {
-      return Colors.green;
+      return colorScheme.tertiary; // Green equivalent
     }
     if (score >= 6.0) {
-      return Colors.orange;
+      return colorScheme.secondary; // Orange equivalent
     }
-    return Colors.red;
+    return colorScheme.error; // Red equivalent
   }
 
   String _formatDate(final DateTime date) =>

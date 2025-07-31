@@ -16,6 +16,7 @@ class WritingErrorWidget extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Center(
       child: Padding(
@@ -26,7 +27,7 @@ class WritingErrorWidget extends StatelessWidget {
             Icon(
               Symbols.error_outline,
               size: 64,
-              color: theme.colorScheme.error,
+              color: colorScheme.error,
             ),
             const SizedBox(height: 16),
             Text(
@@ -40,7 +41,7 @@ class WritingErrorWidget extends StatelessWidget {
             Text(
               message,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                color: colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -51,8 +52,8 @@ class WritingErrorWidget extends StatelessWidget {
                 icon: const Icon(Symbols.refresh),
                 label: Text(context.t.writing.tryAgain),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primaryColor,
-                  foregroundColor: Colors.white,
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

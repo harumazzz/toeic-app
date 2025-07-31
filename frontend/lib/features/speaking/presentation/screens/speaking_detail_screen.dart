@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
 import '../../../../core/services/ai_response_service.dart';
@@ -109,26 +112,65 @@ class SpeakingDetailScreen extends HookConsumerWidget {
 
     Future<void> startRecording() async {
       try {
-        if (await audioRecorder.hasPermission() &&
-            await SpeechToTextService.hasPermission()) {
+        if (await audioRecorder.hasPermission()) {
+          debugPrint('Audio recording permission granted');
+
+          // Request speech recognition permission explicitly
+          final speechPermission =
+              await SpeechToTextService.requestPermission();
+          debugPrint('Speech recognition permission: $speechPermission');
+
+          if (!speechPermission && context.mounted) {
+            ToastService.error(
+              context: context,
+              message: context.t.speaking.speechRecognitionPermissionRequired,
+            );
+            return;
+          }
+
+          debugPrint(
+            'Permissions granted for audio recording and speech recognition',
+          );
+
           final initialized = await SpeechToTextService.initialize();
+          debugPrint('Speech service initialized: $initialized');
+          debugPrint(
+            'Speech service available: ${SpeechToTextService.isAvailable}',
+          );
+
           if (!initialized && context.mounted) {
             throw Exception(context.t.exceptions.speechRecognitionNotAvailable);
           }
           recognizedText.value = '';
           final timestamp = DateTime.now().millisecondsSinceEpoch;
-          final path = 'speaking_recording_$timestamp.aac';
+          final filename = 'speaking_recording_$timestamp.aac';
+
+          // Get the app's documents directory for a writable path
+          final Directory appDocDir = await getApplicationDocumentsDirectory();
+          final String recordingPath = path.join(appDocDir.path, filename);
+
           await audioRecorder.start(
             const RecordConfig(),
-            path: path,
+            path: recordingPath,
           );
           isRecording.value = true;
           isListening.value = true;
           await SpeechToTextService.startListening(
             onResult: (final text) {
               recognizedText.value = text;
+              debugPrint(
+                'Speech recognition update: "$text" (length: ${text.length})',
+              );
             },
+            listenFor: const Duration(
+              seconds: 60,
+            ), // Increase to 60 seconds for longer phrases
+            pauseFor: const Duration(
+              seconds: 2,
+            ), // Reduce pause time to 2 seconds for better responsiveness
           );
+
+          debugPrint('Speech recognition started successfully');
           if (context.mounted) {
             ToastService.info(
               context: context,
@@ -136,10 +178,11 @@ class SpeakingDetailScreen extends HookConsumerWidget {
             );
           }
         } else {
+          debugPrint('Audio recording permission denied');
           if (context.mounted) {
             ToastService.error(
               context: context,
-              message: context.t.speaking.recordingPermissionDenied,
+              message: context.t.speaking.audioRecordingPermissionRequired,
             );
           }
         }
@@ -162,25 +205,79 @@ class SpeakingDetailScreen extends HookConsumerWidget {
         isProcessing.value = true;
 
         final userSpeech = recognizedText.value.trim();
+
+        // Debug logging
+        debugPrint('Recording stopped. Path: $path');
+        debugPrint('Recognized text: "$userSpeech"');
+        debugPrint('Text length: ${userSpeech.length}');
+
         if (userSpeech.isEmpty) {
           if (context.mounted) {
-            ToastService.error(
+            // Give the user an option to continue without speech recognition
+            ToastService.info(
               context: context,
-              message: context.t.speaking.speechProcessingFailed,
+              message: context.t.speaking.noSpeechDetectedCanStillPractice,
             );
+
+            // Add a placeholder message for the conversation
+            _addUserMessage(
+              conversation,
+              context.t.speaking.audioRecordingSpeechNotRecognized,
+              path,
+            );
+
+            // Save turn to backend if session exists
+            if (currentSessionId.value != null) {
+              await _saveSpeakingTurn(
+                ref,
+                currentSessionId.value!,
+                context.t.speaking.speakerTypeUser,
+                context.t.speaking.audioRecording,
+                path ?? '',
+              );
+            }
+
+            // Generate a helpful AI response
+            if (context.mounted) {
+              final aiResponse = await aiResponseService
+                  .generateSpeakingResponse(
+                    userMessage: context
+                        .t
+                        .speaking
+                        .userMadeRecordingButSpeechNotRecognized,
+                    conversationContext: conversation.value
+                        .where((final m) => !m.isUser)
+                        .map((final m) => m.text)
+                        .join('\n'),
+                  );
+              _addAIMessage(conversation, aiResponse);
+
+              // Save AI turn to backend if session exists
+              if (currentSessionId.value != null && context.mounted) {
+                await _saveSpeakingTurn(
+                  ref,
+                  currentSessionId.value!,
+                  context.t.speaking.speakerTypeAi,
+                  aiResponse,
+                  '',
+                );
+              } // Speak AI response
+              await TTSService.speak(text: aiResponse);
+            }
+            isProcessing.value = false;
+            return;
           }
-          return;
         }
 
         // Add user message to conversation
         _addUserMessage(conversation, userSpeech, path);
 
         // Save turn to backend if session exists
-        if (currentSessionId.value != null) {
+        if (currentSessionId.value != null && context.mounted) {
           await _saveSpeakingTurn(
             ref,
             currentSessionId.value!,
-            'user',
+            context.t.speaking.speakerTypeUser,
             userSpeech,
             path ?? '',
           );
@@ -197,11 +294,11 @@ class SpeakingDetailScreen extends HookConsumerWidget {
         _addAIMessage(conversation, aiResponse);
 
         // Save AI turn to backend if session exists
-        if (currentSessionId.value != null) {
+        if (currentSessionId.value != null && context.mounted) {
           await _saveSpeakingTurn(
             ref,
             currentSessionId.value!,
-            'ai',
+            context.t.speaking.speakerTypeAi,
             aiResponse,
             '',
           );
@@ -217,6 +314,7 @@ class SpeakingDetailScreen extends HookConsumerWidget {
           );
         }
       } catch (e) {
+        debugPrint('Error in stopRecording: $e');
         if (context.mounted) {
           ToastService.error(
             context: context,
@@ -323,7 +421,7 @@ class SpeakingDetailScreen extends HookConsumerWidget {
                 child: Text(
                   recognizedText.value.isNotEmpty
                       ? recognizedText.value
-                      : 'Listening...',
+                      : context.t.speaking.listening,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.bold,

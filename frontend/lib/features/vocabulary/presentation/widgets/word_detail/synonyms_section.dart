@@ -204,8 +204,9 @@ class WordListContainer extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isAntonym = type == WordListType.antonym;
-    final color = isAntonym ? Colors.red : Colors.green;
+    final color = isAntonym ? colorScheme.error : colorScheme.tertiary;
     final icon = isAntonym ? Symbols.remove_circle : Symbols.add_circle;
     final title =
         isAntonym
@@ -228,13 +229,13 @@ class WordListContainer extends StatelessWidget {
               Icon(
                 icon,
                 size: 14,
-                color: color.shade600,
+                color: color,
               ),
               const SizedBox(width: 4),
               Text(
                 title,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color.shade700,
+                  color: color,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -274,7 +275,7 @@ class WordChip extends StatelessWidget {
   });
 
   final String word;
-  final MaterialColor color;
+  final Color color;
   @override
   Widget build(final BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(
@@ -291,7 +292,7 @@ class WordChip extends StatelessWidget {
     child: Text(
       word,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: color.shade700,
+        color: color,
         fontWeight: FontWeight.w500,
         fontSize: 12,
       ),

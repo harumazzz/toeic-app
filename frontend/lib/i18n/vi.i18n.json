@@ -500,6 +500,16 @@
     "ai": "AI",
     "user": "Người dùng",
     "playingRecordedAudio": "Đang phát ghi âm...",
+    "speechRecognitionPermissionRequired": "Cần quyền nhận dạng giọng nói cho tính năng này",
+    "audioRecordingPermissionRequired": "Cần quyền ghi âm cho tính năng này. Vui lòng cho phép truy cập microphone trong cài đặt.",
+    "noSpeechDetectedCanStillPractice": "Không phát hiện giọng nói. Ghi âm đã được lưu nhưng chuyển giọng nói thành văn bản thất bại. Bạn vẫn có thể luyện tập!",
+    "audioRecordingSpeechNotRecognized": "[Ghi âm - Không nhận dạng được giọng nói]",
+    "audioRecording": "[Ghi âm]",
+    "userMadeRecordingButSpeechNotRecognized": "Người dùng đã thực hiện ghi âm nhưng không nhận dạng được giọng nói.",
+    "listening": "Đang nghe...",
+    "speakerTypeUser": "người dùng",
+    "speakerTypeAi": "ai",
+    "scoreOutOf100": "Điểm: {score}/100"
     "toeicPractice": {
       "title": "Luyện Tập TOEIC",
       "part1Title": "Part 1 - Mô tả tranh",

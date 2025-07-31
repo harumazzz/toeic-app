@@ -4,6 +4,7 @@ import 'package:dart_either/dart_either.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learn/core/error/failures.dart';
 import 'package:learn/features/writing/domain/entities/user_writing.dart';
+import 'package:learn/features/writing/domain/entities/writing_feedback.dart';
 import 'package:learn/features/writing/domain/repositories/user_writing_repository.dart';
 import 'package:learn/features/writing/domain/repositories/writing_repository.dart';
 import 'package:learn/features/writing/domain/use_cases/user_writing_usecases.dart';
@@ -43,7 +44,11 @@ void main() {
       promptId: 456,
       submissionText:
           'My favorite hobby is reading because it expands my knowledge and vocabulary.',
-      aiFeedback: {'grammar': 'Good', 'vocabulary': 'Excellent'},
+      aiFeedback: WritingFeedback(
+        overallScore: 8,
+        grammarFeedback: 'Good',
+        vocabularyFeedback: 'Excellent',
+      ),
       aiScore: 8.5,
     );
 
@@ -53,7 +58,11 @@ void main() {
       promptId: 456,
       submissionText:
           'My favorite hobby is reading because it expands my knowledge and vocabulary.',
-      aiFeedback: const {'grammar': 'Good', 'vocabulary': 'Excellent'},
+      aiFeedback: const WritingFeedback(
+        overallScore: 8,
+        grammarFeedback: 'Good',
+        vocabularyFeedback: 'Excellent',
+      ),
       aiScore: 8.5,
       submittedAt: DateTime(2024, 1, 17, 16, 45),
       evaluatedAt: DateTime(2024, 1, 17, 16, 50),
@@ -170,7 +179,11 @@ void main() {
       promptId: 456,
       submissionText:
           'My favorite hobby is reading because it expands my knowledge and vocabulary.',
-      aiFeedback: const {'grammar': 'Good', 'vocabulary': 'Excellent'},
+      aiFeedback: const WritingFeedback(
+        overallScore: 8,
+        grammarFeedback: 'Good',
+        vocabularyFeedback: 'Excellent',
+      ),
       aiScore: 8.5,
       submittedAt: DateTime(2024, 1, 17, 16, 45),
       evaluatedAt: DateTime(2024, 1, 17, 16, 50),
@@ -248,7 +261,10 @@ void main() {
         userId: tUserId,
         promptId: 456,
         submissionText: 'First writing submission.',
-        aiFeedback: const {'grammar': 'Good'},
+        aiFeedback: const WritingFeedback(
+          overallScore: 7,
+          grammarFeedback: 'Good',
+        ),
         aiScore: 7.5,
         submittedAt: DateTime(2024, 1, 17, 16, 45),
         evaluatedAt: DateTime(2024, 1, 17, 16, 50),
@@ -259,7 +275,10 @@ void main() {
         userId: tUserId,
         promptId: 789,
         submissionText: 'Second writing submission.',
-        aiFeedback: const {'grammar': 'Excellent'},
+        aiFeedback: const WritingFeedback(
+          overallScore: 9,
+          grammarFeedback: 'Excellent',
+        ),
         aiScore: 9,
         submittedAt: DateTime(2024, 1, 18, 10, 30),
         evaluatedAt: DateTime(2024, 1, 18, 10, 35),
@@ -345,7 +364,10 @@ void main() {
         userId: 123,
         promptId: tPromptId,
         submissionText: 'User 123 response to prompt.',
-        aiFeedback: const {'grammar': 'Good'},
+        aiFeedback: const WritingFeedback(
+          overallScore: 7,
+          grammarFeedback: 'Good',
+        ),
         aiScore: 7.5,
         submittedAt: DateTime(2024, 1, 17, 16, 45),
         evaluatedAt: DateTime(2024, 1, 17, 16, 50),
@@ -356,7 +378,10 @@ void main() {
         userId: 456,
         promptId: tPromptId,
         submissionText: 'User 456 response to prompt.',
-        aiFeedback: const {'grammar': 'Excellent'},
+        aiFeedback: const WritingFeedback(
+          overallScore: 9,
+          grammarFeedback: 'Excellent',
+        ),
         aiScore: 9,
         submittedAt: DateTime(2024, 1, 18, 10, 30),
         evaluatedAt: DateTime(2024, 1, 18, 10, 35),
@@ -441,7 +466,11 @@ void main() {
     const tUserWritingId = 1;
     final tUserWritingUpdateRequest = UserWritingUpdateRequest(
       submissionText: 'Updated submission text.',
-      aiFeedback: const {'grammar': 'Excellent', 'vocabulary': 'Outstanding'},
+      aiFeedback: const WritingFeedback(
+        overallScore: 9,
+        grammarFeedback: 'Excellent',
+        vocabularyFeedback: 'Outstanding',
+      ),
       aiScore: 9.2,
       evaluatedAt: DateTime(2024, 1, 18, 10, 15),
     );
@@ -451,7 +480,11 @@ void main() {
       userId: 123,
       promptId: 456,
       submissionText: 'Updated submission text.',
-      aiFeedback: const {'grammar': 'Excellent', 'vocabulary': 'Outstanding'},
+      aiFeedback: const WritingFeedback(
+        overallScore: 9,
+        grammarFeedback: 'Excellent',
+        vocabularyFeedback: 'Outstanding',
+      ),
       aiScore: 9.2,
       submittedAt: DateTime(2024, 1, 17, 16, 45),
       evaluatedAt: DateTime(2024, 1, 18, 10, 15),
@@ -748,11 +781,12 @@ void main() {
     });
 
     const tSubmissionId = 1;
-    const tAiFeedback = {
-      'grammar': 'Excellent',
-      'vocabulary': 'Outstanding',
-      'coherence': 'Very good',
-    };
+    const tAiFeedback = WritingFeedback(
+      overallScore: 9,
+      grammarFeedback: 'Excellent',
+      vocabularyFeedback: 'Outstanding',
+      organizationFeedback: 'Very good',
+    );
     const tAiScore = 9.2;
 
     final tUpdatedUserWriting = UserWriting(

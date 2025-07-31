@@ -58,6 +58,19 @@ type AIScoreRequest struct {
 	UserID   int32  `json:"user_id"`
 }
 
+// AISpeakingRequest represents the request to generate speaking response
+type AISpeakingRequest struct {
+	UserMessage         string `json:"user_message"`
+	ConversationContext string `json:"conversation_context"`
+	Difficulty          string `json:"difficulty,omitempty"`
+}
+
+// AISpeakingResponse represents the AI speaking response
+type AISpeakingResponse struct {
+	Response    string    `json:"response"`
+	ProcessedAt time.Time `json:"processed_at"`
+}
+
 // OpenAI API structures
 type OpenAIRequest struct {
 	Model       string    `json:"model"`
@@ -620,4 +633,107 @@ func (s *ScoringService) validateBand(bandStr string) TOEICBand {
 		// Default to band 4 if invalid
 		return BandLevel4
 	}
+}
+
+// GenerateSpeakingResponse generates an AI response for speaking practice
+func (s *ScoringService) GenerateSpeakingResponse(ctx context.Context, req AISpeakingRequest) (*AISpeakingResponse, error) {
+	// Create the prompt for TOEIC speaking conversation
+	prompt := s.createSpeakingPrompt(req.UserMessage, req.ConversationContext, req.Difficulty)
+	
+	// Prepare OpenAI request
+	openAIReq := OpenAIRequest{
+		Model: "gpt-3.5-turbo",
+		Messages: []Message{
+			{
+				Role:    "system",
+				Content: `You are a TOEIC speaking practice assistant. Help the user practice English conversation with appropriate responses. Keep responses conversational, encouraging, and suitable for TOEIC speaking practice. Ask follow-up questions to continue the conversation naturally.`,
+			},
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+		MaxTokens:   500,
+		Temperature: 0.7,
+	}
+
+	// Convert to JSON
+	requestBody, err := json.Marshal(openAIReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %v", err)
+	}
+
+	// Create HTTP request
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", s.apiURL, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %v", err)
+	}
+
+	// Set headers
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", "Bearer "+s.apiKey)
+
+	// Make the request
+	resp, err := s.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to make request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Read response
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("OpenAI API error (status %d): %s", resp.StatusCode, string(responseBody))
+	}
+
+	// Parse OpenAI response
+	var openAIResp OpenAIResponse
+	if err := json.Unmarshal(responseBody, &openAIResp); err != nil {
+		return nil, fmt.Errorf("failed to parse OpenAI response: %v", err)
+	}
+	
+	if len(openAIResp.Choices) == 0 {
+		return nil, fmt.Errorf("no choices in OpenAI response")
+	}
+
+	// Track usage
+	s.updateUsageStats(openAIResp.Usage)
+
+	return &AISpeakingResponse{
+		Response:    openAIResp.Choices[0].Message.Content,
+		ProcessedAt: time.Now(),
+	}, nil
+}
+
+// createSpeakingPrompt creates a prompt for speaking conversation
+func (s *ScoringService) createSpeakingPrompt(userMessage, conversationContext, difficulty string) string {
+	if difficulty == "" {
+		difficulty = "intermediate"
+	}
+
+	prompt := fmt.Sprintf(`Context: You are helping a student practice TOEIC speaking skills at %s level.
+
+Previous conversation:
+%s
+
+User's latest message: %s
+
+Please provide a natural, encouraging response that:
+1. Acknowledges what the user said
+2. Asks a follow-up question to continue the conversation
+3. Uses vocabulary appropriate for %s level
+4. Helps the user practice speaking skills
+5. Keeps the tone friendly and supportive
+
+Respond naturally as if you're having a real conversation.`, 
+		difficulty, 
+		conversationContext, 
+		userMessage, 
+		difficulty)
+
+	return prompt
 }

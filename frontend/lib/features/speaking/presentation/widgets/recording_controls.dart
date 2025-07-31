@@ -19,77 +19,81 @@ class RecordingControls extends StatelessWidget {
   final VoidCallback onStopRecording;
 
   @override
-  Widget build(final BuildContext context) => Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Theme.of(context).colorScheme.surface,
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.1),
-          blurRadius: 8,
-          offset: const Offset(0, -2),
-        ),
-      ],
-    ),
-    child: Column(
-      children: [
-        if (isProcessing)
-          const LinearProgressIndicator()
-        else
-          Container(height: 4),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Recording button
-            GestureDetector(
-              onTap: isProcessing
-                  ? null
-                  : (isRecording ? onStopRecording : onStartRecording),
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: isRecording
-                      ? Colors.red
-                      : Theme.of(context).colorScheme.primary,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color:
-                          (isRecording
-                                  ? Colors.red
-                                  : Theme.of(context).colorScheme.primary)
-                              .withValues(alpha: 0.3),
-                      blurRadius: 16,
-                      spreadRadius: 4,
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  isRecording ? Symbols.stop : Symbols.mic,
-                  color: Colors.white,
-                  size: 32,
+  Widget build(final BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          if (isProcessing)
+            const LinearProgressIndicator()
+          else
+            Container(height: 4),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Recording button
+              GestureDetector(
+                onTap: isProcessing
+                    ? null
+                    : (isRecording ? onStopRecording : onStartRecording),
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: isRecording
+                        ? colorScheme.error
+                        : colorScheme.primary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            (isRecording
+                                    ? colorScheme.error
+                                    : colorScheme.primary)
+                                .withValues(alpha: 0.3),
+                        blurRadius: 16,
+                        spreadRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    isRecording ? Symbols.stop : Symbols.mic,
+                    color: colorScheme.onPrimary,
+                    size: 32,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Text(
-          isProcessing
-              ? context.t.speaking.processingYourSpeech
-              : isRecording
-              ? context.t.speaking.recordingTapToStop
-              : context.t.speaking.tapMicrophoneToStart,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ],
           ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    ),
-  );
+          const SizedBox(height: 16),
+          Text(
+            isProcessing
+                ? context.t.speaking.processingYourSpeech
+                : isRecording
+                ? context.t.speaking.recordingTapToStop
+                : context.t.speaking.tapMicrophoneToStart,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {

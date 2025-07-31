@@ -2,6 +2,85 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../../../i18n/strings.g.dart';
+import '../../domain/entities/evaluation.dart';
+
+class EvaluationWidget extends StatelessWidget {
+  const EvaluationWidget({
+    required this.evaluation,
+    super.key,
+  });
+
+  final SpeakingEvaluation evaluation;
+
+  @override
+  Widget build(final BuildContext context) {
+    final score = evaluation.overallScore;
+
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Symbols.grade,
+                size: 16,
+                color: _getScoreColor(context, score),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                context.t.speaking.scoreOutOf100.replaceAll(
+                  '{score}',
+                  score.toString(),
+                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          if (evaluation.feedback != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              evaluation.feedback!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Color _getScoreColor(final BuildContext context, final int score) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (score >= 80) {
+      return colorScheme.tertiary; // Green equivalent
+    }
+    if (score >= 60) {
+      return colorScheme.secondary; // Orange equivalent
+    }
+    return colorScheme.error; // Red equivalent
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<SpeakingEvaluation>('evaluation', evaluation),
+    );
+  }
+}
+
 class ConversationMessage {
   const ConversationMessage({
     required this.text,
@@ -15,7 +94,7 @@ class ConversationMessage {
   final bool isUser;
   final DateTime timestamp;
   final String? audioPath;
-  final Map<String, dynamic>? evaluation;
+  final SpeakingEvaluation? evaluation;
 }
 
 class ConversationBubble extends StatelessWidget {
@@ -82,7 +161,7 @@ class ConversationBubble extends StatelessWidget {
                 ),
                 if (message.evaluation != null && message.isUser) ...[
                   const SizedBox(height: 8),
-                  _buildEvaluationWidget(context),
+                  EvaluationWidget(evaluation: message.evaluation!),
                 ],
                 const SizedBox(height: 4),
                 Row(
@@ -146,60 +225,6 @@ class ConversationBubble extends StatelessWidget {
       ],
     ),
   );
-
-  Widget _buildEvaluationWidget(final BuildContext context) {
-    final evaluation = message.evaluation!;
-    final score = evaluation['overall_score'] as int? ?? 0;
-
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Symbols.grade,
-                size: 16,
-                color: _getScoreColor(score),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                'Score: $score/100',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          if (evaluation['feedback'] != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              evaluation['feedback'] as String,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Color _getScoreColor(final int score) {
-    if (score >= 80) {
-      return Colors.green;
-    }
-    if (score >= 60) {
-      return Colors.orange;
-    }
-    return Colors.red;
-  }
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {

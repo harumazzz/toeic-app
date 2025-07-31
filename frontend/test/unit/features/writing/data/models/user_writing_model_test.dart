@@ -3,6 +3,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learn/features/writing/data/models/user_writing_model.dart';
 import 'package:learn/features/writing/domain/entities/user_writing.dart';
+import 'package:learn/features/writing/domain/entities/writing_feedback.dart';
 
 void main() {
   group('UserWritingModel', () {
@@ -10,15 +11,20 @@ void main() {
     final testEvaluatedAt = DateTime(2024, 1, 17, 16, 50);
     final testUpdatedAt = DateTime(2024, 1, 17, 16, 50);
 
-    const tAiFeedback = {
-      'grammar': 'Good',
-      'vocabulary': 'Excellent',
-      'coherence': 'Very good',
-      'suggestions': [
+    const tAiFeedback = WritingFeedback(
+      overallScore: 8,
+      feedback: 'Good writing with room for improvement',
+      grammarScore: 7,
+      grammarFeedback: 'Good',
+      vocabularyScore: 9,
+      vocabularyFeedback: 'Excellent',
+      organizationScore: 8,
+      organizationFeedback: 'Very good',
+      suggestions: [
         'Consider using more transition words',
         'Expand on your main points',
       ],
-    };
+    );
 
     final tUserWritingModel = UserWritingModel(
       id: 1,
@@ -261,36 +267,48 @@ void main() {
 
     test('should handle complex AI feedback structure in JSON', () async {
       // arrange
-      const complexFeedback = {
-        'overall_score': 8.5,
-        'grammar': {
-          'score': 8,
-          'issues': ['Minor tense inconsistency in paragraph 2'],
-          'suggestions': ['Review past perfect usage'],
-        },
-        'vocabulary': {
-          'score': 9,
-          'strengths': [
-            'Good range of vocabulary',
-            'Appropriate academic words',
-          ],
-          'suggestions': ['Consider using more sophisticated synonyms'],
-        },
-        'coherence': {
-          'score': 8,
-          'strengths': [
-            'Clear paragraph structure',
-            'Good use of linking words',
-          ],
-          'weaknesses': ['Could improve transitions between ideas'],
-        },
+      const complexFeedbackJson = {
+        'overall_score': 8,
+        'feedback': 'Strong writing with good structure and ideas',
+        'grammar_score': 8,
+        'grammar_feedback': 'Good use of grammar with minor issues',
+        'vocabulary_score': 9,
+        'vocabulary_feedback': 'Good range of vocabulary',
+        'organization_score': 8,
+        'organization_feedback': 'Well-organized structure',
+        'suggestions': [
+          'Review past perfect usage',
+          'Use more varied synonyms',
+        ],
+        'strengths': [
+          'Good use of topic-specific terms',
+          'Clear paragraph structure',
+        ],
+        'areas_for_improvement': ['Tense consistency', 'Vocabulary range'],
       };
+
+      const expectedFeedback = WritingFeedback(
+        overallScore: 8,
+        feedback: 'Strong writing with good structure and ideas',
+        grammarScore: 8,
+        grammarFeedback: 'Good use of grammar with minor issues',
+        vocabularyScore: 9,
+        vocabularyFeedback: 'Good range of vocabulary',
+        organizationScore: 8,
+        organizationFeedback: 'Well-organized structure',
+        suggestions: ['Review past perfect usage', 'Use more varied synonyms'],
+        strengths: [
+          'Good use of topic-specific terms',
+          'Clear paragraph structure',
+        ],
+        areasForImprovement: ['Tense consistency', 'Vocabulary range'],
+      );
 
       final jsonMap = {
         'id': 1,
         'user_id': 123,
         'submission_text': 'Complex AI feedback test',
-        'ai_feedback': complexFeedback,
+        'ai_feedback': complexFeedbackJson,
         'ai_score': 8.5,
         'submitted_at': testSubmittedAt.toIso8601String(),
         'updated_at': testUpdatedAt.toIso8601String(),
@@ -300,11 +318,10 @@ void main() {
       final result = UserWritingModel.fromJson(jsonMap);
 
       // assert
-      expect(result.aiFeedback, complexFeedback);
-      // ignore: avoid_dynamic_calls
-      expect(result.aiFeedback!['grammar']['score'], 8);
-      // ignore: avoid_dynamic_calls
-      expect(result.aiFeedback!['vocabulary']['strengths'], isA<List>());
+      expect(result.aiFeedback, expectedFeedback);
+      expect(result.aiFeedback!.grammarScore, 8);
+      expect(result.aiFeedback!.suggestions, isA<List<String>>());
+      expect(result.aiFeedback!.strengths, isA<List<String>>());
     });
 
     test('should handle different AI score ranges in JSON', () async {
@@ -338,11 +355,16 @@ void main() {
   });
 
   group('UserWritingRequestModel', () {
-    const tAiFeedback = {
-      'grammar': 'Good',
-      'vocabulary': 'Excellent',
-      'coherence': 'Very good',
-    };
+    const tAiFeedback = WritingFeedback(
+      overallScore: 8,
+      feedback: 'Good writing overall',
+      grammarScore: 7,
+      grammarFeedback: 'Good',
+      vocabularyScore: 9,
+      vocabularyFeedback: 'Excellent',
+      organizationScore: 8,
+      organizationFeedback: 'Very good',
+    );
 
     const tUserWritingRequestModel = UserWritingRequestModel(
       userId: 123,
@@ -536,23 +558,32 @@ void main() {
 
     test('should handle complex AI feedback in JSON conversion', () async {
       // arrange
-      const complexFeedback = {
-        'grammar': {
-          'score': 8,
-          'comments': 'Good overall structure',
-          'errors': ['Tense consistency in paragraph 2'],
-        },
-        'vocabulary': {
-          'score': 9,
-          'strengths': ['Academic vocabulary', 'Varied word choice'],
-          'suggestions': ['Use more advanced synonyms'],
-        },
+      const complexFeedbackJson = {
+        'overall_score': 8,
+        'feedback': 'Good overall structure',
+        'grammar_score': 8,
+        'grammar_feedback': 'Good overall structure',
+        'vocabulary_score': 9,
+        'vocabulary_feedback': 'Academic vocabulary, Varied word choice',
+        'suggestions': ['Use more advanced synonyms'],
+        'strengths': ['Academic vocabulary', 'Varied word choice'],
       };
+
+      const expectedFeedback = WritingFeedback(
+        overallScore: 8,
+        feedback: 'Good overall structure',
+        grammarScore: 8,
+        grammarFeedback: 'Good overall structure',
+        vocabularyScore: 9,
+        vocabularyFeedback: 'Academic vocabulary, Varied word choice',
+        suggestions: ['Use more advanced synonyms'],
+        strengths: ['Academic vocabulary', 'Varied word choice'],
+      );
 
       final jsonWithComplexFeedback = {
         'user_id': 123,
         'submission_text': 'Complex feedback test',
-        'ai_feedback': complexFeedback,
+        'ai_feedback': complexFeedbackJson,
         'ai_score': 8.5,
       };
 
@@ -560,20 +591,26 @@ void main() {
       final result = UserWritingRequestModel.fromJson(jsonWithComplexFeedback);
 
       // assert
-      expect(result.aiFeedback, complexFeedback);
-      // ignore: avoid_dynamic_calls
-      expect(result.aiFeedback!['grammar']['score'], 8);
-      // ignore: avoid_dynamic_calls
-      expect(result.aiFeedback!['vocabulary']['strengths'], isA<List>());
+      expect(result.aiFeedback, expectedFeedback);
+      expect(result.aiFeedback!.grammarScore, 8);
+      expect(result.aiFeedback!.strengths, isA<List<String>>());
     });
 
     test('should handle edge cases with empty strings', () async {
       // arrange
+      const emptyFeedback = WritingFeedback(
+        overallScore: 0,
+        feedback: '',
+      );
+
       final jsonWithEmptyStrings = {
         'user_id': 123,
         'prompt_id': 456,
         'submission_text': '',
-        'ai_feedback': <String, dynamic>{},
+        'ai_feedback': {
+          'overall_score': 0,
+          'feedback': '',
+        },
         'ai_score': 0.0,
       };
 
@@ -584,7 +621,7 @@ void main() {
       expect(result.userId, 123);
       expect(result.promptId, 456);
       expect(result.submissionText, '');
-      expect(result.aiFeedback, <String, dynamic>{});
+      expect(result.aiFeedback, emptyFeedback);
       expect(result.aiScore, 0.0);
     });
   });
@@ -592,11 +629,16 @@ void main() {
   group('UserWritingUpdateRequestModel', () {
     final testEvaluatedAt = DateTime(2024, 1, 18, 10, 15);
 
-    const tAiFeedback = {
-      'grammar': 'Excellent',
-      'vocabulary': 'Outstanding',
-      'coherence': 'Excellent',
-    };
+    const tAiFeedback = WritingFeedback(
+      overallScore: 9,
+      feedback: 'Outstanding writing',
+      grammarScore: 9,
+      grammarFeedback: 'Excellent',
+      vocabularyScore: 9,
+      vocabularyFeedback: 'Outstanding',
+      organizationScore: 9,
+      organizationFeedback: 'Excellent',
+    );
 
     final tUserWritingUpdateRequestModel = UserWritingUpdateRequestModel(
       submissionText: 'Updated submission text with improvements.',
@@ -868,9 +910,17 @@ void main() {
 
     test('should handle edge cases with empty values', () async {
       // arrange
+      const emptyFeedback = WritingFeedback(
+        overallScore: 0,
+        feedback: '',
+      );
+
       final jsonWithEmptyValues = {
         'submission_text': '',
-        'ai_feedback': <String, dynamic>{},
+        'ai_feedback': {
+          'overall_score': 0,
+          'feedback': '',
+        },
         'ai_score': 0.0,
       };
 
@@ -881,7 +931,7 @@ void main() {
 
       // assert
       expect(result.submissionText, '');
-      expect(result.aiFeedback, <String, dynamic>{});
+      expect(result.aiFeedback, emptyFeedback);
       expect(result.aiScore, 0.0);
       expect(result.evaluatedAt, isNull);
     });

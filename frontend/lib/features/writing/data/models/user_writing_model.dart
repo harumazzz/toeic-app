@@ -1,9 +1,23 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../domain/entities/user_writing.dart';
+import '../../domain/entities/writing_feedback.dart';
 
 part 'user_writing_model.freezed.dart';
 part 'user_writing_model.g.dart';
+
+class WritingFeedbackConverter
+    implements JsonConverter<WritingFeedback?, Map<String, dynamic>?> {
+  const WritingFeedbackConverter();
+
+  @override
+  WritingFeedback? fromJson(final Map<String, dynamic>? json) =>
+      json == null ? null : WritingFeedback.fromJson(json);
+
+  @override
+  Map<String, dynamic>? toJson(final WritingFeedback? object) =>
+      object?.toJson();
+}
 
 @freezed
 abstract class UserWritingModel with _$UserWritingModel {
@@ -12,7 +26,9 @@ abstract class UserWritingModel with _$UserWritingModel {
     @JsonKey(name: 'user_id') required final int userId,
     @JsonKey(name: 'prompt_id') final int? promptId,
     @JsonKey(name: 'submission_text') required final String submissionText,
-    @JsonKey(name: 'ai_feedback') final Map<String, dynamic>? aiFeedback,
+    @WritingFeedbackConverter()
+    @JsonKey(name: 'ai_feedback')
+    final WritingFeedback? aiFeedback,
     @JsonKey(name: 'ai_score') final double? aiScore,
     @JsonKey(name: 'submitted_at') required final DateTime submittedAt,
     @JsonKey(name: 'evaluated_at') final DateTime? evaluatedAt,
@@ -29,7 +45,9 @@ abstract class UserWritingRequestModel with _$UserWritingRequestModel {
     @JsonKey(name: 'user_id') required final int userId,
     @JsonKey(name: 'prompt_id') final int? promptId,
     @JsonKey(name: 'submission_text') required final String submissionText,
-    @JsonKey(name: 'ai_feedback') final Map<String, dynamic>? aiFeedback,
+    @WritingFeedbackConverter()
+    @JsonKey(name: 'ai_feedback')
+    final WritingFeedback? aiFeedback,
     @JsonKey(name: 'ai_score') final double? aiScore,
   }) = _UserWritingRequestModel;
 
@@ -45,7 +63,9 @@ abstract class UserWritingUpdateRequestModel
     with _$UserWritingUpdateRequestModel {
   const factory UserWritingUpdateRequestModel({
     @JsonKey(name: 'submission_text') final String? submissionText,
-    @JsonKey(name: 'ai_feedback') final Map<String, dynamic>? aiFeedback,
+    @WritingFeedbackConverter()
+    @JsonKey(name: 'ai_feedback')
+    final WritingFeedback? aiFeedback,
     @JsonKey(name: 'ai_score') final double? aiScore,
     @JsonKey(name: 'evaluated_at') final DateTime? evaluatedAt,
   }) = _UserWritingUpdateRequestModel;

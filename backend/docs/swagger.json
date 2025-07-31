@@ -6027,6 +6027,312 @@
                 }
             }
         },
+        "/api/v1/learning/sessions": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Start a new vocabulary learning session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "summary": "Start a new learning session",
+                "parameters": [
+                    {
+                        "description": "Session configuration",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.createLearningSessionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Learning session started successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.LearningSessionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to start learning session",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/sessions/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get details of a learning session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "summary": "Get learning session",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Learning session retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.LearningSessionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid session ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Session not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve learning session",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/sessions/{id}/attempts": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Submit an answer for a word in a learning session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "summary": "Submit learning attempt",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Learning attempt details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.submitLearningAttemptRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Learning attempt submitted successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.LearningAttemptResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or session ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Session not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to submit learning attempt",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/sessions/{id}/complete": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Mark a learning session as completed",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "summary": "Complete learning session",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Session completion data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.completeSessionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Learning session completed successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.LearningSessionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or session ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Session not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to complete learning session",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/part-contents/{part_id}": {
             "get": {
                 "security": [
@@ -7598,6 +7904,565 @@
                     },
                     "500": {
                         "description": "Failed to retrieve speaking sessions",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/study-sets": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "List study sets created by the current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study-sets"
+                ],
+                "summary": "List user's study sets",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Study sets retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.StudySetResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve study sets",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new study set for vocabulary learning",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study-sets"
+                ],
+                "summary": "Create a new study set",
+                "parameters": [
+                    {
+                        "description": "Study set details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.createStudySetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Study set created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.StudySetResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create study set",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/study-sets/public": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "List publicly available study sets",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study-sets"
+                ],
+                "summary": "List public study sets",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Public study sets retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.StudySetResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve public study sets",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/study-sets/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get a study set by ID with its words",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study-sets"
+                ],
+                "summary": "Get a study set",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Study Set ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Study set retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.StudySetWithWordsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid study set ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Study set not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve study set",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update an existing study set",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study-sets"
+                ],
+                "summary": "Update a study set",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Study Set ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Study set details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.updateStudySetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Study set updated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.StudySetResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or study set ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Study set not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update study set",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete an existing study set",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study-sets"
+                ],
+                "summary": "Delete a study set",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Study Set ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Study set deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid study set ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Study set not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete study set",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/study-sets/{id}/words": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Add a word to an existing study set",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study-sets"
+                ],
+                "summary": "Add word to study set",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Study Set ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Word to add",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.addWordToStudySetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Word added to study set successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or study set ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Study set not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to add word to study set",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/study-sets/{id}/words/{word_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Remove a word from an existing study set",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "study-sets"
+                ],
+                "summary": "Remove word from study set",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Study Set ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Word ID",
+                        "name": "word_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Word removed from study set successfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid study set ID or word ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Study set not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to remove word from study set",
                         "schema": {
                             "$ref": "#/definitions/api.Response"
                         }
@@ -9491,6 +10356,349 @@
                 }
             }
         },
+        "/api/v1/vocabulary/mastery-distribution": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get distribution of words across different mastery levels",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocabulary-stats"
+                ],
+                "summary": "Get mastery level distribution",
+                "responses": {
+                    "200": {
+                        "description": "Mastery distribution retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.MasteryDistribution"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve mastery distribution",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/vocabulary/progress": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get overall vocabulary learning progress for the current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocabulary-stats"
+                ],
+                "summary": "Get overall learning progress",
+                "responses": {
+                    "200": {
+                        "description": "Learning progress retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.LearningProgressResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve learning progress",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/vocabulary/review": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get words that need review based on mastery level",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocabulary-stats"
+                ],
+                "summary": "Get words needing review",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 5,
+                        "description": "Mastery threshold",
+                        "name": "mastery_threshold",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Words for review retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.WordForReviewResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve words for review",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/vocabulary/stats": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get vocabulary learning statistics for the current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocabulary-stats"
+                ],
+                "summary": "Get vocabulary statistics for current user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Vocabulary statistics retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/api.VocabularyStatsResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve vocabulary statistics",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/vocabulary/words/{word_id}/mastery": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update the mastery level for a specific word",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocabulary-stats"
+                ],
+                "summary": "Update word mastery level",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Word ID",
+                        "name": "word_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Mastery level update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.updateMasteryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Word mastery updated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.VocabularyStatsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or word ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Word not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update word mastery",
+                        "schema": {
+                            "$ref": "#/definitions/api.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/words": {
             "get": {
                 "security": [
@@ -10264,7 +11472,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Score a writing submission using AI to get TOEIC band assessment and detailed feedback",
+                "description": "Score a writing submission using AI to get TOEIC band assessment and detailed feedback. If submission_id is provided, the submission will be updated with AI scores.",
                 "consumes": [
                     "application/json"
                 ],
@@ -11316,6 +12524,37 @@
                 }
             }
         },
+        "api.FlashcardQuestion": {
+            "type": "object",
+            "properties": {
+                "level": {
+                    "type": "integer"
+                },
+                "meaning": {
+                    "type": "string"
+                },
+                "pronunciation": {
+                    "type": "string"
+                },
+                "word": {
+                    "type": "string"
+                },
+                "word_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.FlashcardSessionData": {
+            "type": "object",
+            "properties": {
+                "questions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.FlashcardQuestion"
+                    }
+                }
+            }
+        },
         "api.GrammarContent": {
             "type": "object",
             "properties": {
@@ -11497,6 +12736,144 @@
                 }
             }
         },
+        "api.LearningAttemptResponse": {
+            "type": "object",
+            "properties": {
+                "attempt_type": {
+                    "type": "string"
+                },
+                "correct_answer": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "difficulty_rating": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_correct": {
+                    "type": "boolean"
+                },
+                "response_time_ms": {
+                    "type": "integer"
+                },
+                "session_id": {
+                    "type": "integer"
+                },
+                "user_answer": {
+                    "type": "string"
+                },
+                "word": {
+                    "type": "string"
+                },
+                "word_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.LearningProgressResponse": {
+            "type": "object",
+            "properties": {
+                "average_mastery": {
+                    "type": "number"
+                },
+                "mastered_words": {
+                    "type": "integer"
+                },
+                "overall_accuracy": {
+                    "type": "number"
+                },
+                "total_attempts": {
+                    "type": "integer"
+                },
+                "total_correct": {
+                    "type": "integer"
+                },
+                "total_study_time_hours": {
+                    "type": "number"
+                },
+                "total_study_time_ms": {
+                    "type": "integer"
+                },
+                "total_words_studied": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.LearningSessionResponse": {
+            "type": "object",
+            "properties": {
+                "completed_at": {
+                    "type": "string"
+                },
+                "correct_answers": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "session_data": {
+                    "$ref": "#/definitions/api.SessionData"
+                },
+                "session_type": {
+                    "type": "string"
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "study_set_id": {
+                    "type": "integer"
+                },
+                "total_questions": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.MasteryDistribution": {
+            "type": "object",
+            "properties": {
+                "mastery_level": {
+                    "type": "integer"
+                },
+                "word_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.MatchPair": {
+            "type": "object",
+            "properties": {
+                "meaning": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "word": {
+                    "type": "string"
+                },
+                "word_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.MatchSessionData": {
+            "type": "object",
+            "properties": {
+                "pairs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.MatchPair"
+                    }
+                }
+            }
+        },
         "api.MeanModel": {
             "type": "object",
             "properties": {
@@ -11620,6 +12997,29 @@
                 }
             }
         },
+        "api.MultipleChoiceQuestion": {
+            "type": "object",
+            "properties": {
+                "correct_answer": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "pronunciation": {
+                    "type": "string"
+                },
+                "word": {
+                    "type": "string"
+                },
+                "word_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "api.PartResponse": {
             "type": "object",
             "properties": {
@@ -11736,6 +13136,17 @@
                 }
             }
         },
+        "api.QuizSessionData": {
+            "type": "object",
+            "properties": {
+                "questions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.MultipleChoiceQuestion"
+                    }
+                }
+            }
+        },
         "api.Response": {
             "type": "object",
             "properties": {
@@ -11830,6 +13241,71 @@
                 }
             }
         },
+        "api.SessionConfig": {
+            "type": "object",
+            "properties": {
+                "allow_partial": {
+                    "description": "Whether to allow partial credit for typing",
+                    "type": "boolean"
+                },
+                "case_sensitive": {
+                    "description": "Whether typing answers are case sensitive",
+                    "type": "boolean"
+                },
+                "show_hints": {
+                    "description": "Whether to show hints",
+                    "type": "boolean"
+                },
+                "shuffle_answers": {
+                    "description": "Whether to shuffle multiple choice answers",
+                    "type": "boolean"
+                },
+                "time_limit": {
+                    "description": "Time limit in seconds",
+                    "type": "integer"
+                }
+            }
+        },
+        "api.SessionData": {
+            "type": "object",
+            "properties": {
+                "final_stats": {
+                    "$ref": "#/definitions/api.SessionStats"
+                },
+                "flashcard": {
+                    "$ref": "#/definitions/api.FlashcardSessionData"
+                },
+                "match": {
+                    "$ref": "#/definitions/api.MatchSessionData"
+                },
+                "quiz": {
+                    "$ref": "#/definitions/api.QuizSessionData"
+                },
+                "type": {
+                    "$ref": "#/definitions/api.TypeSessionData"
+                }
+            }
+        },
+        "api.SessionStats": {
+            "type": "object",
+            "properties": {
+                "accuracy_percentage": {
+                    "type": "number"
+                },
+                "avg_difficulty": {
+                    "type": "number"
+                },
+                "avg_response_time": {
+                    "type": "number"
+                },
+                "correct_attempts": {
+                    "type": "integer"
+                },
+                "total_attempts": {
+                    "type": "integer"
+                }
+            }
+        },
         "api.SpeakingSessionResponse": {
             "type": "object",
             "properties": {
@@ -11882,6 +13358,70 @@
                 }
             }
         },
+        "api.StudySetResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "word_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.StudySetWithWordsResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "word_count": {
+                    "type": "integer"
+                },
+                "words": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.WordResponse"
+                    }
+                }
+            }
+        },
         "api.SynonymData": {
             "type": "object",
             "properties": {
@@ -11893,6 +13433,17 @@
                 },
                 "kind": {
                     "type": "string"
+                }
+            }
+        },
+        "api.TypeSessionData": {
+            "type": "object",
+            "properties": {
+                "questions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.FlashcardQuestion"
+                    }
                 }
             }
         },
@@ -12108,6 +13659,121 @@
                 }
             }
         },
+        "api.VocabularyStatsResponse": {
+            "type": "object",
+            "properties": {
+                "accuracy_percentage": {
+                    "type": "number"
+                },
+                "avg_response_time_ms": {
+                    "type": "number"
+                },
+                "correct_attempts": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "last_attempt_at": {
+                    "type": "string"
+                },
+                "mastery_level": {
+                    "type": "integer"
+                },
+                "total_attempts": {
+                    "type": "integer"
+                },
+                "total_response_time_ms": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "word": {
+                    "type": "string"
+                },
+                "word_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.WordForReviewResponse": {
+            "type": "object",
+            "properties": {
+                "accuracy_percentage": {
+                    "type": "number"
+                },
+                "avg_response_time_ms": {
+                    "type": "number"
+                },
+                "conjugation": {
+                    "$ref": "#/definitions/api.ConjugationData"
+                },
+                "correct_attempts": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "descript_level": {
+                    "type": "string"
+                },
+                "freq": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_attempt_at": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "mastery_level": {
+                    "type": "integer"
+                },
+                "means": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.MeaningData"
+                    }
+                },
+                "pronounce": {
+                    "type": "string"
+                },
+                "short_mean": {
+                    "type": "string"
+                },
+                "snym": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.SynonymData"
+                    }
+                },
+                "total_attempts": {
+                    "type": "integer"
+                },
+                "total_response_time_ms": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "word": {
+                    "type": "string"
+                },
+                "word_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "api.WordProgressResponse": {
             "type": "object",
             "properties": {
@@ -12303,6 +13969,18 @@
                 },
                 "version": {
                     "type": "string"
+                }
+            }
+        },
+        "api.addWordToStudySetRequest": {
+            "type": "object",
+            "required": [
+                "word_id"
+            ],
+            "properties": {
+                "word_id": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },
@@ -12653,6 +14331,14 @@
                 }
             }
         },
+        "api.completeSessionRequest": {
+            "type": "object",
+            "properties": {
+                "final_stats": {
+                    "$ref": "#/definitions/api.SessionStats"
+                }
+            }
+        },
         "api.createContentRequest": {
             "type": "object",
             "required": [
@@ -12756,6 +14442,34 @@
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "api.createLearningSessionRequest": {
+            "type": "object",
+            "required": [
+                "session_type"
+            ],
+            "properties": {
+                "session_config": {
+                    "$ref": "#/definitions/api.SessionConfig"
+                },
+                "session_type": {
+                    "type": "string",
+                    "enum": [
+                        "flashcard",
+                        "match",
+                        "quiz",
+                        "type"
+                    ]
+                },
+                "study_set_id": {
+                    "type": "integer"
+                },
+                "word_limit": {
+                    "type": "integer",
+                    "maximum": 50,
+                    "minimum": 1
                 }
             }
         },
@@ -12865,6 +14579,25 @@
                 },
                 "timestamp": {
                     "type": "string"
+                }
+            }
+        },
+        "api.createStudySetRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
                 }
             }
         },
@@ -13280,17 +15013,13 @@
         },
         "api.scoreWritingRequest": {
             "type": "object",
-            "required": [
-                "text"
-            ],
             "properties": {
-                "prompt_id": {
-                    "type": "integer"
-                },
                 "submission_id": {
+                    "description": "If provided, update this submission",
                     "type": "integer"
                 },
                 "text": {
+                    "description": "Text to score (required if no submission_id)",
                     "type": "string"
                 }
             }
@@ -13333,6 +15062,33 @@
                 },
                 "user_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "api.submitLearningAttemptRequest": {
+            "type": "object",
+            "required": [
+                "attempt_type",
+                "word_id"
+            ],
+            "properties": {
+                "attempt_type": {
+                    "type": "string"
+                },
+                "difficulty_rating": {
+                    "type": "integer",
+                    "maximum": 5,
+                    "minimum": 1
+                },
+                "response_time_ms": {
+                    "type": "integer"
+                },
+                "user_answer": {
+                    "type": "string"
+                },
+                "word_id": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },
@@ -13455,6 +15211,19 @@
                 }
             }
         },
+        "api.updateMasteryRequest": {
+            "type": "object",
+            "required": [
+                "mastery_level"
+            ],
+            "properties": {
+                "mastery_level": {
+                    "type": "integer",
+                    "maximum": 10,
+                    "minimum": 1
+                }
+            }
+        },
         "api.updatePartRequest": {
             "type": "object",
             "properties": {
@@ -13532,6 +15301,25 @@
                 },
                 "timestamp": {
                     "type": "string"
+                }
+            }
+        },
+        "api.updateStudySetRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
                 }
             }
         },

@@ -424,19 +424,22 @@ class _ReviewProgressLoadingView extends StatelessWidget {
   const _ReviewProgressLoadingView();
 
   @override
-  Widget build(final BuildContext context) => Center(
-    child: Container(
-      width: MediaQuery.of(context).size.width * 0.85,
+  Widget build(final BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final shimmerColor = colorScheme.brightness == Brightness.light
+        ? Colors.grey[300]!
+        : Colors.grey[700]!;
+
+    return Container(
+      width: double.infinity,
       height: MediaQuery.of(context).size.height * 0.5,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(
-              context,
-            ).colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 12,
+            color: colorScheme.shadow.withValues(alpha: 0.1),
+            blurRadius: 8,
             offset: const Offset(0, 4),
           ),
         ],
@@ -452,7 +455,7 @@ class _ReviewProgressLoadingView extends StatelessWidget {
                   width: double.infinity,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: shimmerColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
@@ -464,7 +467,7 @@ class _ReviewProgressLoadingView extends StatelessWidget {
                   width: MediaQuery.of(context).size.width * 0.6,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: shimmerColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -476,7 +479,7 @@ class _ReviewProgressLoadingView extends StatelessWidget {
                   width: MediaQuery.of(context).size.width * 0.4,
                   height: 20,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: shimmerColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -491,7 +494,7 @@ class _ReviewProgressLoadingView extends StatelessWidget {
                       width: 60,
                       height: 24,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: shimmerColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -502,7 +505,7 @@ class _ReviewProgressLoadingView extends StatelessWidget {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: shimmerColor,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -513,7 +516,7 @@ class _ReviewProgressLoadingView extends StatelessWidget {
                       width: 60,
                       height: 24,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: shimmerColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -524,8 +527,8 @@ class _ReviewProgressLoadingView extends StatelessWidget {
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _ShimmerContainer extends StatelessWidget {
@@ -569,7 +572,7 @@ Future<void> _requestNotificationPermissions(final BuildContext context) async {
 void _showNotificationMenu(
   final BuildContext context,
   final WidgetRef ref,
-  final dynamic wordState,
+  final WordState wordState,
 ) {
   showModalBottomSheet(
     context: context,

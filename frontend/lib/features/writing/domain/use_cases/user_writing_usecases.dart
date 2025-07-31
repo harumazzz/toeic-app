@@ -7,6 +7,7 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/use_cases/use_case.dart';
 import '../../data/repositories/user_writing_repository_impl.dart';
 import '../entities/user_writing.dart';
+import '../entities/writing_feedback.dart';
 import '../repositories/user_writing_repository.dart';
 
 part 'user_writing_usecases.freezed.dart';
@@ -177,7 +178,7 @@ class SubmitWritingForEvaluationUseCase
 abstract class AddAIFeedbackParams with _$AddAIFeedbackParams {
   const factory AddAIFeedbackParams({
     required final int submissionId,
-    required final Map<String, dynamic> aiFeedback,
+    required final WritingFeedback aiFeedback,
     required final double aiScore,
   }) = _AddAIFeedbackParams;
 }

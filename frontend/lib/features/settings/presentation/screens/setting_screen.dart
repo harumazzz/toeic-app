@@ -170,44 +170,55 @@ class SettingScreen extends HookConsumerWidget {
 class _ShimmerSettings extends StatelessWidget {
   const _ShimmerSettings();
   @override
-  Widget build(final BuildContext context) => ListView(
-    padding: const EdgeInsets.all(16),
-    children: [
-      Shimmer(
-        duration: const Duration(seconds: 2),
-        color: Colors.grey.shade300,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...List.generate(
-              2,
-              (final i) => Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(height: 24, width: 180, color: Colors.white),
-                        const SizedBox(height: 16),
-                        ...List.generate(
-                          2,
-                          (final j) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Container(height: 56, color: Colors.white),
+  Widget build(final BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final shimmerColor = colorScheme.brightness == Brightness.light
+        ? Colors.grey[300]!
+        : Colors.grey[700]!;
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Shimmer(
+          duration: const Duration(seconds: 2),
+          color: shimmerColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...List.generate(
+                2,
+                (final i) => Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Card(
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 24,
+                            width: 180,
+                            color: shimmerColor,
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+                          ...List.generate(
+                            2,
+                            (final j) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Container(height: 56, color: shimmerColor),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 }

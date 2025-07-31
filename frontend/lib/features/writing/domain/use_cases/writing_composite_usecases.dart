@@ -8,6 +8,7 @@ import '../../../../core/use_cases/use_case.dart';
 import '../../data/repositories/user_writing_repository_impl.dart';
 import '../../data/repositories/writing_repository_impl.dart';
 import '../entities/user_writing.dart';
+import '../entities/writing_feedback.dart';
 import '../entities/writing_prompt.dart';
 import '../repositories/user_writing_repository.dart';
 import '../repositories/writing_repository.dart';
@@ -222,45 +223,43 @@ class BatchEvaluateWritingsUseCase
     );
   }
 
-  Map<String, dynamic> _generateMockAIFeedback(
+  WritingFeedback _generateMockAIFeedback(
     final String text,
     final EvaluationCriteria criteria,
-  ) => {
-    'grammar': {
-      'score': 8,
-      'feedback': 'Good use of grammar with minor issues in complex sentences.',
-      'errors': ['Tense consistency in paragraph 2'],
-      'suggestions': [
-        'Review past perfect usage',
-        'Check subject-verb agreement',
-      ],
-    },
-    'vocabulary': {
-      'score': 7,
-      'feedback': 'Adequate vocabulary range with room for improvement.',
-      'strengths': ['Good use of topic-specific terms'],
-      'suggestions': [
-        'Use more varied synonyms',
-        'Include more advanced vocabulary',
-      ],
-    },
-    'coherence': {
-      'score': 8,
-      'feedback': 'Well-organized with clear paragraph structure.',
-      'strengths': ['Good use of transition words', 'Clear topic sentences'],
-      'suggestions': ['Improve conclusion strength'],
-    },
-    'task_response': {
-      'score': 9,
-      'feedback': 'Excellent response addressing all parts of the prompt.',
-      'coverage': 'All main points addressed with examples',
-    },
-    'overall_feedback':
-        // ignore: lines_longer_than_80_chars
+  ) => WritingFeedback(
+    overallScore: 8,
+    feedback:
         'Strong writing with good structure and ideas. Focus on expanding vocabulary and refining grammar in complex sentences.',
-    'writing_length': text.split(' ').length,
-    'estimated_level': criteria.targetLevel,
-  };
+    grammarScore: 8,
+    grammarFeedback:
+        'Good use of grammar with minor issues in complex sentences.',
+    vocabularyScore: 7,
+    vocabularyFeedback: 'Adequate vocabulary range with room for improvement.',
+    organizationScore: 8,
+    organizationFeedback: 'Well-organized with clear paragraph structure.',
+    contentScore: 9,
+    contentFeedback: 'Excellent response addressing all parts of the prompt.',
+    taskAchievementScore: 9,
+    suggestions: [
+      'Review past perfect usage',
+      'Check subject-verb agreement',
+      'Use more varied synonyms',
+      'Include more advanced vocabulary',
+      'Improve conclusion strength',
+    ],
+    strengths: [
+      'Good use of topic-specific terms',
+      'Good use of transition words',
+      'Clear topic sentences',
+    ],
+    areasForImprovement: [
+      'Tense consistency in complex sentences',
+      'Vocabulary range expansion',
+    ],
+    toeicBand: criteria.targetLevel,
+    estimatedScore: (_calculateMockScore(text) * 10).round(),
+    confidenceLevel: 0.85,
+  );
 
   double _calculateMockScore(final String text) {
     final wordCount = text.split(' ').length;

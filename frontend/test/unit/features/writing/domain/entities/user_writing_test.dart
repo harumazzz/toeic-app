@@ -2,6 +2,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learn/features/writing/domain/entities/user_writing.dart';
+import 'package:learn/features/writing/domain/entities/writing_feedback.dart';
 
 void main() {
   group('UserWriting Entity', () {
@@ -9,15 +10,20 @@ void main() {
     final testEvaluatedAt = DateTime(2024, 1, 17, 16, 50);
     final testUpdatedAt = DateTime(2024, 1, 17, 16, 50);
 
-    const tAiFeedback = {
-      'grammar': 'Good',
-      'vocabulary': 'Excellent',
-      'coherence': 'Very good',
-      'suggestions': [
+    const tAiFeedback = WritingFeedback(
+      overallScore: 8,
+      feedback: 'Good writing with room for improvement',
+      grammarScore: 7,
+      grammarFeedback: 'Good',
+      vocabularyScore: 9,
+      vocabularyFeedback: 'Excellent',
+      organizationScore: 8,
+      organizationFeedback: 'Very good',
+      suggestions: [
         'Consider using more transition words',
         'Expand on your main points',
       ],
-    };
+    );
 
     final tUserWriting = UserWriting(
       id: 1,
@@ -162,34 +168,31 @@ void main() {
 
     test('should handle complex AI feedback structure', () {
       // arrange
-      const complexFeedback = {
-        'overall_score': 8.5,
-        'grammar': {
-          'score': 8,
-          'issues': ['Minor tense inconsistency in paragraph 2'],
-          'suggestions': ['Review past perfect usage'],
-        },
-        'vocabulary': {
-          'score': 9,
-          'strengths': [
-            'Good range of vocabulary',
-            'Appropriate academic words',
-          ],
-          'suggestions': ['Consider using more sophisticated synonyms'],
-        },
-        'coherence': {
-          'score': 8,
-          'strengths': [
-            'Clear paragraph structure',
-            'Good use of linking words',
-          ],
-          'weaknesses': ['Could improve transitions between ideas'],
-        },
-        'task_response': {
-          'score': 9,
-          'comments': 'Fully addresses all parts of the task',
-        },
-      };
+      const complexFeedback = WritingFeedback(
+        overallScore: 8,
+        feedback: 'Strong writing with clear structure',
+        grammarScore: 8,
+        grammarFeedback: 'Minor tense inconsistency in paragraph 2',
+        vocabularyScore: 9,
+        vocabularyFeedback: 'Good range of vocabulary',
+        organizationScore: 8,
+        organizationFeedback: 'Clear paragraph structure',
+        contentScore: 9,
+        contentFeedback: 'Fully addresses all parts of the task',
+        suggestions: [
+          'Review past perfect usage',
+          'Consider using more sophisticated synonyms',
+        ],
+        strengths: [
+          'Good range of vocabulary',
+          'Appropriate academic words',
+          'Clear paragraph structure',
+          'Good use of linking words',
+        ],
+        areasForImprovement: [
+          'Could improve transitions between ideas',
+        ],
+      );
 
       final userWriting = UserWriting(
         id: 1,
@@ -203,10 +206,8 @@ void main() {
 
       // assert
       expect(userWriting.aiFeedback, complexFeedback);
-      // ignore: avoid_dynamic_calls
-      expect(userWriting.aiFeedback!['grammar']['score'], 8);
-      // ignore: avoid_dynamic_calls
-      expect(userWriting.aiFeedback!['vocabulary']['strengths'], isA<List>());
+      expect(userWriting.aiFeedback!.grammarScore, 8);
+      expect(userWriting.aiFeedback!.strengths, isA<List<String>>());
     });
 
     test('should handle AI score validation ranges', () {
@@ -246,11 +247,16 @@ void main() {
   });
 
   group('UserWritingRequest Entity', () {
-    const tAiFeedback = {
-      'grammar': 'Good',
-      'vocabulary': 'Excellent',
-      'coherence': 'Very good',
-    };
+    const tAiFeedback = WritingFeedback(
+      overallScore: 8,
+      feedback: 'Good writing overall',
+      grammarScore: 7,
+      grammarFeedback: 'Good',
+      vocabularyScore: 9,
+      vocabularyFeedback: 'Excellent',
+      organizationScore: 8,
+      organizationFeedback: 'Very good',
+    );
 
     test('should create UserWritingRequest entity with correct values', () {
       // arrange
@@ -353,11 +359,16 @@ void main() {
   group('UserWritingUpdateRequest Entity', () {
     final testEvaluatedAt = DateTime(2024, 1, 18, 10, 15);
 
-    const tAiFeedback = {
-      'grammar': 'Excellent',
-      'vocabulary': 'Outstanding',
-      'coherence': 'Excellent',
-    };
+    const tAiFeedback = WritingFeedback(
+      overallScore: 9,
+      feedback: 'Outstanding writing',
+      grammarScore: 9,
+      grammarFeedback: 'Excellent',
+      vocabularyScore: 9,
+      vocabularyFeedback: 'Outstanding',
+      organizationScore: 9,
+      organizationFeedback: 'Excellent',
+    );
 
     test(
       'should create UserWritingUpdateRequest entity with correct values',
@@ -460,12 +471,21 @@ void main() {
 
     test('should handle AI feedback update scenarios', () {
       // arrange
-      const initialFeedback = {'grammar': 'Good'};
-      const updatedFeedback = {
-        'grammar': 'Excellent',
-        'vocabulary': 'Very good',
-        'coherence': 'Good',
-      };
+      const initialFeedback = WritingFeedback(
+        overallScore: 7,
+        grammarScore: 7,
+        grammarFeedback: 'Good',
+      );
+
+      const updatedFeedback = WritingFeedback(
+        overallScore: 8,
+        grammarScore: 9,
+        grammarFeedback: 'Excellent',
+        vocabularyScore: 8,
+        vocabularyFeedback: 'Very good',
+        organizationScore: 7,
+        organizationFeedback: 'Good',
+      );
 
       const request1 = UserWritingUpdateRequest(
         aiFeedback: initialFeedback,
