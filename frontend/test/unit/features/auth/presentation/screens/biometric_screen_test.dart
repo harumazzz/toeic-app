@@ -5,7 +5,6 @@ void main() {
     final tester,
   ) async {
     // Skip this test for now due to complex service dependencies
-    // TODO(dev): Implement proper mocking for BiometricService
     expect(true, true); // Placeholder test
   });
 }

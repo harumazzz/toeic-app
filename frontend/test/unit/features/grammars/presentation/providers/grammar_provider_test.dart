@@ -419,15 +419,6 @@ void main() {
   });
 
   group('GrammarDetail', () {
-    const tGrammar = Grammar(
-      id: 1,
-      grammarKey: 'present-simple',
-      title: 'Present Simple Tense',
-      level: 1,
-      tag: ['basic', 'tense'],
-      related: [2, 3],
-    );
-
     const tRelatedGrammar = Grammar(
       id: 2,
       grammarKey: 'past-simple',

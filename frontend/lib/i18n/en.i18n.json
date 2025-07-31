@@ -509,7 +509,7 @@
     "listening": "Listening...",
     "speakerTypeUser": "user",
     "speakerTypeAi": "ai",
-    "scoreOutOf100": "Score: {score}/100"
+    "scoreOutOf100": "Score: {score}/100",
     "toeicPractice": {
       "title": "TOEIC Practice",
       "part1Title": "Part 1 - Describe Pictures",
@@ -541,7 +541,121 @@
       "aiQuestion": "AI Question",
       "aiInitializing": "Initializing AI...",
       "aiError": "AI Error",
-      "aiNotAvailable": "AI not available"
+      "aiNotAvailable": "AI not available",
+      "aiService": {
+        "initSuccess": "🚀 Firebase Gemini AI Examiner Service initialized successfully",
+        "initPrimaryModel": "✅ Primary Model: gemini-1.5-flash (Quick responses)",
+        "initAdvancedModel": "✅ Advanced Model: gemini-1.5-pro (Complex evaluations)",
+        "initFailed": "❌ Failed to initialize Firebase Gemini AI",
+        "part1EvaluationComplete": "🎯 Gemini Pro Part 1 evaluation completed",
+        "part2EvaluationComplete": "🎯 Gemini Pro Part 2 evaluation completed",
+        "part5EvaluationComplete": "🎯 Gemini Pro Part 5 evaluation completed",
+        "followUpGenerated": "🤖 Gemini generated adaptive follow-up",
+        "adaptiveQuestionGenerated": "🎯 Generated adaptive question",
+        "studyPlanGenerated": "📚 Generated personalized study plan",
+        "serviceDisposed": "🧹 Firebase Gemini AI Examiner Service disposed",
+        "part1EvaluationError": "❌ Error evaluating Part 1 response with Gemini",
+        "part2EvaluationError": "❌ Error evaluating Part 2 response with Gemini",
+        "part5EvaluationError": "❌ Error evaluating Part 5 response with Gemini",
+        "followUpError": "❌ Error generating follow-up question with Gemini",
+        "adaptiveQuestionError": "❌ Error generating adaptive question",
+        "studyPlanError": "❌ Error generating study plan",
+        "jsonExtractionWarning": "⚠️ Could not extract JSON, using default evaluation",
+        "questions": {
+          "part1": {
+            "describeDetail": "Describe what you see in this image in detail.",
+            "describePeople": "Tell me about the people and activities in this picture.",
+            "describeScene": "What is happening in this image? Describe the scene.",
+            "describeSetting": "Describe the setting and atmosphere of this picture.",
+            "identifyObjects": "What objects or elements can you identify in this image?"
+          },
+          "part2": {
+            "lastWeekend": "What did you do last weekend?",
+            "idealVacation": "Describe your ideal vacation destination.",
+            "favoriteHobby": "What is your favorite hobby and why?",
+            "hometown": "Tell me about your hometown.",
+            "futurePlans": "What are your plans for the future?",
+            "memorableExperience": "Describe a memorable experience you had recently.",
+            "favoriteMusic": "What type of music do you enjoy and why?",
+            "favoriteRestaurant": "Tell me about your favorite restaurant.",
+            "freeTime": "What do you like to do in your free time?",
+            "bestFriend": "Describe your best friend."
+          },
+          "part5": {
+            "meetingPostponed": {
+              "question": "The meeting _____ postponed until next week due to technical issues.",
+              "options": "A) was B) were C) is D) are",
+              "correct": "A",
+              "explanation": "Use \"was\" because \"meeting\" is singular and the sentence is in past tense."
+            },
+            "workingYears": {
+              "question": "She has been working here _____ five years.",
+              "options": "A) since B) for C) during D) from",
+              "correct": "B",
+              "explanation": "Use \"for\" with a period of time (five years)."
+            },
+            "reportCompleted": {
+              "question": "The report must be _____ by Friday.",
+              "options": "A) complete B) completed C) completing D) completion",
+              "correct": "B",
+              "explanation": "Use past participle \"completed\" in passive voice construction."
+            },
+            "achieveTargets": {
+              "question": "We need to _____ our sales targets this quarter.",
+              "options": "A) achieve B) achievement C) achieving D) achieved",
+              "correct": "A",
+              "explanation": "Use base form \"achieve\" after \"need to\"."
+            },
+            "weatherImproves": {
+              "question": "_____ the weather improves, we will cancel the outdoor event.",
+              "options": "A) If B) Unless C) When D) Because",
+              "correct": "B",
+              "explanation": "Use \"Unless\" meaning \"if not\" - if the weather does not improve."
+            }
+          }
+        },
+        "defaultEvaluation": {
+          "feedback": "Good effort! Your response shows understanding of the task. Continue practicing to improve fluency and accuracy.",
+          "strengths": "You attempted to answer the question and showed effort in your response.",
+          "improvements": "Focus on expanding your vocabulary, improving grammar accuracy, and practicing speaking more fluently.",
+          "estimatedLevel": "intermediate",
+          "speakingTips": {
+            "practice": "Practice speaking daily",
+            "record": "Record yourself and listen back",
+            "pronunciation": "Focus on clear pronunciation"
+          }
+        },
+        "defaultStudyPlan": {
+          "levelAssessment": "Based on available data, you show intermediate-level English speaking skills.",
+          "strengths": ["Willingness to practice", "Basic communication ability"],
+          "priorityAreas": ["Grammar accuracy", "Vocabulary expansion", "Fluency improvement"],
+          "weeklyPlan": {
+            "week1": ["Daily vocabulary review", "Grammar exercises", "Speaking practice 15 min/day"],
+            "week2": ["Continue vocabulary building", "Focus on tenses", "Record speaking exercises"],
+            "week3": ["Advanced vocabulary", "Complex sentence structures", "Mock TOEIC speaking tests"],
+            "week4": ["Review and consolidation", "Full practice tests", "Error analysis"]
+          },
+          "practiceFocus": {
+            "grammar": ["Present/past tenses", "Articles", "Prepositions"],
+            "vocabulary": ["Business English", "Academic words", "Everyday expressions"],
+            "speaking": ["Fluency exercises", "Pronunciation drills", "Response organization"],
+            "listening": ["Audio materials", "Native speaker content", "Speed adjustment practice"]
+          },
+          "milestones": ["Complete daily practice", "Record weekly speaking samples", "Take monthly assessments"],
+          "timeline": "2-3 months of consistent practice for noticeable improvement",
+          "motivationTips": ["Set small daily goals", "Celebrate progress", "Join English speaking groups"],
+          "resources": ["TOEIC practice books", "English learning apps", "Speaking partner platforms"]
+        },
+        "prompts": {
+          "followUpFallback": "Can you tell me more about that?",
+          "part1Evaluation": "You are an expert TOEIC speaking examiner using advanced AI evaluation criteria. Evaluate this Part 1 response (image description) comprehensively.\n\nContext: TOEIC Speaking Test Part 1 - Describe a Picture\nQuestion: {question}\nStudent's Response: \"{userResponse}\"\n\nProvide a detailed evaluation in JSON format with score, feedback, pronunciation_score, fluency_score, grammar_score, vocabulary_score, content_relevance_score, strengths, improvements, grammar_errors, vocabulary_suggestions, speaking_tips, estimated_toeic_level, and confidence_level.\n\nEvaluation Criteria (TOEIC Official Rubric):\n- Content Relevance & Accuracy (20%): How well does the response describe the image?\n- Grammar & Sentence Structure (25%): Proper use of tenses, articles, etc.\n- Vocabulary Usage & Range (20%): Appropriate and varied word choice\n- Fluency & Coherence (20%): Natural flow and logical organization\n- Pronunciation & Clarity (15%): Clear articulation and stress patterns\n\nBe encouraging yet constructive. Provide specific examples from their response.",
+          "part2Evaluation": "You are an expert TOEIC speaking examiner with advanced AI capabilities. Evaluate this Part 2 response (Question & Answer) using official TOEIC criteria.\n\nContext: TOEIC Speaking Test Part 2 - Question & Response\nQuestion: {question}\nStudent's Response: \"{userResponse}\"\n\nProvide comprehensive evaluation in JSON format with score, feedback, relevance_score, grammar_score, vocabulary_score, fluency_score, completeness_score, strengths, improvements, grammar_errors, vocabulary_suggestions, conversation_tips, cultural_appropriateness, estimated_toeic_level, follow_up_suggestions, and confidence_level.\n\nTOEIC Official Criteria:\n- Relevance to Question (25%): Direct response to what was asked\n- Grammar & Language Use (25%): Correct structures and forms\n- Vocabulary Range & Accuracy (20%): Appropriate and varied expressions\n- Fluency & Coherence (15%): Natural rhythm and logical flow\n- Completeness of Response (15%): Adequate development of ideas\n\nProvide encouraging feedback while maintaining accuracy standards.",
+          "part5Evaluation": "You are an expert TOEIC grammar examiner with advanced linguistic analysis capabilities. Evaluate this Part 5 response (grammar question explanation) using comprehensive criteria.\n\nContext: TOEIC Speaking Test Part 5 - Grammar & Explanation\nGrammar Question: {question}\nAnswer Options: {options}\nCorrect Answer: {correct}\nOfficial Explanation: {explanation}\nStudent's Response: \"{userResponse}\"\n\nProvide detailed evaluation in JSON format with score, feedback, answer_accuracy, explanation_quality, language_use, grammar_understanding, communication_clarity, strengths, improvements, correct_answer_given, explanation_accuracy, alternative_explanations, related_grammar_points, study_recommendations, metalinguistic_awareness, estimated_toeic_level, and confidence_level.\n\nEvaluation Criteria:\n- Correct Answer Selection (30%): Did they choose the right answer?\n- Quality of Explanation (35%): How well did they explain the grammar rule?\n- Language Accuracy & Clarity (20%): Grammar and vocabulary in their explanation\n- Metalinguistic Understanding (15%): Depth of grammar rule comprehension\n\nFocus on both accuracy and pedagogical understanding. Encourage learning mindset.",
+          "followUpGeneration": "You are an adaptive TOEIC speaking examiner with advanced conversational AI. Generate an intelligent, personalized follow-up question based on the student's response.\n\nContext:\n- TOEIC Part: {partType}\n- Original Question: {originalQuestion}\n- Student's Response: \"{userResponse}\"\n\nInstructions:\n1. Analyze the student's language level and response quality\n2. Create a follow-up that builds on their answer naturally\n3. Adjust difficulty appropriately (slightly challenging but achievable)\n4. Make it conversational and engaging\n5. Focus on areas that need improvement while being encouraging\n\nGenerate a follow-up question that:\n- Relates directly to their specific response content\n- Encourages elaboration or clarification\n- Helps assess their speaking ability further\n- Maintains appropriate TOEIC difficulty level\n- Feels natural in conversation flow\n\nReturn only the follow-up question, nothing else.\n\nExamples of good follow-ups:\n- \"That's interesting! Can you tell me more about [specific detail they mentioned]?\"\n- \"You mentioned [X]. How does that compare to [related topic]?\"\n- \"What do you think would happen if [scenario based on their response]?\"\n- \"Can you give me a specific example of what you just described?\"",
+          "adaptiveQuestionGeneration": "You are an expert TOEIC test creator with access to advanced AI capabilities. Generate a personalized TOEIC {partType} question with appropriate difficulty.\n\nParameters:\n- Part Type: {partType}\n- Difficulty Level: {difficultyLevel}\n- Previous Performance: {previousPerformance}\n\nFor Part 1 (Image Description):\nReturn a detailed, engaging prompt for describing an image that tests:\n- Vocabulary range and accuracy\n- Grammar structures appropriate to level\n- Descriptive language skills\n\nFor Part 2 (Question & Response):\nCreate a conversational question that:\n- Relates to common TOEIC themes (work, travel, education, etc.)\n- Matches the specified difficulty level\n- Encourages natural, extended responses\n\nFor Part 5 (Grammar):\nGenerate a grammar question with:\n- Realistic business/academic context\n- Clear distractors that test specific grammar points\n- Proper difficulty level progression\n\nReturn JSON format with question, options (Part 5 only), correct (Part 5 only), explanation (Part 5 only), topic, difficulty_indicators, and learning_objectives.",
+          "studyPlanGeneration": "You are an AI TOEIC study advisor with advanced learning analytics capabilities. Analyze the student's performance data and create a personalized study plan.\n\nRecent Evaluations:\n{evaluationsText}\n\nTarget TOEIC Score: {targetScore}\n\nProvide comprehensive analysis in JSON format with current_level_assessment, strengths, priority_areas, study_plan (week_1, week_2, week_3, week_4), practice_focus (grammar, vocabulary, speaking, listening), progress_milestones, estimated_timeline, motivation_tips, and recommended_resources.\n\nMake recommendations specific, actionable, and encouraging."
+        }
+      }
     }
   },
   "writingAnalysis": {

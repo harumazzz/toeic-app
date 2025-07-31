@@ -48,9 +48,7 @@ void main() {
         updatedAt: DateTime.now().toIso8601String(),
       ),
     ];
-    final tExamAttempts = tExamAttemptModels
-        .map((final model) => model.toEntity())
-        .toList();
+    tExamAttemptModels.map((final model) => model.toEntity()).toList();
 
     const tExamRequest = ExamRequest(
       examId: 1,

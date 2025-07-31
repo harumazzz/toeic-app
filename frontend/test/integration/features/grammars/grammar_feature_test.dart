@@ -17,14 +17,6 @@ import 'package:mocktail/mocktail.dart';
 
 class MockGetGrammars extends Mock implements GetGrammars {}
 
-
-class MockGetGrammarsByLevel extends Mock implements GetGrammarsByLevel {}
-
-class MockGetGrammarsByTag extends Mock implements GetGrammarsByTag {}
-
-class MockSearchGrammar extends Mock implements SearchGrammar {}
-
-
 class MockGetGrammar extends Mock implements GetGrammar {}
 
 class MockGetRelatedGrammars extends Mock implements GetRelatedGrammars {}
@@ -125,9 +117,6 @@ class _TestGrammarListScreenState extends ConsumerState<TestGrammarListScreen> {
 
 void main() {
   late MockGetGrammars mockGetGrammars;
-  late MockGetGrammarsByLevel mockGetGrammarsByLevel;
-  late MockGetGrammarsByTag mockGetGrammarsByTag;
-  late MockSearchGrammar mockSearchGrammar;
   late MockGetGrammar mockGetGrammar;
   late MockGetRelatedGrammars mockGetRelatedGrammars;
 
@@ -142,9 +131,6 @@ void main() {
 
   setUp(() {
     mockGetGrammars = MockGetGrammars();
-    mockGetGrammarsByLevel = MockGetGrammarsByLevel();
-    mockGetGrammarsByTag = MockGetGrammarsByTag();
-    mockSearchGrammar = MockSearchGrammar();
     mockGetGrammar = MockGetGrammar();
     mockGetRelatedGrammars = MockGetRelatedGrammars();
   });

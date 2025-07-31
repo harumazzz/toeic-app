@@ -80,7 +80,7 @@ void main() {
       );
 
       test(
-        'should return ServerFailure when the call to remote data source throws general exception',
+        'should return ServerFailure',
         () async {
           // arrange
           when(

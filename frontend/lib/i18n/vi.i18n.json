@@ -509,7 +509,7 @@
     "listening": "Đang nghe...",
     "speakerTypeUser": "người dùng",
     "speakerTypeAi": "ai",
-    "scoreOutOf100": "Điểm: {score}/100"
+    "scoreOutOf100": "Điểm: {score}/100",
     "toeicPractice": {
       "title": "Luyện Tập TOEIC",
       "part1Title": "Part 1 - Mô tả tranh",
@@ -541,7 +541,121 @@
       "aiQuestion": "Câu hỏi của AI",
       "aiInitializing": "Đang khởi tạo AI...",
       "aiError": "Lỗi AI",
-      "aiNotAvailable": "AI không khả dụng"
+      "aiNotAvailable": "AI không khả dụng",
+      "aiService": {
+        "initSuccess": "🚀 Dịch vụ Giám khảo AI Firebase Gemini đã khởi tạo thành công",
+        "initPrimaryModel": "✅ Mô hình chính: gemini-1.5-flash (Phản hồi nhanh)",
+        "initAdvancedModel": "✅ Mô hình nâng cao: gemini-1.5-pro (Đánh giá phức tạp)",
+        "initFailed": "❌ Không thể khởi tạo Firebase Gemini AI",
+        "part1EvaluationComplete": "🎯 Đánh giá Part 1 của Gemini Pro đã hoàn thành",
+        "part2EvaluationComplete": "🎯 Đánh giá Part 2 của Gemini Pro đã hoàn thành",
+        "part5EvaluationComplete": "🎯 Đánh giá Part 5 của Gemini Pro đã hoàn thành",
+        "followUpGenerated": "🤖 Gemini đã tạo câu hỏi tiếp theo thích ứng",
+        "adaptiveQuestionGenerated": "🎯 Đã tạo câu hỏi thích ứng",
+        "studyPlanGenerated": "📚 Đã tạo kế hoạch học tập cá nhân hóa",
+        "serviceDisposed": "🧹 Dịch vụ Giám khảo AI Firebase Gemini đã được giải phóng",
+        "part1EvaluationError": "❌ Lỗi đánh giá phản hồi Part 1 với Gemini",
+        "part2EvaluationError": "❌ Lỗi đánh giá phản hồi Part 2 với Gemini",
+        "part5EvaluationError": "❌ Lỗi đánh giá phản hồi Part 5 với Gemini",
+        "followUpError": "❌ Lỗi tạo câu hỏi tiếp theo với Gemini",
+        "adaptiveQuestionError": "❌ Lỗi tạo câu hỏi thích ứng",
+        "studyPlanError": "❌ Lỗi tạo kế hoạch học tập",
+        "jsonExtractionWarning": "⚠️ Không thể trích xuất JSON, sử dụng đánh giá mặc định",
+        "questions": {
+          "part1": {
+            "describeDetail": "Mô tả những gì bạn thấy trong hình ảnh này một cách chi tiết.",
+            "describePeople": "Hãy kể cho tôi về những người và hoạt động trong bức tranh này.",
+            "describeScene": "Điều gì đang xảy ra trong hình ảnh này? Hãy mô tả cảnh này.",
+            "describeSetting": "Mô tả bối cảnh và không khí của bức tranh này.",
+            "identifyObjects": "Bạn có thể nhận dạng những vật thể hoặc yếu tố nào trong hình ảnh này?"
+          },
+          "part2": {
+            "lastWeekend": "Bạn đã làm gì vào cuối tuần trước?",
+            "idealVacation": "Mô tả điểm đến nghỉ dưỡng lý tưởng của bạn.",
+            "favoriteHobby": "Sở thích yêu thích của bạn là gì và tại sao?",
+            "hometown": "Hãy kể cho tôi về quê hương của bạn.",
+            "futurePlans": "Kế hoạch tương lai của bạn là gì?",
+            "memorableExperience": "Mô tả một trải nghiệm đáng nhớ mà bạn có gần đây.",
+            "favoriteMusic": "Bạn thích loại nhạc nào và tại sao?",
+            "favoriteRestaurant": "Hãy kể cho tôi về nhà hàng yêu thích của bạn.",
+            "freeTime": "Bạn thích làm gì trong thời gian rảnh?",
+            "bestFriend": "Mô tả người bạn thân nhất của bạn."
+          },
+          "part5": {
+            "meetingPostponed": {
+              "question": "Cuộc họp _____ hoãn đến tuần tới do sự cố kỹ thuật.",
+              "options": "A) was B) were C) is D) are",
+              "correct": "A",
+              "explanation": "Dùng \"was\" vì \"meeting\" là số ít và câu ở thì quá khứ."
+            },
+            "workingYears": {
+              "question": "Cô ấy đã làm việc ở đây _____ năm năm.",
+              "options": "A) since B) for C) during D) from",
+              "correct": "B",
+              "explanation": "Dùng \"for\" với khoảng thời gian (năm năm)."
+            },
+            "reportCompleted": {
+              "question": "Báo cáo phải được _____ trước thứ Sáu.",
+              "options": "A) complete B) completed C) completing D) completion",
+              "correct": "B",
+              "explanation": "Dùng quá khứ phân từ \"completed\" trong cấu trúc câu bị động."
+            },
+            "achieveTargets": {
+              "question": "Chúng ta cần _____ mục tiêu bán hàng trong quý này.",
+              "options": "A) achieve B) achievement C) achieving D) achieved",
+              "correct": "A",
+              "explanation": "Dùng dạng nguyên mẫu \"achieve\" sau \"need to\"."
+            },
+            "weatherImproves": {
+              "question": "_____ thời tiết cải thiện, chúng ta sẽ hủy sự kiện ngoài trời.",
+              "options": "A) If B) Unless C) When D) Because",
+              "correct": "B",
+              "explanation": "Dùng \"Unless\" có nghĩa \"nếu không\" - nếu thời tiết không cải thiện."
+            }
+          }
+        },
+        "defaultEvaluation": {
+          "feedback": "Cố gắng tốt! Phản hồi của bạn cho thấy sự hiểu biết về nhiệm vụ. Hãy tiếp tục luyện tập để cải thiện độ trôi chảy và độ chính xác.",
+          "strengths": "Bạn đã cố gắng trả lời câu hỏi và thể hiện nỗ lực trong phản hồi của mình.",
+          "improvements": "Tập trung vào việc mở rộng từ vựng, cải thiện độ chính xác ngữ pháp và luyện nói trôi chảy hơn.",
+          "estimatedLevel": "trung cấp",
+          "speakingTips": {
+            "practice": "Luyện nói hàng ngày",
+            "record": "Ghi âm và nghe lại",
+            "pronunciation": "Tập trung vào phát âm rõ ràng"
+          }
+        },
+        "defaultStudyPlan": {
+          "levelAssessment": "Dựa trên dữ liệu có sẵn, bạn thể hiện kỹ năng nói tiếng Anh ở trình độ trung cấp.",
+          "strengths": ["Sẵn sàng luyện tập", "Khả năng giao tiếp cơ bản"],
+          "priorityAreas": ["Độ chính xác ngữ pháp", "Mở rộng từ vựng", "Cải thiện độ trôi chảy"],
+          "weeklyPlan": {
+            "week1": ["Ôn tập từ vựng hàng ngày", "Bài tập ngữ pháp", "Luyện nói 15 phút/ngày"],
+            "week2": ["Tiếp tục xây dựng từ vựng", "Tập trung vào thì", "Ghi âm bài tập nói"],
+            "week3": ["Từ vựng nâng cao", "Cấu trúc câu phức tạp", "Bài thi nói TOEIC mô phỏng"],
+            "week4": ["Ôn tập và củng cố", "Bài thi thực hành đầy đủ", "Phân tích lỗi"]
+          },
+          "practiceFocus": {
+            "grammar": ["Thì hiện tại/quá khứ", "Mạo từ", "Giới từ"],
+            "vocabulary": ["Tiếng Anh thương mại", "Từ học thuật", "Biểu đạt hàng ngày"],
+            "speaking": ["Bài tập trôi chảy", "Luyện phát âm", "Tổ chức phản hồi"],
+            "listening": ["Tài liệu âm thanh", "Nội dung người bản ngữ", "Luyện điều chỉnh tốc độ"]
+          },
+          "milestones": ["Hoàn thành luyện tập hàng ngày", "Ghi âm mẫu nói hàng tuần", "Làm bài đánh giá hàng tháng"],
+          "timeline": "2-3 tháng luyện tập đều đặn để có sự cải thiện đáng chú ý",
+          "motivationTips": ["Đặt mục tiêu nhỏ hàng ngày", "Ăn mừng tiến bộ", "Tham gia nhóm nói tiếng Anh"],
+          "resources": ["Sách luyện TOEIC", "Ứng dụng học tiếng Anh", "Nền tảng đối tác nói"]
+        },
+        "prompts": {
+          "followUpFallback": "Bạn có thể kể thêm về điều đó không?",
+          "part1Evaluation": "Bạn là một giám khảo chuyên gia TOEIC speaking sử dụng tiêu chí đánh giá AI tiên tiến. Đánh giá toàn diện phản hồi Phần 1 này (mô tả hình ảnh).\n\nBối cảnh: Bài thi TOEIC Speaking Phần 1 - Mô tả hình ảnh\nCâu hỏi: {question}\nPhản hồi của học sinh: \"{userResponse}\"\n\nCung cấp đánh giá chi tiết dưới dạng JSON với điểm số, phản hồi, điểm_phát_âm, điểm_trôi_chảy, điểm_ngữ_pháp, điểm_từ_vựng, điểm_liên_quan_nội_dung, điểm_mạnh, cải_thiện, lỗi_ngữ_pháp, đề_xuất_từ_vựng, mẹo_nói, mức_toeic_ước_tính, và mức_tự_tin.\n\nTiêu chí đánh giá (Rubric chính thức TOEIC):\n- Tính liên quan & Chính xác nội dung (20%): Phản hồi mô tả hình ảnh tốt như thế nào?\n- Ngữ pháp & Cấu trúc câu (25%): Sử dụng đúng thì, mạo từ, v.v.\n- Sử dụng & Phạm vi từ vựng (20%): Lựa chọn từ phù hợp và đa dạng\n- Trôi chảy & Mạch lạc (20%): Dòng chảy tự nhiên và tổ chức logic\n- Phát âm & Rõ ràng (15%): Phát âm rõ ràng và nhấn âm\n\nHãy khuyến khích nhưng vẫn mang tính xây dựng. Đưa ra ví dụ cụ thể từ phản hồi của họ.",
+          "part2Evaluation": "Bạn là một giám khảo chuyên gia TOEIC speaking với khả năng AI tiên tiến. Đánh giá phản hồi Phần 2 này (Hỏi & Đáp) sử dụng tiêu chí TOEIC chính thức.\n\nBối cảnh: Bài thi TOEIC Speaking Phần 2 - Hỏi & Trả lời\nCâu hỏi: {question}\nPhản hồi của học sinh: \"{userResponse}\"\n\nCung cấp đánh giá toàn diện dưới dạng JSON với điểm số, phản hồi, điểm_liên_quan, điểm_ngữ_pháp, điểm_từ_vựng, điểm_trôi_chảy, điểm_đầy_đủ, điểm_mạnh, cải_thiện, lỗi_ngữ_pháp, đề_xuất_từ_vựng, mẹo_hội_thoại, phù_hợp_văn_hóa, mức_toeic_ước_tính, đề_xuất_theo_dõi, và mức_tự_tin.\n\nTiêu chí chính thức TOEIC:\n- Liên quan đến câu hỏi (25%): Trả lời trực tiếp những gì được hỏi\n- Ngữ pháp & Sử dụng ngôn ngữ (25%): Cấu trúc và hình thức đúng\n- Phạm vi & Chính xác từ vựng (20%): Biểu đạt phù hợp và đa dạng\n- Trôi chảy & Mạch lạc (15%): Nhịp độ tự nhiên và dòng chảy logic\n- Đầy đủ phản hồi (15%): Phát triển ý tưởng đầy đủ\n\nCung cấp phản hồi khuyến khích trong khi duy trì tiêu chuẩn chính xác.",
+          "part5Evaluation": "Bạn là một giám khảo ngữ pháp chuyên gia TOEIC với khả năng phân tích ngôn ngữ học tiên tiến. Đánh giá phản hồi Phần 5 này (giải thích câu hỏi ngữ pháp) sử dụng tiêu chí toàn diện.\n\nBối cảnh: Bài thi TOEIC Speaking Phần 5 - Ngữ pháp & Giải thích\nCâu hỏi ngữ pháp: {question}\nCác lựa chọn đáp án: {options}\nĐáp án đúng: {correct}\nGiải thích chính thức: {explanation}\nPhản hồi của học sinh: \"{userResponse}\"\n\nCung cấp đánh giá chi tiết dưới dạng JSON với điểm số, phản hồi, độ_chính_xác_đáp_án, chất_lượng_giải_thích, sử_dụng_ngôn_ngữ, hiểu_biết_ngữ_pháp, rõ_ràng_giao_tiếp, điểm_mạnh, cải_thiện, đưa_ra_đáp_án_đúng, độ_chính_xác_giải_thích, giải_thích_thay_thế, điểm_ngữ_pháp_liên_quan, đề_xuất_học_tập, nhận_thức_siêu_ngôn_ngữ, mức_toeic_ước_tính, và mức_tự_tin.\n\nTiêu chí đánh giá:\n- Lựa chọn đáp án đúng (30%): Họ có chọn đáp án đúng không?\n- Chất lượng giải thích (35%): Họ giải thích quy tắc ngữ pháp tốt như thế nào?\n- Độ chính xác & Rõ ràng ngôn ngữ (20%): Ngữ pháp và từ vựng trong giải thích của họ\n- Hiểu biết siêu ngôn ngữ (15%): Độ sâu hiểu biết quy tắc ngữ pháp\n\nTập trung vào cả độ chính xác và hiểu biết sư phạm. Khuyến khích tư duy học tập.",
+          "followUpGeneration": "Bạn là một giám khảo TOEIC speaking thích ứng với AI hội thoại tiên tiến. Tạo ra một câu hỏi theo dõi thông minh, cá nhân hóa dựa trên phản hồi của học sinh.\n\nBối cảnh:\n- Phần TOEIC: {partType}\n- Câu hỏi gốc: {originalQuestion}\n- Phản hồi của học sinh: \"{userResponse}\"\n\nHướng dẫn:\n1. Phân tích trình độ ngôn ngữ và chất lượng phản hồi của học sinh\n2. Tạo một câu hỏi theo dõi xây dựng trên câu trả lời của họ một cách tự nhiên\n3. Điều chỉnh độ khó phù hợp (hơi thách thức nhưng có thể đạt được)\n4. Làm cho nó mang tính hội thoại và hấp dẫn\n5. Tập trung vào các lĩnh vực cần cải thiện trong khi khuyến khích\n\nTạo ra một câu hỏi theo dõi:\n- Liên quan trực tiếp đến nội dung phản hồi cụ thể của họ\n- Khuyến khích mở rộng hoặc làm rõ\n- Giúp đánh giá khả năng nói của họ thêm\n- Duy trì mức độ khó TOEIC phù hợp\n- Cảm thấy tự nhiên trong dòng chảy hội thoại\n\nChỉ trả về câu hỏi theo dõi, không có gì khác.\n\nVí dụ về câu hỏi theo dõi tốt:\n- \"Thật thú vị! Bạn có thể kể thêm về [chi tiết cụ thể họ đã đề cập] không?\"\n- \"Bạn đã đề cập [X]. Điều đó so sánh như thế nào với [chủ đề liên quan]?\"\n- \"Bạn nghĩ điều gì sẽ xảy ra nếu [kịch bản dựa trên phản hồi của họ]?\"\n- \"Bạn có thể đưa ra một ví dụ cụ thể về những gì bạn vừa mô tả không?\"",
+          "adaptiveQuestionGeneration": "Bạn là một chuyên gia tạo bài thi TOEIC với quyền truy cập vào khả năng AI tiên tiến. Tạo ra một câu hỏi TOEIC {partType} được cá nhân hóa với độ khó phù hợp.\n\nThông số:\n- Loại phần: {partType}\n- Mức độ khó: {difficultyLevel}\n- Hiệu suất trước đó: {previousPerformance}\n\nĐối với Phần 1 (Mô tả hình ảnh):\nTrả về một lời nhắc chi tiết, hấp dẫn để mô tả hình ảnh kiểm tra:\n- Phạm vi và độ chính xác từ vựng\n- Cấu trúc ngữ pháp phù hợp với cấp độ\n- Kỹ năng ngôn ngữ mô tả\n\nĐối với Phần 2 (Hỏi & Trả lời):\nTạo một câu hỏi hội thoại:\n- Liên quan đến các chủ đề TOEIC phổ biến (công việc, du lịch, giáo dục, v.v.)\n- Phù hợp với mức độ khó được chỉ định\n- Khuyến khích phản hồi tự nhiên, mở rộng\n\nĐối với Phần 5 (Ngữ pháp):\nTạo ra một câu hỏi ngữ pháp với:\n- Bối cảnh kinh doanh/học thuật thực tế\n- Các lựa chọn sai rõ ràng kiểm tra các điểm ngữ pháp cụ thể\n- Tiến triển mức độ khó phù hợp\n\nTrả về định dạng JSON với câu_hỏi, lựa_chọn (chỉ Phần 5), đúng (chỉ Phần 5), giải_thích (chỉ Phần 5), chủ_đề, chỉ_số_độ_khó, và mục_tiêu_học_tập.",
+          "studyPlanGeneration": "Bạn là một cố vấn học tập AI TOEIC với khả năng phân tích học tập tiên tiến. Phân tích dữ liệu hiệu suất của học sinh và tạo ra một kế hoạch học tập cá nhân hóa.\n\nCác đánh giá gần đây:\n{evaluationsText}\n\nĐiểm TOEIC mục tiêu: {targetScore}\n\nCung cấp phân tích toàn diện dưới dạng JSON với đánh_giá_trình_độ_hiện_tại, điểm_mạnh, lĩnh_vực_ưu_tiên, kế_hoạch_học_tập (tuần_1, tuần_2, tuần_3, tuần_4), trọng_tâm_luyện_tập (ngữ_pháp, từ_vựng, nói, nghe), cột_mốc_tiến_bộ, thời_gian_ước_tính, mẹo_động_lực, và tài_nguyên_đề_xuất.\n\nĐưa ra các đề xuất cụ thể, có thể hành động và khuyến khích."
+        }
+      }
     }
   },
   "writingAnalysis": {

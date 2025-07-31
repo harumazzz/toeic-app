@@ -5,79 +5,221 @@ import 'dart:math';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/foundation.dart';
 
-/// AI Examiner Service using Firebase AI to act as TOEIC examiner
+import '../../i18n/strings.g.dart';
+import '../models/toeic_evaluation.dart';
+
+/// AI Examiner Service using Firebase Gemini AI to act as TOEIC examiner
+/// This service leverages Firebase's Generative AI with advanced Gemini models
+/// for comprehensive TOEIC speaking practice and evaluation.
 class AIExaminerService {
   static GenerativeModel? _model;
+  static GenerativeModel? _advancedModel;
   static bool _isInitialized = false;
 
   // TOEIC questions bank for different parts
-  static final List<String> _part1Questions = [
-    'Describe what you see in this image in detail.',
-    'Tell me about the people and activities in this picture.',
-    'What is happening in this image? Describe the scene.',
-    'Describe the setting and atmosphere of this picture.',
-    'What objects or elements can you identify in this image?',
+  static List<String> get _part1Questions => [
+    t.speaking.toeicPractice.aiService.questions.part1.describeDetail,
+    t.speaking.toeicPractice.aiService.questions.part1.describePeople,
+    t.speaking.toeicPractice.aiService.questions.part1.describeScene,
+    t.speaking.toeicPractice.aiService.questions.part1.describeSetting,
+    t.speaking.toeicPractice.aiService.questions.part1.identifyObjects,
   ];
 
-  static final List<String> _part2Questions = [
-    'What did you do last weekend?',
-    'Describe your ideal vacation destination.',
-    'What is your favorite hobby and why?',
-    'Tell me about your hometown.',
-    'What are your plans for the future?',
-    'Describe a memorable experience you had recently.',
-    'What type of music do you enjoy and why?',
-    'Tell me about your favorite restaurant.',
-    'What do you like to do in your free time?',
-    'Describe your best friend.',
+  static List<String> get _part2Questions => [
+    t.speaking.toeicPractice.aiService.questions.part2.lastWeekend,
+    t.speaking.toeicPractice.aiService.questions.part2.idealVacation,
+    t.speaking.toeicPractice.aiService.questions.part2.favoriteHobby,
+    t.speaking.toeicPractice.aiService.questions.part2.hometown,
+    t.speaking.toeicPractice.aiService.questions.part2.futurePlans,
+    t.speaking.toeicPractice.aiService.questions.part2.memorableExperience,
+    t.speaking.toeicPractice.aiService.questions.part2.favoriteMusic,
+    t.speaking.toeicPractice.aiService.questions.part2.favoriteRestaurant,
+    t.speaking.toeicPractice.aiService.questions.part2.freeTime,
+    t.speaking.toeicPractice.aiService.questions.part2.bestFriend,
   ];
 
-  static final List<Map<String, String>> _part5Questions = [
-    {
-      'question':
-          'The meeting _____ postponed until next week due to technical issues.',
-      'options': 'A) was B) were C) is D) are',
-      'correct': 'A',
-      'explanation':
-          'Use "was" because "meeting" is singular and the sentence is in past tense.',
-    },
-    {
-      'question': 'She has been working here _____ five years.',
-      'options': 'A) since B) for C) during D) from',
-      'correct': 'B',
-      'explanation': 'Use "for" with a period of time (five years).',
-    },
-    {
-      'question': 'The report must be _____ by Friday.',
-      'options': 'A) complete B) completed C) completing D) completion',
-      'correct': 'B',
-      'explanation':
-          'Use past participle "completed" in passive voice construction.',
-    },
-    {
-      'question': 'We need to _____ our sales targets this quarter.',
-      'options': 'A) achieve B) achievement C) achieving D) achieved',
-      'correct': 'A',
-      'explanation': 'Use base form "achieve" after "need to".',
-    },
-    {
-      'question':
-          '_____ the weather improves, we will cancel the outdoor event.',
-      'options': 'A) If B) Unless C) When D) Because',
-      'correct': 'B',
-      'explanation':
-          'Use "Unless" meaning "if not" - if the weather does not improve.',
-    },
+  static List<ToeicPart5Question> get _part5Questions => [
+    ToeicPart5Question(
+      question: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .meetingPostponed
+          .question,
+      options: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .meetingPostponed
+          .options,
+      correct: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .meetingPostponed
+          .correct,
+      explanation: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .meetingPostponed
+          .explanation,
+    ),
+    ToeicPart5Question(
+      question: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .workingYears
+          .question,
+      options: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .workingYears
+          .options,
+      correct: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .workingYears
+          .correct,
+      explanation: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .workingYears
+          .explanation,
+    ),
+    ToeicPart5Question(
+      question: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .reportCompleted
+          .question,
+      options: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .reportCompleted
+          .options,
+      correct: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .reportCompleted
+          .correct,
+      explanation: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .reportCompleted
+          .explanation,
+    ),
+    ToeicPart5Question(
+      question: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .achieveTargets
+          .question,
+      options: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .achieveTargets
+          .options,
+      correct: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .achieveTargets
+          .correct,
+      explanation: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .achieveTargets
+          .explanation,
+    ),
+    ToeicPart5Question(
+      question: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .weatherImproves
+          .question,
+      options: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .weatherImproves
+          .options,
+      correct: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .weatherImproves
+          .correct,
+      explanation: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .questions
+          .part5
+          .weatherImproves
+          .explanation,
+    ),
   ];
 
-  /// Initialize Firebase AI
+  /// Initialize Firebase AI with enhanced Gemini models
+  /// Uses Gemini-1.5-flash for quick responses and Gemini-1.5-pro
   static Future<bool> initialize() async {
     if (_isInitialized) {
       return true;
     }
 
     try {
-      // Initialize Firebase Vertex AI with Gemini model
+      // Initialize primary model (Gemini 1.5 Flash) for quick responses
       _model = FirebaseAI.googleAI().generativeModel(
         model: 'gemini-1.5-flash',
         generationConfig: GenerationConfig(
@@ -87,11 +229,25 @@ class AIExaminerService {
           maxOutputTokens: 1024,
         ),
       );
+
+      // Initialize advanced model (Gemini 1.5 Pro) for complex evaluations
+      _advancedModel = FirebaseAI.googleAI().generativeModel(
+        model: 'gemini-1.5-pro',
+        generationConfig: GenerationConfig(
+          temperature: 0.3, // Lower temperature for more consistent evaluations
+          topK: 20,
+          topP: 0.8,
+          maxOutputTokens: 2048,
+        ),
+      );
+
       _isInitialized = true;
-      debugPrint('AI Examiner Service initialized successfully');
+      debugPrint(t.speaking.toeicPractice.aiService.initSuccess);
+      debugPrint(t.speaking.toeicPractice.aiService.initPrimaryModel);
+      debugPrint(t.speaking.toeicPractice.aiService.initAdvancedModel);
       return true;
     } catch (e) {
-      debugPrint('Failed to initialize AI Examiner Service: $e');
+      debugPrint('${t.speaking.toeicPractice.aiService.initFailed}: $e');
       return false;
     }
   }
@@ -109,173 +265,114 @@ class AIExaminerService {
   }
 
   /// Get a random Part 5 question (grammar)
-  static Map<String, String> getRandomPart5Question() {
+  static ToeicPart5Question getRandomPart5Question() {
     final random = Random();
     return _part5Questions[random.nextInt(_part5Questions.length)];
   }
 
-  /// Evaluate Part 1 response (image description)
-  static Future<Map<String, dynamic>> evaluatePart1Response({
+  /// Evaluate Part 1 response (image description) with advanced Gemini Pro
+  static Future<ToeicEvaluation> evaluatePart1Response({
     required final String userResponse,
     required final String question,
   }) async {
-    if (!_isInitialized || _model == null) {
+    if (!_isInitialized || _advancedModel == null) {
       await initialize();
     }
 
     try {
-      final prompt =
-          '''
-You are a TOEIC speaking test examiner. Evaluate this Part 1 response (image description).
-
-Question: $question
-Student's Response: "$userResponse"
-
-Please provide evaluation in JSON format:
-{
-  "score": [score from 0-5],
-  "feedback": "detailed feedback about grammar, vocabulary, fluency, and content",
-  "strengths": "what the student did well",
-  "improvements": "specific areas for improvement",
-  "grammar_errors": ["list of grammar mistakes if any"],
-  "vocabulary_suggestions": ["better word choices if any"]
-}
-
-Evaluation criteria:
-- Content relevance and accuracy (0-1 points)
-- Grammar and sentence structure (0-1 points)  
-- Vocabulary usage (0-1 points)
-- Fluency and coherence (0-1 points)
-- Pronunciation and clarity (0-1 points)
-
-Be encouraging but constructive in your feedback.
-''';
+      final prompt = t.speaking.toeicPractice.aiService.prompts.part1Evaluation
+          .replaceAll('{question}', question)
+          .replaceAll('{userResponse}', userResponse);
 
       final content = [Content.text(prompt)];
-      final response = await _model!.generateContent(content);
+      final response = await _advancedModel!.generateContent(content);
 
       if (response.text != null) {
-        // Try to parse JSON from response
         final jsonString = _extractJsonFromResponse(response.text!);
-        final result = jsonDecode(jsonString);
-        return result as Map<String, dynamic>;
+        final result = jsonDecode(jsonString) as Map<String, dynamic>;
+        debugPrint(t.speaking.toeicPractice.aiService.part1EvaluationComplete);
+        return ToeicEvaluation.fromJson(result);
       }
 
       return _getDefaultEvaluation();
     } catch (e) {
-      debugPrint('Error evaluating Part 1 response: $e');
+      debugPrint(
+        '${t.speaking.toeicPractice.aiService.part1EvaluationError}: $e',
+      );
       return _getDefaultEvaluation();
     }
   }
 
-  /// Evaluate Part 2 response (Q&A)
-  static Future<Map<String, dynamic>> evaluatePart2Response({
+  /// Evaluate Part 2 response (Q&A) with advanced Gemini Pro
+  static Future<ToeicEvaluation> evaluatePart2Response({
     required final String userResponse,
     required final String question,
   }) async {
-    if (!_isInitialized || _model == null) {
+    if (!_isInitialized || _advancedModel == null) {
       await initialize();
     }
 
     try {
-      final prompt =
-          '''
-You are a TOEIC speaking test examiner. Evaluate this Part 2 response (question and answer).
-
-Question: $question
-Student's Response: "$userResponse"
-
-Please provide evaluation in JSON format:
-{
-  "score": [score from 0-5],
-  "feedback": "detailed feedback about relevance, grammar, vocabulary, and fluency",
-  "strengths": "what the student did well",
-  "improvements": "specific areas for improvement",
-  "grammar_errors": ["list of grammar mistakes if any"],
-  "vocabulary_suggestions": ["better word choices if any"]
-}
-
-Evaluation criteria:
-- Relevance to question (0-1 points)
-- Grammar and sentence structure (0-1 points)
-- Vocabulary range and accuracy (0-1 points)
-- Fluency and coherence (0-1 points)
-- Overall communication effectiveness (0-1 points)
-
-Be encouraging but provide specific, actionable feedback.
-''';
+      final prompt = t.speaking.toeicPractice.aiService.prompts.part2Evaluation
+          .replaceAll('{question}', question)
+          .replaceAll('{userResponse}', userResponse);
 
       final content = [Content.text(prompt)];
-      final response = await _model!.generateContent(content);
+      final response = await _advancedModel!.generateContent(content);
 
       if (response.text != null) {
         final jsonString = _extractJsonFromResponse(response.text!);
-        final result = jsonDecode(jsonString);
-        return result as Map<String, dynamic>;
+        final result = jsonDecode(jsonString) as Map<String, dynamic>;
+        debugPrint(t.speaking.toeicPractice.aiService.part2EvaluationComplete);
+        return ToeicEvaluation.fromJson(result);
       }
 
       return _getDefaultEvaluation();
     } catch (e) {
-      debugPrint('Error evaluating Part 2 response: $e');
+      debugPrint(
+        '${t.speaking.toeicPractice.aiService.part2EvaluationError}: $e',
+      );
       return _getDefaultEvaluation();
     }
   }
 
-  /// Evaluate Part 5 response (grammar explanation)
-  static Future<Map<String, dynamic>> evaluatePart5Response({
+  /// Evaluate Part 5 response (grammar explanation) with advanced Gemini Pro
+  static Future<ToeicEvaluation> evaluatePart5Response({
     required final String userResponse,
-    required final Map<String, String> questionData,
+    required final ToeicPart5Question questionData,
   }) async {
-    if (!_isInitialized || _model == null) {
+    if (!_isInitialized || _advancedModel == null) {
       await initialize();
     }
 
     try {
-      final prompt =
-          '''
-You are a TOEIC speaking test examiner. Evaluate this Part 5 response (grammar question explanation).
-
-Question: ${questionData['question']}
-Options: ${questionData['options']}
-Correct Answer: ${questionData['correct']}
-Correct Explanation: ${questionData['explanation']}
-Student's Response: "$userResponse"
-
-Please provide evaluation in JSON format:
-{
-  "score": [score from 0-5],
-  "feedback": "detailed feedback about correctness, explanation quality, and language use",
-  "strengths": "what the student did well",
-  "improvements": "specific areas for improvement",
-  "correct_answer": "whether they chose the right answer",
-  "explanation_quality": "how well they explained their choice"
-}
-
-Evaluation criteria:
-- Correct answer selection (0-2 points)
-- Quality of explanation (0-2 points)
-- Language accuracy and clarity (0-1 points)
-
-Provide constructive feedback focusing on grammar understanding.
-''';
+      final prompt = t.speaking.toeicPractice.aiService.prompts.part5Evaluation
+          .replaceAll('{question}', questionData.question)
+          .replaceAll('{options}', questionData.options)
+          .replaceAll('{correct}', questionData.correct)
+          .replaceAll('{explanation}', questionData.explanation)
+          .replaceAll('{userResponse}', userResponse);
 
       final content = [Content.text(prompt)];
-      final response = await _model!.generateContent(content);
+      final response = await _advancedModel!.generateContent(content);
 
       if (response.text != null) {
         final jsonString = _extractJsonFromResponse(response.text!);
-        final result = jsonDecode(jsonString);
-        return result as Map<String, dynamic>;
+        final result = jsonDecode(jsonString) as Map<String, dynamic>;
+        debugPrint(t.speaking.toeicPractice.aiService.part5EvaluationComplete);
+        return ToeicEvaluation.fromJson(result);
       }
 
       return _getDefaultEvaluation();
     } catch (e) {
-      debugPrint('Error evaluating Part 5 response: $e');
+      debugPrint(
+        '${t.speaking.toeicPractice.aiService.part5EvaluationError}: $e',
+      );
       return _getDefaultEvaluation();
     }
   }
 
-  /// Generate follow-up question based on user response
+  /// Generate intelligent follow-up question using Gemini's advanced reasoning
   static Future<String> generateFollowUpQuestion({
     required final String userResponse,
     required final String originalQuestion,
@@ -286,63 +383,273 @@ Provide constructive feedback focusing on grammar understanding.
     }
 
     try {
-      final prompt =
-          '''
-You are a TOEIC speaking examiner. Based on the student's response, generate a relevant follow-up question.
-
-Part Type: $partType
-Original Question: $originalQuestion
-Student's Response: "$userResponse"
-
-Generate a follow-up question that:
-- Is related to their response
-- Encourages them to elaborate or clarify
-- Maintains appropriate TOEIC difficulty level
-- Helps assess their speaking ability further
-
-Respond with just the follow-up question, no additional text.
-''';
+      final prompt = t
+          .speaking
+          .toeicPractice
+          .aiService
+          .prompts
+          .followUpGeneration
+          .replaceAll('{partType}', partType)
+          .replaceAll('{originalQuestion}', originalQuestion)
+          .replaceAll('{userResponse}', userResponse);
 
       final content = [Content.text(prompt)];
       final response = await _model!.generateContent(content);
 
-      return response.text?.trim() ?? 'Can you tell me more about that?';
+      final followUpQuestion =
+          response.text?.trim() ??
+          t.speaking.toeicPractice.aiService.prompts.followUpFallback;
+      final msg =
+          // ignore: lines_longer_than_80_chars
+          '${t.speaking.toeicPractice.aiService.followUpGenerated}: $followUpQuestion';
+      debugPrint(msg);
+      return followUpQuestion;
     } catch (e) {
-      debugPrint('Error generating follow-up question: $e');
-      return 'Can you tell me more about that?';
+      debugPrint('${t.speaking.toeicPractice.aiService.followUpError}: $e');
+      return t.speaking.toeicPractice.aiService.prompts.followUpFallback;
     }
   }
 
-  /// Extract JSON from AI response text
+  /// Generate adaptive TOEIC questions using Gemini's advanced reasoning
+  static Future<AdaptiveToeicQuestion> generateAdaptiveToeicQuestion({
+    required final String partType,
+    required final String difficultyLevel, // beginner, intermediate, advanced
+    final String? previousPerformance,
+  }) async {
+    if (!_isInitialized || _advancedModel == null) {
+      await initialize();
+    }
+
+    try {
+      final prompt = t
+          .speaking
+          .toeicPractice
+          .aiService
+          .prompts
+          .adaptiveQuestionGeneration
+          .replaceAll('{partType}', partType)
+          .replaceAll('{difficultyLevel}', difficultyLevel)
+          .replaceAll(
+            '{previousPerformance}',
+            previousPerformance ?? 'No previous data',
+          );
+
+      final content = [Content.text(prompt)];
+      final response = await _advancedModel!.generateContent(content);
+
+      if (response.text != null) {
+        final jsonString = _extractJsonFromResponse(response.text!);
+        final result = jsonDecode(jsonString) as Map<String, dynamic>;
+
+        debugPrint(
+          // ignore: lines_longer_than_80_chars
+          '${t.speaking.toeicPractice.aiService.adaptiveQuestionGenerated} ($partType - $difficultyLevel)',
+        );
+        return AdaptiveToeicQuestion.fromJson(result);
+      }
+
+      // Fallback to existing static questions
+      final staticQuestion = getRandomPart5Question();
+      return AdaptiveToeicQuestion(
+        question: staticQuestion.question,
+        topic: 'Grammar',
+        difficultyIndicators: ['Static question'],
+        learningObjectives: ['Grammar practice'],
+        options: staticQuestion.options,
+        correct: staticQuestion.correct,
+        explanation: staticQuestion.explanation,
+      );
+    } catch (e) {
+      debugPrint(
+        '${t.speaking.toeicPractice.aiService.adaptiveQuestionError}: $e',
+      );
+      // Fallback to existing static questions
+      final staticQuestion = getRandomPart5Question();
+      return AdaptiveToeicQuestion(
+        question: staticQuestion.question,
+        topic: 'Grammar',
+        difficultyIndicators: ['Static question'],
+        learningObjectives: ['Grammar practice'],
+        options: staticQuestion.options,
+        correct: staticQuestion.correct,
+        explanation: staticQuestion.explanation,
+      );
+    }
+  }
+
+  /// Analyze user's progress and recommend personalized study plan
+  static Future<StudyPlan> generatePersonalizedStudyPlan({
+    required final List<ToeicEvaluation> recentEvaluations,
+    required final String targetScore,
+  }) async {
+    if (!_isInitialized || _advancedModel == null) {
+      await initialize();
+    }
+
+    try {
+      final evaluationsText = recentEvaluations
+          .map(
+            (final eval) =>
+                // ignore: lines_longer_than_80_chars
+                'Score: ${eval.score}, Strengths: ${eval.strengths}, Improvements: ${eval.improvements}',
+          )
+          .join('\n');
+
+      final prompt = t
+          .speaking
+          .toeicPractice
+          .aiService
+          .prompts
+          .studyPlanGeneration
+          .replaceAll('{evaluationsText}', evaluationsText)
+          .replaceAll('{targetScore}', targetScore);
+
+      final content = [Content.text(prompt)];
+      final response = await _advancedModel!.generateContent(content);
+
+      if (response.text != null) {
+        final jsonString = _extractJsonFromResponse(response.text!);
+        final result = jsonDecode(jsonString) as Map<String, dynamic>;
+        debugPrint(t.speaking.toeicPractice.aiService.studyPlanGenerated);
+        return StudyPlan.fromJson(result);
+      }
+
+      return _getDefaultStudyPlan();
+    } catch (e) {
+      debugPrint('${t.speaking.toeicPractice.aiService.studyPlanError}: $e');
+      return _getDefaultStudyPlan();
+    }
+  }
+
+  /// Extract JSON from AI response text with improved parsing
   static String _extractJsonFromResponse(final String response) {
-    // Try to find JSON block in the response
-    final jsonStart = response.indexOf('{');
-    final jsonEnd = response.lastIndexOf('}');
+    // Clean the response and find JSON content
+    final cleanResponse = response.trim();
+
+    // Try to find JSON block markers first
+    final jsonBlockStart = cleanResponse.indexOf('```json');
+    if (jsonBlockStart != -1) {
+      final jsonStart = cleanResponse.indexOf('{', jsonBlockStart);
+      final jsonEnd = cleanResponse.lastIndexOf('}');
+      if (jsonStart != -1 && jsonEnd != -1 && jsonEnd > jsonStart) {
+        return cleanResponse.substring(jsonStart, jsonEnd + 1);
+      }
+    }
+
+    // Try to find JSON in the response directly
+    final jsonStart = cleanResponse.indexOf('{');
+    final jsonEnd = cleanResponse.lastIndexOf('}');
 
     if (jsonStart != -1 && jsonEnd != -1 && jsonEnd > jsonStart) {
-      return response.substring(jsonStart, jsonEnd + 1);
+      return cleanResponse.substring(jsonStart, jsonEnd + 1);
     }
 
     // Return a default JSON structure if parsing fails
-    return jsonEncode(_getDefaultEvaluation());
+    debugPrint(t.speaking.toeicPractice.aiService.jsonExtractionWarning);
+    return jsonEncode(_getDefaultEvaluation().toJson());
   }
 
-  /// Get default evaluation when AI fails
-  static Map<String, dynamic> _getDefaultEvaluation() => {
-    'score': 3,
-    'feedback': 'Good effort! Keep practicing to improve your speaking skills.',
-    'strengths': 'You attempted to answer the question.',
-    'improvements': 'Focus on grammar, vocabulary, and fluency.',
-    'grammar_errors': <String>[],
-    'vocabulary_suggestions': <String>[],
-  };
+  /// Get enhanced default evaluation with more comprehensive feedback
+  static ToeicEvaluation _getDefaultEvaluation() => ToeicEvaluation(
+    score: 3,
+    feedback: t.speaking.toeicPractice.aiService.defaultEvaluation.feedback,
+    pronunciationScore: 3,
+    fluencyScore: 3,
+    grammarScore: 3,
+    vocabularyScore: 3,
+    contentRelevanceScore: 3,
+    strengths: t.speaking.toeicPractice.aiService.defaultEvaluation.strengths,
+    improvements:
+        t.speaking.toeicPractice.aiService.defaultEvaluation.improvements,
+    grammarErrors: [],
+    vocabularySuggestions: [],
+    speakingTips: [
+      t
+          .speaking
+          .toeicPractice
+          .aiService
+          .defaultEvaluation
+          .speakingTips
+          .practice,
+      t.speaking.toeicPractice.aiService.defaultEvaluation.speakingTips.record,
+      t
+          .speaking
+          .toeicPractice
+          .aiService
+          .defaultEvaluation
+          .speakingTips
+          .pronunciation,
+    ],
+    estimatedToeicLevel:
+        t.speaking.toeicPractice.aiService.defaultEvaluation.estimatedLevel,
+    confidenceLevel: 75,
+  );
+
+  /// Get default study plan for fallback scenarios
+  static StudyPlan _getDefaultStudyPlan() => StudyPlan(
+    currentLevelAssessment:
+        t.speaking.toeicPractice.aiService.defaultStudyPlan.levelAssessment,
+    strengths: t.speaking.toeicPractice.aiService.defaultStudyPlan.strengths,
+    priorityAreas:
+        t.speaking.toeicPractice.aiService.defaultStudyPlan.priorityAreas,
+    weeklyPlan: WeeklyStudyPlan(
+      week1:
+          t.speaking.toeicPractice.aiService.defaultStudyPlan.weeklyPlan.week1,
+      week2:
+          t.speaking.toeicPractice.aiService.defaultStudyPlan.weeklyPlan.week2,
+      week3:
+          t.speaking.toeicPractice.aiService.defaultStudyPlan.weeklyPlan.week3,
+      week4:
+          t.speaking.toeicPractice.aiService.defaultStudyPlan.weeklyPlan.week4,
+    ),
+    practiceFocus: PracticeFocus(
+      grammar: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .defaultStudyPlan
+          .practiceFocus
+          .grammar,
+      vocabulary: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .defaultStudyPlan
+          .practiceFocus
+          .vocabulary,
+      speaking: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .defaultStudyPlan
+          .practiceFocus
+          .speaking,
+      listening: t
+          .speaking
+          .toeicPractice
+          .aiService
+          .defaultStudyPlan
+          .practiceFocus
+          .listening,
+    ),
+    progressMilestones:
+        t.speaking.toeicPractice.aiService.defaultStudyPlan.milestones,
+    estimatedTimeline:
+        t.speaking.toeicPractice.aiService.defaultStudyPlan.timeline,
+    motivationTips:
+        t.speaking.toeicPractice.aiService.defaultStudyPlan.motivationTips,
+    recommendedResources:
+        t.speaking.toeicPractice.aiService.defaultStudyPlan.resources,
+  );
 
   /// Check if service is initialized
   static bool get isInitialized => _isInitialized;
 
-  /// Dispose resources
+  /// Dispose resources and clean up models
   static void dispose() {
     _model = null;
+    _advancedModel = null;
     _isInitialized = false;
+    debugPrint(t.speaking.toeicPractice.aiService.serviceDisposed);
   }
 }

@@ -227,7 +227,7 @@ class BiometricSettingsScreen extends HookConsumerWidget {
                           : colorScheme.error,
                     );
                   },
-
+                ),
                 const SizedBox(height: 12),
                 Builder(
                   builder: (final context) {

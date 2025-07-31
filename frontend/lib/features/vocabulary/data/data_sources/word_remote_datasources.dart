@@ -18,8 +18,7 @@ WordRemoteDataSource wordRemoteDataSource(final Ref ref) {
 @RestApi(
   parser: Parser.FlutterCompute,
 )
-sealed class WordRemoteDataSource {
-
+abstract class WordRemoteDataSource {
   factory WordRemoteDataSource(final Dio dio) = _WordRemoteDataSource;
 
   @GET('/api/v1/words')
